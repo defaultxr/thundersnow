@@ -12,7 +12,6 @@
                #:mutility
                #:closer-mop
                #:cl-patterns/supercollider ;; FIX: ensure thundersnow is backend-agnostic
-               ;; #:cl-collider
                #:bdef
                #:mcclim
                #:sndfile-blob
@@ -24,7 +23,8 @@
                (:file "src/gui")
                (:file "src/thundersnow")
                (:file "src/piano-roll")
-               (:file "src/tracker"))
+               (:file "src/tracker")
+               (:file "src/waveform"))
   :in-order-to ((test-op (test-op "thundersnow/tests"))))
 
 (asdf:defsystem #:thundersnow/tests

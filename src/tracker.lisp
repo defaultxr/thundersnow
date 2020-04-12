@@ -63,7 +63,8 @@
 (define-presentation-type cell ())
 
 (define-presentation-method present (cell (type cell) stream (view textual-view) &key)
-  (format stream "~a" (content cell)))
+  (with-accessors ((content content)) cell
+    (format stream "~a" (if content content "     "))))
 
 (defclass cell-row-number (cell) ;; FIX: use this instead of just `cell' ?
   ()
@@ -218,6 +219,7 @@ See also: `ptracker'"))
                 (with-border ((cell-color t col))
                   (formatting-cell (pane)
                     (present (make-instance 'cell-column-header :frame frame :content "+" :row :insert-column) 'cell-column-header :stream pane)))))
+            ;; FIX: alternate color for every N rows, where N is determined by the beats per bar
             (dolist* (row row-num rows)
               (declare (ignore row))
               (formatting-row (pane)
@@ -276,23 +278,6 @@ See also: `ptracker'"))
 
 (defparameter tmp nil)
 
-(define-presentation-to-command-translator insert-column
-    (cell com-insert-column tracker
-          :tester
-          ((cell)
-           (eql (slot-value cell 'row) :insert-column))
-          :pointer-documentation
-          ((cell stream)
-           (format stream "Insert new column after this one")))
-    (object)
-  (with-slots (ptracker) *application-frame*
-    (with-slots (row) object
-      (list (case row
-              (:insert-column
-               (/ (length (slot-value ptracker 'cl-patterns::header)) 2))
-              (nil 0)
-              (t (1+ row)))))))
-
 (define-presentation-to-command-translator hello-pattern-id
     (cell-pattern-id com-pattern-id tracker
                      :pointer-documentation
@@ -321,9 +306,9 @@ See also: `ptracker'"))
            (with-slots (key row) cell
              (if (null row)
                  (format stream "Edit ~s header" key)
-                 (format stream "Edit ~s cell ~s" key row)))))
-    (object presentation)
-  (list presentation))
+                 (format stream "Edit ~a cell ~s" key row)))))
+    (object)
+  (list object))
 
 (define-tracker-command (com-insert-column :name t :command-table tracker)
     ((index '(or integer cell-column-header) ;; :display-default (lambda () (concat (random 2)))
@@ -331,6 +316,41 @@ See also: `ptracker'"))
   (with-swank-output
     (print 'com-insert-column)
     (print index)))
+
+(define-presentation-to-command-translator insert-column
+    (cell-column-header com-insert-column tracker
+                        :tester
+                        ((cell)
+                         (eql (slot-value cell 'row) :insert-column))
+                        :pointer-documentation
+                        ((cell stream)
+                         (format stream "Insert new column")))
+    (object)
+  (list (with-slots (ptracker) *application-frame*
+          (with-slots (row) object
+            (case row
+              (:insert-column
+               (/ (length (slot-value ptracker 'cl-patterns::header)) 2))
+              (nil 0)
+              (t (1+ row)))))))
+
+(define-tracker-command (com-insert-row :name t :command-table tracker)
+    ((index '(or integer cell-row-number) ;; :display-default (lambda () (concat (random 2)))
+            ))
+  (with-swank-output
+    (print 'com-insert-row)
+    (print index)))
+
+(define-presentation-to-command-translator insert-row
+    (cell-row-number com-insert-row tracker
+                     ;; :tester
+                     ;; ((cell)
+                     ;;  (eql (slot-value cell 'row) :insert-column))
+                     :pointer-documentation
+                     ((cell stream)
+                      (format stream "Insert new row")))
+    (object)
+  (list (slot-value object 'row)))
 
 (define-tracker-command (com-test :name t)
     ()
@@ -365,13 +385,28 @@ See also: `ptracker'"))
     ((cell 'cell))
   (with-swank-output
     (print 'com-edit-cell))
-  (with-slots (row key) cell
-    (let (string)
+  (setf tmp cell)
+  (with-slots (key row) cell
+    (let (string
+          (prompt (format nil "~a ~a" key row)))
       (accepting-values ()
-        (setf string (accept 'string
-                             :view +cell-unparsed-text-view+
-                             :default (content cell))))
-      (setf (content cell) string))))
+        (setf string (apply 'accept 'string
+                            :view +cell-unparsed-text-view+
+                            :prompt prompt ;; for some reason this doesn't work if i put the format here directly?
+                            (when-let ((content (content cell)))
+                              (list :display-default content)))))
+      (with-swank-output
+        (print 'here)
+        (print string))
+      (setf (content cell) (if (equal "" string)
+                               (progn
+                                 (with-swank-output
+                                   (print 'fuck))
+                                 nil)
+                               (progn
+                                 (with-swank-output
+                                   (print 'you))
+                                 string))))))
 
 (define-command-table tracker-view-command-table)
 

@@ -14,3 +14,19 @@
                  69
                  60)
   :quant 1)
+
+;;; initialization
+
+(defparameter *initialized* nil
+  "True after `thundersnow-initialize' has been run.")
+
+(defun load-config ()
+  "Load the user's custom configurations by checking a few common locations."
+  (loop :for file :in (list (concatenate 'string (uiop:getenv "XDG_CONFIG_HOME") "/thundersnow/config.lisp")
+                            (concatenate 'string (uiop:getenv "HOME") ".thundersnow.lisp"))
+        :until (load file :if-does-not-exist nil)))
+
+(defun thundersnow-initialize ()
+  "Run thundersnow's initialization routine; read config files, etc."
+  (load-config)
+  (setf *initialized* t))

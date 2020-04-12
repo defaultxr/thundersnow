@@ -1,4 +1,5 @@
 ;;;; thundersnow.lisp
+;;; this file mostly contains the code for the main thundersnow gui; common gui functionality is in common.lisp
 ;; NOTES:
 ;; - https://common-lisp.net/project/mcclim/static/manual/mcclim.html
 ;; - https://github.com/McCLIM/McCLIM/wiki/Default-Keyboard-and-Mouse-Gestures
@@ -292,42 +293,8 @@
 
 ;;; main
 
-;; (defun load-config (&optional file)
-;;   "Load the user's custom configurations. Defaults to $XDG_CONFIG_HOME/thundersnow/config.lisp."
-;;   (let ((file (or file (concatenate 'string (uiop:getenv "XDG_CONFIG_HOME") "/thundersnow/config.lisp"))))
-;;     (when (probe-file file)
-;;       (with-open-file (s file :if-does-not-exist nil)
-;;         (eval (read-string (read-file-into-string )))))))
-
 (defun thundersnow (&rest args)
   "Start thundersnow."
+  (unless *initialized*
+    (thundersnow-initialize))
   (apply 'find-application-frame 'thundersnow args))
-
-;;; misc / messing around
-
-;; (ql:quickload '(sndfile-blob bodge-sndfile))
-
-(defun sound-file (file) ;; only supports 16-bit sounds
-  (sndfile:with-open-sound-file (sf-file (truename file))
-    (sndfile::read-short-samples-into-array sf-file)))
-
-(defun demos ()
-  (ql:quickload :clim-examples)
-  (bt:make-thread (lambda ()
-                    (a:when-let ((pkg (find-package :clim-demo)))
-                      (funcall (find-symbol "DEMODEMO" pkg))))))
-
-(defun test-thundersnow ()
-  (let ((thundersnow (thundersnow)))
-    (print thundersnow)
-    (setf (pane-pattern thundersnow)
-          (pb :thunder
-            :foo 1
-            :bar (pseq (list 1 2 3) 1)))))
-
-;;; cl-wav-synth
-
-#|
-(ql:quickload '(thundersnow clim-listener cl-wav-synth cl-wav-synth-clim))
-|#
-
