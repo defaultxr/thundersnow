@@ -8,7 +8,7 @@ Please note that this is a major work in progress at the moment, and very little
 
 * Intro
 
-To start thundersnow:
+To start thundersnow, put it in your quicklisp ~local-projects~ directory, then:
 
 #+BEGIN_SRC lisp
 (ql:quickload :thundersnow)
@@ -18,14 +18,47 @@ To start thundersnow:
 
 More documentation and functionality will exist in the future.
 
+* Overview
+
+The main GUIs included with thundersnow are the following. Note none of these have much implemented yet.
+
+** Main interface
+Gives a general overview of all synths, patterns, routines, etc, that are playing, buffers that are loaded, etc, and makes it easier to control or modify them.
+** Tracker
+A tracker-inspired interface over cl-patterns' ~ptracker~ pattern.
+** Piano roll
+A piano roll interface for editing sequences of notes via cl-patterns' ~eseq~. Will eventually become a more general pattern/data plotting interface.
+
+** Pattern GUIs
+Not implemented at all yet. GUIs for showing the structure of nested patterns and for changing their parameters, etc.
+** Waveform editor
+Not implemented at all yet. Show the waveform of a sound buffer and optionally ~splits~ data. The waveform view gadget will also be used for a general scope in the future if it can be made to run fast enough for that.
+** Synth GUIs
+Not implemented at all yet. Interfaces to controlling synths as well as generating synthdefs. Will likely use template macros to generate the synthdefs.
+
 * Features
 
-- Basically nothing yet! Wow!
+Basically nothing yet! Wow!
+
+- Configuration file loaded when thundersnow is started (located at ~$XDG_CONFIG_HOME/thundersnow/config.lisp~). This is basically just whatever Lisp code you want to run before the window opens. Examples/suggestions forthcoming.
 
 * Future
 
-Roughly in descending order of priority.
+Roughly in descending order of priority. Not an exhaustive list, of course.
 
-- specify a license
-- EVERYTHING!
+- Specify a license
+- Scope/waveform view
+- Knob gadget
+- Example config files
+- Theming support (this also depends on more theming functionality being implemented in McCLIM)
+- Command line interface
+- MIDI controller support
+- Routing GUI/"Session" support
+- Create the universe
+  - Bake an apple pie from scratch
+- EVERYTHING ELSE!
 
+* Known Issues
+
+- Interfaces are sometimes drawn with the wrong size at first, until a command is run or a manual redraw triggered. This appears to be due to [[https://github.com/McCLIM/McCLIM/issues/970][this bug]] in McCLIM.
+- Some libraries (i.e. Drakma) will cause package nickname errors if loaded in the same image as thundersnow. This is due to [[https://github.com/borodust/claw/issues/3][a bug in claw]], which is used by the bodge-sndfile library that thundersnow depends on. For now this is usually not an issue if you just use the "continue" restart.

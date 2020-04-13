@@ -140,8 +140,9 @@
    (default
     (raising (:border-width 0 :background +black+)
       (vertically ()
-        (1/10 (horizontally ()
+        (1/10 (horizontally () ;; toolbar
                 (8/10 logo)
+                ;; FIX: add server status pane with cpu load, number of active ugens, active synths, active groups, and number of synthdefs
                 (1/10 tempo)
                 (1/10 scope)))
         (7/10 pattern-pane
