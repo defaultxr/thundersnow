@@ -24,7 +24,7 @@
     (draw-rectangle* pane 0 0 width height
                      :filled t
                      :ink (if clock
-                              (let ((c (expt (- 1 (mod (clp:beat clp:*clock*) 1.0) cl-patterns::*latency*) 3)))
+                              (let ((c (expt (- 1 (mod (- (beat *clock*) (time-dur cl-patterns::*latency*)) 1.0)) 3)))
                                 (make-rgb-color (* c 0.5) (+ 0.5 (* 0.5 c)) (* c 0.5)))
                               (make-gray-color 0.5)))
     (draw-text* pane
