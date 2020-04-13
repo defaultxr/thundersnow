@@ -61,7 +61,7 @@
 (define-command (com-readme :name "README" :menu t
                             :command-table thundersnow-common-help-command-table)
     ()
-  (ed (asdf:system-relative-pathname :zoned "README.org")))
+  (ed (asdf:system-relative-pathname :thundersnow "README.org")))
 
 (define-command (com-repo :name t :menu t
                           :command-table thundersnow-common-help-command-table)
