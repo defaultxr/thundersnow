@@ -24,7 +24,7 @@
                (:file "src/thundersnow")
                (:file "src/piano-roll")
                (:file "src/tracker")
-               (:file "src/waveform"))
+               (:file "src/wave-editor"))
   :in-order-to ((test-op (test-op "thundersnow/tests"))))
 
 (asdf:defsystem #:thundersnow/tests

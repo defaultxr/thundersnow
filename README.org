@@ -31,7 +31,7 @@ A piano roll interface for editing sequences of notes via cl-patterns' ~eseq~. W
 
 ** Pattern GUIs
 Not implemented at all yet. GUIs for showing the structure of nested patterns and for changing their parameters, etc.
-** Waveform editor
+** Wave editor
 Not implemented at all yet. Show the waveform of a sound buffer and optionally ~splits~ data. The waveform view gadget will also be used for a general scope in the future if it can be made to run fast enough for that.
 ** Synth GUIs
 Not implemented at all yet. Interfaces to controlling synths as well as generating synthdefs. Will likely use template macros to generate the synthdefs.
@@ -51,9 +51,12 @@ Roughly in descending order of priority. Not an exhaustive list, of course.
 - Knob gadget
 - Example config files
 - Theming support (this also depends on more theming functionality being implemented in McCLIM)
+- File search pane (for loading samples, projects, etc)
+  - Use thumbnails if possible
 - Command line interface
 - MIDI controller support
 - Routing GUI/"Session" support
+- Make it actually look good (related to theming support, above)
 - Create the universe
   - Bake an apple pie from scratch
 - EVERYTHING ELSE!

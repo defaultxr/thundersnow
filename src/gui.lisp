@@ -47,6 +47,11 @@
     ()
   (tracker))
 
+(define-command (com-wave-editor :name t :menu t
+                                 :command-table thundersnow-common-tools-command-table)
+    ()
+  (wave-editor))
+
 ;;; help commands
 
 (define-command-table thundersnow-common-help-command-table)
