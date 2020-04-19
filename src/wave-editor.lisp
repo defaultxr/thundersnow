@@ -20,50 +20,41 @@
 ;;   (make-space-requirement :width 500
 ;;                           :height 500))
 
-(defmethod handle-repaint :before ((pane wave-editor-pane) region)
-  (with-slots (%saved-extent) pane
-    (setf %saved-extent (pane-viewport-region pane))))
+;; (defmethod handle-repaint :before ((pane wave-editor-pane) region)
+;;   nil)
 
 (defun draw-wave-editor (frame stream)
-  (with-slots (sndfile) frame
-    (unless sndfile
+  (with-slots (sound) frame
+    (unless sound
       (return-from draw-wave-editor nil))
-    (let* ((region (sheet-region stream))
-           (width (rectangle-width region))
-           (height (rectangle-height region))
-           (hd2 (/ height 2))
-           (line-color (get-theme-color :foreground))
-           (frames (bdef-range sndfile 0 width)))
-      (dotimes (i width)
-        (let ((val (elt frames i)))
-          (draw-line* stream i hd2 i (+ hd2 (* val height 10)) :ink line-color)))
-      ;; (with-room-for-graphics (stream :first-quadrant t)
-      
-      ;;   (present (make-instance '%background) '%background :stream stream)
-      ;;   (loop :for x :from 0 :upto (max (+ (dur eseq) 32) (/ stream-width beat-size))
-      ;;         :for xpos = (* x beat-size)
-      ;;         :do
-      ;;            (draw-line* stream xpos 0 xpos stream-height :ink +gray+)
-      ;;            (draw-text* stream (write-to-string x) (1+ xpos) 1 :ink +gray+))
-      ;;   (loop :for y :from 0 :upto 127
-      ;;         :for ypos = (* y y-size)
-      ;;         :do
-      ;;            (draw-line* stream 0 ypos stream-width ypos :ink +gray+)
-      ;;            (draw-text* stream (write-to-string y) 1 (1+ ypos) :ink +gray+))
-      ;;   (dolist (event events)
-      ;;     (updating-output (stream :unique-id event :cache-value event :cache-test #'event-presentation-equal)
-      ;;       (present event 'event :stream stream))))
-      )
-    )
-  ;; (with-slots (%saved-extent) stream
-  ;;   (apply #'scroll-extent stream
-  ;;          (if %saved-extent
-  ;;              (list (rectangle-min-x %saved-extent) (rectangle-min-y %saved-extent))
-  ;;              (list 0 0))))
-  )
+    (with-slots (sound %cached-frames) frame
+      (unless %cached-frames
+        (setf %cached-frames (bdef-range sound 0 (frames sound))))
+      (let* ((x-margin 10)
+             (y-margin 40)
+             (second-px 500)
+             (region (sheet-region stream))
+             ;; (width (rectangle-width region))
+             (height (rectangle-height region))
+             (hd2 (- (/ height 2) y-margin))
+             (line-color (get-theme-color :foreground))
+             ;; (viewport-region (pane-viewport-region stream))
+             (frames %cached-frames)
+             (num-frames (length frames)) ;; FIX: use a more generic function to get bdef length
+             )
+        ;; (with-swank-output (print 'hi))
+        ;; (setf tmp viewport-region)
+        (draw-rectangle* stream x-margin y-margin (+ x-margin num-frames) (- height y-margin) :filled nil :ink (make-rgb-color 1 0 0))
+        (let ((end-line-x (+ (* 2 x-margin) num-frames)))
+          (draw-line* stream end-line-x 0 end-line-x height))
+        (dotimes (i num-frames)
+          (let ((val (elt frames i))
+                (x (+ x-margin i)))
+            (draw-line* stream x hd2 x (+ hd2 (* val height)) :ink line-color)))))))
 
 (define-application-frame wave-editor ()
-  ((sndfile :initarg :sndfile :initform nil :documentation "The sndfile instance as loaded by `sound-file'."))
+  ((sound :initarg :sound :initform nil :documentation "The sound instance as loaded by `sound-file'.")
+   (%cached-frames :initform nil :documentation "Cached frames from the sound. Frames are cached since getting a buffer's contents from the server may take a long time."))
   (:command-table (wave-editor
 		   :inherit-from (wave-editor-file-command-table
                                   wave-editor-edit-command-table
@@ -76,6 +67,7 @@
                           ("Tools" :menu wave-editor-tools-command-table)
 			  ("Help" :menu wave-editor-help-command-table))))
   (:panes
+   (wave-editor-pane (make-pane 'wave-editor-pane))
    (interactor-pane (make-clim-interactor-pane
                      :name 'interactor
                      :scroll-bar :vertical))
@@ -86,8 +78,8 @@
   (:layouts
    (default
     (vertically ()
-      (5/6 (scrolling ()
-             (make-pane 'wave-editor-pane)))
+      (5/6 (scrolling (:scroll-bar :horizontal)
+             wave-editor-pane))
       (1/6 interactor-pane)
       pointer-documentation-pane)))
   (:menu-bar t))
@@ -114,11 +106,11 @@
 
 (defun wave-editor (&optional wave)
   "Open a wave-editor. WAVE is the wave to edit; it can either be a bdef, or a filename, in which case the file is loaded as a bdef."
-  (let ((sndfile (etypecase wave
-                   (string (bdef wave))
-                   (bdef wave)
-                   (null nil))))
-    (find-application-frame 'wave-editor :sndfile sndfile)))
+  (let ((sound (etypecase wave
+                 (string (bdef wave))
+                 (bdef wave)
+                 (null nil))))
+    (find-application-frame 'wave-editor :sound sound)))
 
 ;; cl-wav-synth
 
