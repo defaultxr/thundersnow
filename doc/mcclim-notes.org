@@ -1,0 +1,23 @@
+#+TITLE: (Mc)CLIM notes
+
+Just various notes I've collected about (Mc)CLIM, either by asking in #clim or randomly online.
+
+* theming
+Feb 17, 2018
+18:23:01 mepian: does McCLIM support themes? was this proposal implemented? http://vintage-digital.com/hefner/mcclim/mcclim-theme-notes.txt
+18:24:55 jackdaniel: mepian: quick grepping through sources shows, that it is implemented
+18:25:14 jackdaniel: I've never approached this document before (and there is no documentation for it)
+18:27:57 mepian: jackdaniel: did anyone ever try to use it? I think every screenshot I've seen used the default look
+18:29:17 jackdaniel: I can't speak for everyone. I didn't use it, but since it is implemented I'm sure it was "ever used" at least by the implementor
+18:33:40 jackdaniel: things from "tentative design" section are not implemented whatsoever
+18:34:13 jackdaniel: only things mentioned earlier. so if the first was just a summary of what is implemented, and the second part is the actual proposal, then no, it was not implemented
+* zoom
+Apr 19, 2020
+14:21:45 defaultxr:   i see that there are examples for scrolling of course, but is there a "preferred" way of doing zoom in (mc)clim, or is that just something i should be implementing myself, i.e. by keeping a "scale" or "zoom" slot in my pane/frame and writing my display-function based on it?
+14:37:26 jackdaniel:  currently you should do exactly that, keep the scale as a slot and redisplay when it changes
+14:37:50 jackdaniel:  in the future it will be more seamless, but the thing I'm thinking about does not work correctly yet
+* multiple selection
+Apr 19, 2020
+14:41:25 defaultxr:   thanks! i'm also wondering about selecting multiple objects at once (i.e. the traditional "click and drag on an empty space to draw a rectangle and all objects in it become selected); does (mc)clim have a preferred way of doing that?
+14:42:37 jackdaniel:  I can't think of anything
+14:42:55 jackdaniel:  but if you write such thing, please share it so we can learn from it

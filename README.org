@@ -28,11 +28,11 @@ Gives a general overview of all synths, patterns, routines, etc, that are playin
 A tracker-inspired interface over cl-patterns' ~ptracker~ pattern.
 ** Piano roll
 A piano roll interface for editing sequences of notes via cl-patterns' ~eseq~. Will eventually become a more general pattern/data plotting interface.
+** Wave editor
+Show the waveform of a sound buffer and optionally ~splits~ data. The waveform view gadget will also be used for a general scope in the future if it can be made to run fast enough for that.
 
 ** Pattern GUIs
 Not implemented at all yet. GUIs for showing the structure of nested patterns and for changing their parameters, etc.
-** Wave editor
-Not implemented at all yet. Show the waveform of a sound buffer and optionally ~splits~ data. The waveform view gadget will also be used for a general scope in the future if it can be made to run fast enough for that.
 ** Synth GUIs
 Not implemented at all yet. Interfaces to controlling synths as well as generating synthdefs. Will likely use template macros to generate the synthdefs.
 
