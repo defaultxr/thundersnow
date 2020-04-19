@@ -112,7 +112,7 @@
                                                 (1+ highlite-x2) (1+ highlite-y2))))))))
 
 (define-application-frame piano-roll ()
-  ((eseq :initarg :eseq :initform (eseq) :documentation "The `eseq' instance.")
+  ((eseq :initarg :eseq :initform (eseq) :type eseq :documentation "The `eseq' instance.")
    (beat-size :initarg :beat-size :initform 200 :documentation "The size of one beat, in pixels.") ;; FIX: make the initform change based on the beats-per-bar
    (grid-size :initarg :beat-size :initform 1/4 :documentation "The grid size in beats.")
    (y-size :initarg :y-size :initform 40))
@@ -161,9 +161,6 @@
 
 (defun draw-piano-roll (frame stream)
   (with-slots (eseq) frame
-    ;; FIX: doesn't handle the case of eseq being nil
-    (unless eseq
-      (return-from draw-piano-roll nil))
     (let* ((region (sheet-region stream))
            (beat-size (slot-value frame 'beat-size))
            (stream-width (rectangle-width region))
@@ -175,16 +172,16 @@
                      (cl-patterns::pattern (next-upto-n eseq)))))
       (with-room-for-graphics (stream :first-quadrant t)
         (present (make-instance '%background) '%background :stream stream)
-        (loop :for x :from 0 :upto (dur eseq)
-           :for xpos = (* x beat-size)
-           :do
-             (draw-line* stream xpos 0 xpos stream-height :ink +gray+)
-             (draw-text* stream (write-to-string x) (1+ xpos) 1 :ink +gray+))
+        (loop :for x :from 0 :upto (max (+ (dur eseq) 32) (/ stream-width beat-size))
+              :for xpos = (* x beat-size)
+              :do
+                 (draw-line* stream xpos 0 xpos stream-height :ink +gray+)
+                 (draw-text* stream (write-to-string x) (1+ xpos) 1 :ink +gray+))
         (loop :for y :from 0 :upto 127
-           :for ypos = (* y y-size)
-           :do
-             (draw-line* stream 0 ypos stream-width ypos :ink +gray+)
-             (draw-text* stream (write-to-string y) 1 (1+ ypos) :ink +gray+))
+              :for ypos = (* y y-size)
+              :do
+                 (draw-line* stream 0 ypos stream-width ypos :ink +gray+)
+                 (draw-text* stream (write-to-string y) 1 (1+ ypos) :ink +gray+))
         (dolist (event events)
           (updating-output (stream :unique-id event :cache-value event :cache-test #'event-presentation-equal)
             (present event 'event :stream stream))))))
@@ -203,7 +200,7 @@
 ;; FIX: default to mouse's current position
 (define-command (com-add :name t :menu t
                          :command-table piano-roll-edit-command-table
-                         :keystroke (#\A :meta))
+                         :keystroke (#\a :meta))
     ((event '(or event number) :prompt "Event or event start beat"))
   (cl-patterns::add-event (slot-value *application-frame* 'eseq)
                           (typecase event
