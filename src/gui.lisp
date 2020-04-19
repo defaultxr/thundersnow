@@ -8,21 +8,42 @@
 
 (defconstant +textual-view+ (make-instance 'textual-view))
 
+;;; theming functionality (FIX: just move to mutility?)
+
+(defvar *theme* (list
+                 :background (make-rgb-color 0.3 0.3 0.4)
+                 :foreground +black+
+                 :grid (make-gray-color 0.8)))
+
+(defun get-theme-color (element)
+  "Get the theme's color for a type of GUI element, i.e. :foreground, :background, :accent, etc.
+
+See also: `*theme*'"
+  (getf *theme* element))
+
 ;;; file commands
 
 (define-command-table thundersnow-common-file-command-table)
-
-(define-command (com-refresh :name t :menu t
-                             :command-table thundersnow-common-file-command-table)
-    ()
-  ;; make clim redraw stuff? this is just for testing; remove this command later
-  nil)
 
 (define-command (com-quit :name t :menu t
                           :command-table thundersnow-common-file-command-table
                           :keystroke (#\q :control))
     ()
   (frame-exit *application-frame*))
+
+;;; edit commands
+
+(define-command-table thundersnow-common-edit-command-table)
+
+;;; view commands
+
+(define-command-table thundersnow-common-view-command-table)
+
+(define-command (com-refresh :name t :menu t
+                             :command-table thundersnow-common-view-command-table)
+    ()
+  ;; make clim redraw stuff? this is just for testing; remove this command later
+  nil)
 
 ;;; tools commands
 
