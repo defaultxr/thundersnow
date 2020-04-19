@@ -64,4 +64,3 @@ Roughly in descending order of priority. Not an exhaustive list, of course.
 * Known Issues
 
 - Interfaces are sometimes drawn with the wrong size at first, until a command is run or a manual redraw triggered. This appears to be due to [[https://github.com/McCLIM/McCLIM/issues/970][this bug]] in McCLIM.
-- Some libraries (i.e. Drakma) will cause package nickname errors if loaded in the same image as thundersnow. This is due to [[https://github.com/borodust/claw/issues/3][a bug in claw]], which is used by the bodge-sndfile library that thundersnow depends on. For now this is usually not an issue if you just use the "continue" restart.

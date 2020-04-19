@@ -14,8 +14,9 @@
                #:cl-patterns/supercollider ;; FIX: ensure thundersnow is backend-agnostic
                #:bdef
                #:mcclim
-               #:sndfile-blob
-               #:bodge-sndfile)
+               ;; #:sndfile-blob
+               ;; #:bodge-sndfile
+               )
   :serial t
   :components ((:file "src/package")
                (:file "src/utility")

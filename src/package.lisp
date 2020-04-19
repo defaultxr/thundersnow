@@ -18,6 +18,7 @@
   (:use #:alexandria
         #:mutility
         #:cl-patterns
+        #:bdef
         #:clim-extensions
         #:clim
         #:clim-lisp
