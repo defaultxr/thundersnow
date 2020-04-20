@@ -3,7 +3,7 @@
 Just various notes I've collected about (Mc)CLIM, either by asking in #clim or randomly online.
 
 * theming
-Feb 17, 2018
+** Feb 17, 2018
 18:23:01 mepian: does McCLIM support themes? was this proposal implemented? http://vintage-digital.com/hefner/mcclim/mcclim-theme-notes.txt
 18:24:55 jackdaniel: mepian: quick grepping through sources shows, that it is implemented
 18:25:14 jackdaniel: I've never approached this document before (and there is no documentation for it)
@@ -11,13 +11,37 @@ Feb 17, 2018
 18:29:17 jackdaniel: I can't speak for everyone. I didn't use it, but since it is implemented I'm sure it was "ever used" at least by the implementor
 18:33:40 jackdaniel: things from "tentative design" section are not implemented whatsoever
 18:34:13 jackdaniel: only things mentioned earlier. so if the first was just a summary of what is implemented, and the second part is the actual proposal, then no, it was not implemented
+** Oct 11, 2018
+7:07:07 fiddlerwoaroof: What is the function of a frame manager?
+7:07:15 fiddlerwoaroof: Does it control styling?
+7:07:30 fiddlerwoaroof: clim frame-manager
+7:09:09 jackdaniel: it is not well documented and quite underdeveloped in McCLIM
+7:09:47 jackdaniel: but in principle frame manager is responsible for styling and similar, yes
+7:10:14 jackdaniel: for instance you could have one port (which is a logical connection to display server) and different toolkits associated with different frame managers
+7:10:19 fiddlerwoaroof: So, if I wanted to theme my clim application, I should think about creating swappable theme managers?
+7:10:36 jackdaniel: it is responsible for mapping abstract panes (i.e push button) to clx-push-button, or material-push-button whatever
+7:10:43 fiddlerwoaroof: And, e.g. swap between a gnome-style ui and a kde-style one, etc.
+7:10:45 fiddlerwoaroof: cool.
+7:11:09 jackdaniel: that said, I have some work started on more elaborate theming (which will utilize frame managers)
+7:11:30 jackdaniel: but this effort is temporarily halted - patterns and fonts ate my last few months
+7:12:05 jackdaniel: https://files.mastodon.social/media_attachments/files/005/005/502/original/7331eec572c7081d.png
+7:12:22 jackdaniel: this is a project of text-field pane
+7:12:32 jackdaniel: using material io guidelines
+7:12:50 jackdaniel: https://files.mastodon.social/media_attachments/files/005/137/698/original/45323837a6307236.png and more of the same
+7:13:14 fiddlerwoaroof: Looks good
+7:13:31 jackdaniel: good news is that since we now have indirect ink protocol in place I will be able to incorporate it
+7:14:09 fiddlerwoaroof: I know everyone is busy, but prioritizing this sort of thing might help attract interest: for some reason, the thing people seem to care about most when it comes to a GUI toolkit is what the outputs look like.
+7:14:18 fiddlerwoaroof: s/outputs/controls/
+7:14:23 jackdaniel: that's why I started this work
+7:14:51 fiddlerwoaroof: I've also been mulling some alternative ports to make it more useful cross-platform
+7:15:53 jackdaniel: imho we should wrap a performant and clean sdl backend - that way we are cross-platform with just one additional backend
 * zoom
-Apr 19, 2020
+** Apr 19, 2020
 14:21:45 defaultxr:   i see that there are examples for scrolling of course, but is there a "preferred" way of doing zoom in (mc)clim, or is that just something i should be implementing myself, i.e. by keeping a "scale" or "zoom" slot in my pane/frame and writing my display-function based on it?
 14:37:26 jackdaniel:  currently you should do exactly that, keep the scale as a slot and redisplay when it changes
 14:37:50 jackdaniel:  in the future it will be more seamless, but the thing I'm thinking about does not work correctly yet
 * multiple selection
-Apr 19, 2020
+** Apr 19, 2020
 14:41:25 defaultxr:   thanks! i'm also wondering about selecting multiple objects at once (i.e. the traditional "click and drag on an empty space to draw a rectangle and all objects in it become selected); does (mc)clim have a preferred way of doing that?
 14:42:37 jackdaniel:  I can't think of anything
 14:42:55 jackdaniel:  but if you write such thing, please share it so we can learn from it
