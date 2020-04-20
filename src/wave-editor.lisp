@@ -1,5 +1,10 @@
 (in-package #:thundersnow)
 
+;;; wave-editor
+;; Notes:
+;; Prior art:
+;; - cl-wav-synth; https://common-lisp.net/project/cl-wav-synth/
+;;
 ;; (defun sound-file (file) ;; only supports 16-bit sounds
 ;;   (sndfile:with-open-sound-file (sf-file (truename file))
 ;;     (sndfile::read-short-samples-into-array sf-file)))
@@ -29,7 +34,7 @@
       (return-from draw-wave-editor nil))
     (with-slots (sound %cached-frames) frame
       (unless %cached-frames
-        (setf %cached-frames (bdef-range sound 0 (frames sound))))
+        (setf %cached-frames (bdef-subseq sound 0 (frames sound))))
       (let* ((x-margin 10)
              (y-margin 40)
              (second-px 500)
