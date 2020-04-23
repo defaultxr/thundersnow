@@ -1,4 +1,6 @@
-(in-package #:thundersnow)
+(in-package #:thundersnow/common)
+
+;;; basic synths and patterns
 
 (defsynth default ((gate 1) (freq 440) (amp 0.5) (pan 0) (out 0))
   (let* ((env (env-gen.kr (asr 0.01 1 0.1) :gate gate :act :free))

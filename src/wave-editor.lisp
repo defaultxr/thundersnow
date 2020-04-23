@@ -1,4 +1,4 @@
-(in-package #:thundersnow)
+(in-package #:thundersnow/wave-editor)
 
 ;;; wave-editor
 ;; Notes:

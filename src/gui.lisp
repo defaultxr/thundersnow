@@ -1,4 +1,4 @@
-(in-package #:thundersnow)
+(in-package #:thundersnow/common)
 
 ;;;; common gui functionality
 ;;; stuff that is used by all guis
@@ -56,22 +56,22 @@ See also: `*theme*'"
 (define-command (com-thundersnow :name t :menu t
                                  :command-table thundersnow-common-tools-command-table)
     ()
-  (thundersnow))
+  (thundersnow/thundersnow:thundersnow))
 
 (define-command (com-piano-roll :name t :menu t
                                 :command-table thundersnow-common-tools-command-table)
     ()
-  (piano-roll))
+  (thundersnow/piano-roll:piano-roll))
 
 (define-command (com-tracker :name t :menu t
                              :command-table thundersnow-common-tools-command-table)
     ()
-  (tracker))
+  (thundersnow/tracker:tracker))
 
 (define-command (com-wave-editor :name t :menu t
                                  :command-table thundersnow-common-tools-command-table)
     ()
-  (wave-editor))
+  (thundersnow/wave-editor:wave-editor))
 
 ;;; help commands
 

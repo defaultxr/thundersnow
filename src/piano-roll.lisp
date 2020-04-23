@@ -1,4 +1,4 @@
-(in-package #:thundersnow)
+(in-package #:thundersnow/piano-roll)
 
 ;;;; piano-roll
 ;;; a piano roll, obviously

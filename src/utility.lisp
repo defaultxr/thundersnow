@@ -1,4 +1,4 @@
-(in-package #:thundersnow)
+(in-package #:thundersnow/common)
 
 (defparameter *swank-output* *standard-output*)
 

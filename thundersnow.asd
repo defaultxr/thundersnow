@@ -22,6 +22,7 @@
                (:file "src/utility")
                (:file "src/common")
                (:file "src/gui")
+               (:file "src/export")
                (:file "src/thundersnow")
                (:file "src/piano-roll")
                (:file "src/tracker")

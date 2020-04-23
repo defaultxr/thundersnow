@@ -9,7 +9,7 @@
 ;; arguments for define-drag-and-drop-translator can include:
 ;; - destination-object context-type frame presentation destination-presentation event window x y
 
-(in-package #:thundersnow)
+(in-package #:thundersnow/thundersnow)
 
 ;;; tempo pane
 
