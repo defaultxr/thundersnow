@@ -36,13 +36,15 @@
   :license "Specify license here"
   :depends-on (#:thundersnow
                #:fiveam)
-  :components ((:file "t/test")
-               (:file "t/utility")
-               (:file "t/common")
-               (:file "t/gui")
-               (:file "t/thundersnow")
-               (:file "t/piano-roll")
-               (:file "t/tracker"))
+  :pathname "t/"
+  :serial t
+  :components ((:file "test")
+               (:file "utility")
+               (:file "common")
+               (:file "gui")
+               (:file "thundersnow")
+               (:file "piano-roll")
+               (:file "tracker"))
   :perform (test-op (op c)
                     (uiop:symbol-call :fiveam :run!
                                       (uiop:find-symbol* '#:thundersnow-tests

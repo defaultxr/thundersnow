@@ -59,6 +59,8 @@ Roughly in descending order of priority. Not an exhaustive list, of course.
 - Make it actually look good (related to theming support, above)
 - Create the universe
   - Bake an apple pie from scratch
+- create site
+  - register a domain for it
 - EVERYTHING ELSE!
 
 * Known Issues

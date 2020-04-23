@@ -378,7 +378,9 @@ See also: `ptracker'"))
                                                            pattern
                                                            (error ""))))))
 
-(define-command-table tracker-edit-command-table)
+(define-command-table tracker-edit-command-table
+  :inherit-from (thundersnow-common-edit-command-table)
+  :inherit-menu t)
 
 (define-command (com-edit-cell :name t :menu t
                                :command-table tracker-edit-command-table)
@@ -408,7 +410,9 @@ See also: `ptracker'"))
                                    (print 'you))
                                  string))))))
 
-(define-command-table tracker-view-command-table)
+(define-command-table tracker-view-command-table
+  :inherit-from (thundersnow-common-view-command-table)
+  :inherit-menu t)
 
 (define-command (com-toggle-interactor :name t :menu t
                                        :command-table tracker-view-command-table
