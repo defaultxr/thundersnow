@@ -49,7 +49,7 @@
 See also: `scaled-frames-for'"
   (with-slots (sound %cached-frames) stream
     (or %cached-frames
-        (let ((frames (bdef-subseq sound 0 (frames sound))))
+        (let ((frames (bdef-subseq sound 0 (bdef-length sound))))
           (setf %cached-frames frames)
           frames))))
 
@@ -62,8 +62,8 @@ See also: `cached-frames-for'"
     (when (eql second-px %cached-second-px)
       (return-from scaled-frames-for %cached-scaled-frames))
     (let* ((cached-frames (cached-frames-for stream))
-           (sound-dur (bdef::duration sound))
-           (array-length (ceiling (* sound-dur second-px)))
+           (sound-duration (bdef-duration sound))
+           (array-length (ceiling (* sound-duration second-px)))
            (array (make-array array-length))
            (sound-length (bdef-length sound))
            (frames-per-scaled-frame (floor (/ sound-length array-length))))
