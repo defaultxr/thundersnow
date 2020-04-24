@@ -129,6 +129,9 @@ See also: `cached-frames-for'"
       pointer-documentation-pane)))
   (:menu-bar t))
 
+(defmethod frame-standard-output ((frame wave-editor))
+  (find-pane-named frame 'interactor))
+
 (defmethod second-px ((this wave-editor))
   (slot-value this 'second-px))
 
