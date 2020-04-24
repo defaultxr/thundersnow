@@ -154,8 +154,8 @@ See also: `cached-frames-for'"
 (define-command (com-open-file :name t :menu t
                                :command-table wave-editor-file-command-table
                                :keystroke (#\o :control))
-    ((file 'string :prompt "File"))
-  (setf (sound *application-frame*) file))
+    ((file 'pathname :prompt "File"))
+  (setf (sound *application-frame*) (namestring file)))
 
 (define-command-table wave-editor-edit-command-table
   :inherit-from (thundersnow-common-edit-command-table)
