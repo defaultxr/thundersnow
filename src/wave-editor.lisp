@@ -14,10 +14,12 @@
 (defclass wave-editor-pane (application-pane)
   ((sound :initarg :sound :initform nil :type (or null bdef) :documentation "The sound instance as a `bdef'.")
    (second-px :initarg :second-px :initform 1000 :type number :documentation "The number of horizontal pixels per second (i.e. the \"zoom\" level of the pane).")
+   (horizontal-margin :initarg :horizontal-margin :initform 10 :type (real 0) :documentation "The margin between the left/right edges of the pane and the start/end of the waveform.")
+   (vertical-margin :initarg :y-margin :initform 40 :type (real 0) :documentation "The margin between the top/bottom of the pane and 1 and -1 of the waveform.")
    (%cached-frames :initform nil :documentation "Cached frames from the sound. Frames are cached since getting a buffer's contents from the server may take a long time.")
    (%cached-second-px :initform nil :documentation "The value of second-px when the %cached-scaled-frames were calculated.")
    (%cached-scaled-frames :initform nil :documentation "The calculated frames generated for the current zoom level.")
-   (%saved-extent :initform nil) ;; FIX: implement?
+   (%saved-extent :initform nil) ;; FIX: implement
    )
   (:default-initargs
    :name 'wave-editor
@@ -77,25 +79,21 @@ See also: `cached-frames-for'"
 
 (defun draw-wave-editor (frame stream)
   (declare (ignore frame))
-  (with-slots (sound) stream
+  (with-slots (sound horizontal-margin vertical-margin) stream
     (unless sound
       (return-from draw-wave-editor nil))
-    (let* ((x-margin 10)
-           (y-margin 40)
-           (region (sheet-region stream))
-           ;; (width (rectangle-width region))
+    (let* ((region (sheet-region stream))
            (height (rectangle-height region))
-           (hd2 (- (/ height 2) y-margin))
+           (hd2 (- (/ height 2) vertical-margin))
            (line-color (get-theme-color :foreground))
-           ;; (viewport-region (pane-viewport-region stream))
            (frames (scaled-frames-for stream))
            (num-frames (length frames)))
-      (draw-rectangle* stream x-margin y-margin (+ x-margin num-frames) (- height y-margin) :filled nil :ink (get-theme-color :grid))
-      (let ((end-line-x (+ (* 2 x-margin) num-frames)))
+      (draw-rectangle* stream horizontal-margin vertical-margin (+ horizontal-margin num-frames) (- height vertical-margin) :filled nil :ink (get-theme-color :grid))
+      (let ((end-line-x (+ (* 2 horizontal-margin) num-frames)))
         (draw-line* stream end-line-x 0 end-line-x height))
       (dotimes (i num-frames)
         (let ((val (aref frames i))
-              (x (+ x-margin i)))
+              (x (+ horizontal-margin i)))
           (draw-line* stream x hd2 x (+ hd2 (* val height)) :ink line-color))))))
 
 (define-application-frame wave-editor ()
