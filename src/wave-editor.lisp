@@ -39,11 +39,17 @@
 (defmethod sound ((this wave-editor-pane))
   (slot-value this 'sound))
 
-(defmethod (setf sound) (sound (this wave-editor-pane))
-  (setf (slot-value this 'sound) sound))
+(defmethod (setf sound) ((bdef bdef) (this wave-editor-pane))
+  (setf (slot-value this 'sound) bdef))
 
 (defmethod (setf sound) ((sound string) (this wave-editor-pane))
   (setf (sound this) (bdef sound)))
+
+(defmethod (setf sound) ((sound symbol) (this wave-editor-pane))
+  (setf (sound this) (bdef sound)))
+
+(defmethod (setf sound) ((sound pathname) (this wave-editor-pane))
+  (setf (sound this) (namestring sound)))
 
 (defun cached-frames-for (stream)
   "Get and cache sound frame data for STREAM.
@@ -143,7 +149,13 @@ See also: `cached-frames-for'"
   (sound (find-pane-named this 'wave-editor-pane)))
 
 (defmethod (setf sound) (sound (this wave-editor))
-  (setf (sound (find-pane-named this 'wave-editor-pane)) sound))
+  (setf (sound (find-pane-named this 'wave-editor-pane)) sound)
+  (let* ((bdef (sound this))
+         (key (bdef-key bdef))
+         (name (etypecase key
+                 (symbol key)
+                 (string (concat (pathname-name key) "." (pathname-type key))))))
+    (setf (frame-pretty-name *application-frame*) (concat "Wave-Editor: " name))))
 
 (define-command-table wave-editor-file-command-table
   :inherit-from (thundersnow-common-file-command-table)
