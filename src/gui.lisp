@@ -92,4 +92,4 @@ See also: `*theme*'"
 (define-command (com-repo :name t :menu t
                           :command-table thundersnow-common-help-command-table)
     ()
-  (browse-url "https://github.com/defaultxr/thundersnow"))
+  (open-url "https://github.com/defaultxr/thundersnow"))
