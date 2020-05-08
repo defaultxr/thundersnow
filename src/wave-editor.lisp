@@ -4,15 +4,12 @@
 ;; Notes:
 ;; Prior art:
 ;; - cl-wav-synth; https://common-lisp.net/project/cl-wav-synth/
-;;
-;; (defun sound-file (file) ;; only supports 16-bit sounds
-;;   (sndfile:with-open-sound-file (sf-file (truename file))
-;;     (sndfile::read-short-samples-into-array sf-file)))
 
 ;;; gui stuff
 
 (defclass wave-editor-pane (application-pane)
   ((sound :initarg :sound :initform nil :type (or null bdef) :documentation "The sound instance as a `bdef'.")
+   (point :initarg :point :initform 0 :type (or integer list) :documentation "The frame that the point is to the left of, or a list consisting of the start and end points of the region if active.")
    (second-px :initarg :second-px :initform 1000 :type number :documentation "The number of horizontal pixels per second (i.e. the \"zoom\" level of the pane).")
    (horizontal-margin :initarg :horizontal-margin :initform 10 :type (real 0) :documentation "The margin between the left/right edges of the pane and the start/end of the waveform.")
    (vertical-margin :initarg :y-margin :initform 40 :type (real 0) :documentation "The margin between the top/bottom of the pane and 1 and -1 of the waveform.")
@@ -28,6 +25,10 @@
    ;; :default-view +graphical-view+
    :foreground (get-theme-color :foreground)
    :background (get-theme-color :background)))
+
+(define-presentation-type wave-editor-point ())
+
+(define-presentation-type sound-frame ())
 
 ;; (defmethod compose-space ((pane wave-editor-pane) &key width height)
 ;;   (make-space-requirement :width 500
@@ -65,27 +66,30 @@ See also: `scaled-frames-for'"
   "Generate and store scaled frames for STREAM.
 
 See also: `cached-frames-for'"
-  ;; FIX(?): this function doesn't yet handle second-px being greater than or equal to buffer's sample rate
   (with-slots (sound second-px %cached-second-px %cached-scaled-frames) stream
     (when (eql second-px %cached-second-px)
       (return-from scaled-frames-for %cached-scaled-frames))
     (let* ((cached-frames (cached-frames-for stream))
+           (cached-frames-length (length cached-frames))
            (sound-duration (bdef-duration sound))
            (array-length (ceiling (* sound-duration second-px)))
            (array (make-array array-length))
            (sound-length (bdef-length sound))
-           (frames-per-scaled-frame (floor (/ sound-length array-length))))
-      (dotimes (n array-length)
-        (setf (aref array n)
-              (mean (subseq cached-frames (* n frames-per-scaled-frame)
-                            (* (1+ n) frames-per-scaled-frame)))))
+           (frames-per-scaled-frame (max 1 (floor (/ sound-length array-length)))))
+      (if (= 1 frames-per-scaled-frame)
+          (setf array (copy-array cached-frames))
+          (dotimes (n array-length)
+            (setf (aref array n)
+                  (mean (subseq cached-frames
+                                (clamp (* n frames-per-scaled-frame) 0 cached-frames-length)
+                                (clamp (* (1+ n) frames-per-scaled-frame) 0 cached-frames-length))))))
       (setf %cached-scaled-frames array
             %cached-second-px second-px)
       array)))
 
 (defun draw-wave-editor (frame stream)
   (declare (ignore frame))
-  (with-slots (sound horizontal-margin vertical-margin) stream
+  (with-slots (sound second-px horizontal-margin vertical-margin) stream
     (unless sound
       (return-from draw-wave-editor nil))
     (let* ((region (sheet-region stream))

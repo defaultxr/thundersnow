@@ -22,8 +22,8 @@ More documentation and functionality will exist in the future.
 
 The main GUIs included with thundersnow are the following. Note none of these have much implemented yet.
 
-** Main interface
-Gives a general overview of all synths, patterns, routines, etc, that are playing, buffers that are loaded, etc, and makes it easier to control or modify them.
+** Thundersnow
+The main interface; gives a general overview of all synths, patterns, routines, etc, that are playing, buffers that are loaded, etc, and makes it easier to control or modify them.
 ** Tracker
 A tracker-inspired interface over cl-patterns' ~ptracker~ pattern.
 ** Piano roll

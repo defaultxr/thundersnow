@@ -8,6 +8,7 @@
 ;; (clim-listener:run-listener)
 ;; arguments for define-drag-and-drop-translator can include:
 ;; - destination-object context-type frame presentation destination-presentation event window x y
+;; zoom should be proportional; zoom series is: 1, 2, 3, 4, 6, 8, 12, 16, 24, 32
 
 (in-package #:thundersnow/thundersnow)
 

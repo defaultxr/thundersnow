@@ -13,10 +13,7 @@
                #:closer-mop
                #:cl-patterns/supercollider ;; FIX: ensure thundersnow is backend-agnostic
                #:bdef
-               #:mcclim
-               ;; #:sndfile-blob
-               ;; #:bodge-sndfile
-               )
+               #:mcclim)
   :serial t
   :components ((:file "src/package")
                (:file "src/utility")
