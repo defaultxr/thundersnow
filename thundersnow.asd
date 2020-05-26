@@ -1,13 +1,15 @@
 ;;;; thundersnow.asd
 
 (asdf:defsystem #:thundersnow
+  :name "thundersnow"
   :description "Digital audio workstation and live coding laboratory for Common Lisp"
-  :author "modula t. <defaultxr@gmail.com>"
+  :author "modula t."
   :license "Specify license here"
   :version "0.1"
-  ;; :homepage "https://w.struct.ws/thundersnow/"
-  :source-control (:git "git@github.com:defaultxr/thundersnow.git")
+  :homepage "https://w.struct.ws/thundersnow/"
   :bug-tracker "https://github.com/defaultxr/thundersnow/issues"
+  :mailto "defaultxr at gmail dot com"
+  :source-control (:git "git@github.com:defaultxr/thundersnow.git")
   :depends-on (#:alexandria
                #:mutility
                #:closer-mop
@@ -28,7 +30,7 @@
 
 (asdf:defsystem #:thundersnow/tests
   :name "thundersnow/tests"
-  :author "modula t. <defaultxr@gmail.com>"
+  :author "modula t."
   :description "FiveAM-based test suite for thundersnow."
   :license "Specify license here"
   :depends-on (#:thundersnow
