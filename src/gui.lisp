@@ -1,7 +1,15 @@
 (in-package #:thundersnow/common)
 
 ;;;; common gui functionality
-;;; stuff that is used by all guis
+;;; stuff that is used by all guis; views, theming, commands, etc
+
+;;; functions
+
+(defun note-text (midinote)
+  "Get the friendly text string for MIDINOTE."
+  (concat (note-name midinote) (midinote-octave midinote) " (" midinote ")"))
+
+;;; views
 
 (defclass textual-view (view)
   ())

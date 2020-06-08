@@ -84,9 +84,9 @@
                      (+ y-top y-size)
                      :ink +red+)
     (draw-text* stream
-                (write-to-string midinote)
-                x-start
-                (+ 2 y-top))))
+                (note-text midinote)
+                x-start (* y-size (1+ midinote))
+                :align-y :top)))
 
 ;; (define-gesture-name :move :pointer-button (:left))
 
@@ -178,10 +178,11 @@
                  (draw-line* stream xpos 0 xpos stream-height :ink +gray+)
                  (draw-text* stream (write-to-string x) (1+ xpos) 1 :ink +gray+))
         (loop :for y :from 0 :upto 127
-              :for ypos = (* y y-size)
+              :for ypos := (* y y-size)
+              :for top-ypos := (* (1+ y) y-size)
               :do
                  (draw-line* stream 0 ypos stream-width ypos :ink +gray+)
-                 (draw-text* stream (write-to-string y) 1 (1+ ypos) :ink +gray+))
+                 (draw-text* stream (note-text y) 1 top-ypos :align-y :top :ink +gray+))
         (dolist (event events)
           (updating-output (stream :unique-id event :cache-value event :cache-test #'event-presentation-equal)
             (present event 'event :stream stream))))))
