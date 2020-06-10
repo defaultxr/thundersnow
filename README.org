@@ -35,6 +35,8 @@ Show the waveform of a sound buffer and optionally ~splits~ data. The waveform v
 Not implemented at all yet. GUIs for showing the structure of nested patterns and for changing their parameters, etc.
 ** Synth GUIs
 Not implemented at all yet. Interfaces to controlling synths as well as generating synthdefs. Will likely use template macros to generate the synthdefs.
+** File/object browser
+Not implemented at all yet. Fast/efficient interface to find a file or object.
 
 * Features
 
@@ -61,6 +63,7 @@ Roughly in descending order of priority. Not an exhaustive list, of course.
   - Bake an apple pie from scratch
 - create site
   - register a domain for it
+- Integration with [[https://freesound.org/][Freesound]]('s API)?
 - EVERYTHING ELSE!
 
 * Known Issues
