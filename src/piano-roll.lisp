@@ -168,8 +168,8 @@
            (stream-height (* y-size 128))
            (events (etypecase eseq
                      (list eseq)
-                     (cl-patterns::eseq (cl-patterns::eseq-events eseq))
-                     (cl-patterns::pattern (next-upto-n eseq)))))
+                     (eseq (eseq-events eseq))
+                     (pattern (next-upto-n eseq)))))
       (with-room-for-graphics (stream :first-quadrant t)
         (present (make-instance '%background) '%background :stream stream)
         (loop :for x :from 0 :upto (max (+ (dur eseq) 32) (/ stream-width beat-size))
@@ -203,15 +203,15 @@
                          :command-table piano-roll-edit-command-table
                          :keystroke (#\a :meta))
     ((event '(or event number) :prompt "Event or event start beat"))
-  (cl-patterns::add-event (slot-value *application-frame* 'eseq)
-                          (typecase event
-                            (event event)
-                            (number (event :beat event)))))
+  (eseq-add (slot-value *application-frame* 'eseq)
+            (typecase event
+              (event event)
+              (number (event :beat event)))))
 
 (define-command (com-erase :name t :menu t
                            :command-table piano-roll-edit-command-table)
     ((event '(or event integer)))
-  (cl-patterns::remove-event (slot-value *application-frame* 'eseq) event))
+  (eseq-remove (slot-value *application-frame* 'eseq) event))
 
 (define-command (com-move :name t :menu t
                           :command-table piano-roll-edit-command-table)
@@ -230,7 +230,7 @@
                                 :command-table piano-roll-edit-command-table)
     ((event 'event))
   ;; (print 'hello (find-pane-named (find-application-frame 'piano-roll) 'interactor))
-  ;; (cl-patterns::remove-event (slot-value *application-frame* 'eseq) event)
+  ;; (eseq-remove (slot-value *application-frame* 'eseq) event)
   (with-swank-output
     (print event))
   (let* ((*standard-input* (frame-standard-input *application-frame*))
