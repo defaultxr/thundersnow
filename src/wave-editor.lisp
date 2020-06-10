@@ -41,7 +41,9 @@
   (slot-value this 'sound))
 
 (defmethod (setf sound) ((bdef bdef) (this wave-editor-pane))
-  (setf (slot-value this 'sound) bdef))
+  (setf (slot-value this 'sound) bdef
+        (pane-needs-redisplay this) t)
+  (redisplay-frame-pane (pane-frame this) this :force-p t))
 
 (defmethod (setf sound) ((sound string) (this wave-editor-pane))
   (setf (sound this) (bdef sound)))
@@ -87,24 +89,80 @@ See also: `cached-frames-for'"
             %cached-second-px second-px)
       array)))
 
+(defun sound-frame-pixel (wave-editor-pane sound-frame)
+  "Get the pixel position of a WAVE-EDITOR-PANE's sound frame.
+
+See also: `pixel-sound-frame'"
+  (with-slots (sound second-px horizontal-margin) wave-editor-pane
+    (+ horizontal-margin (* (/ second-px (bdef-sample-rate sound)) sound-frame))))
+
+(defun pixel-sound-frame (wave-editor-pane pixel)
+  "Get the sound frame at PIXEL or nil if the pixel is out of range.
+
+See also: `sound-frame-pixel'"
+  (with-slots (sound second-px horizontal-margin) wave-editor-pane
+    (when (<= horizontal-margin pixel (+ horizontal-margin (* second-px (bdef-duration sound))))
+      (* (/ (- pixel horizontal-margin) second-px) (bdef-sample-rate sound)))))
+
 (defun draw-wave-editor (frame stream)
   (declare (ignore frame))
-  (with-slots (sound second-px horizontal-margin vertical-margin) stream
+  (with-slots (sound point second-px horizontal-margin vertical-margin) stream
     (unless sound
       (return-from draw-wave-editor nil))
     (let* ((region (sheet-region stream))
            (height (rectangle-height region))
+           (waveform-height (- height (* 2 vertical-margin)))
            (hd2 (- (/ height 2) vertical-margin))
            (line-color (get-theme-color :foreground))
+           (background-color (get-theme-color :background))
            (frames (scaled-frames-for stream))
-           (num-frames (length frames)))
-      (draw-rectangle* stream horizontal-margin vertical-margin (+ horizontal-margin num-frames) (- height vertical-margin) :filled nil :ink (get-theme-color :grid))
-      (let ((end-line-x (+ (* 2 horizontal-margin) num-frames)))
+           (num-scaled-frames (length frames))
+           (sr (bdef-sample-rate sound))
+           (px-per-frame (max 1 ))
+           (sound-frame-scaling (/ sr num-scaled-frames))
+           (point (ensure-list point))
+           (point-start (car point))
+           (point-end (or (cadr point) (car point)))
+           (point-start-x (sound-frame-pixel stream point-start))
+           (point-end-x (sound-frame-pixel stream point-end)))
+      ;; selection rectangle background
+      ;; (draw-rectangle* stream
+      ;;                  point-start-x vertical-margin
+      ;;                  point-end-x (- height vertical-margin)
+      ;;                  :ink +yellow-green+)
+      ;; line drawn at the end for the right margin
+      (let ((end-line-x (+ (* 2 horizontal-margin) (sound-frame-pixel stream num-scaled-frames))))
         (draw-line* stream end-line-x 0 end-line-x height))
-      (dotimes (i num-frames)
-        (let ((val (aref frames i))
-              (x (+ horizontal-margin i)))
-          (draw-line* stream x hd2 x (+ hd2 (* val height)) :ink line-color))))))
+      ;; frames
+      (dotimes (i num-scaled-frames)
+        (let* ((val (aref frames i))
+               (actual-frame (* i sound-frame-scaling))
+               (x (sound-frame-pixel stream i))
+               (next-x (sound-frame-pixel stream (1+ i))))
+          (with-output-as-presentation (stream (round actual-frame) 'sound-frame)
+            (updating-output (stream :unique-id (round actual-frame))
+              ;; (draw-rectangle* stream x vertical-margin next-x (- height vertical-margin)
+              ;;                  :filled t
+              ;;                  :ink (if (<= point-start actual-frame point-end)
+              ;;                           +yellow-green+
+              ;;                           background-color))
+              (draw-rectangle* stream x hd2 next-x (+ hd2 (* val waveform-height))
+                               :filled t
+                               :ink line-color)))))
+      ;; border rectangle
+      (draw-rectangle* stream
+                       horizontal-margin
+                       vertical-margin
+                       (sound-frame-pixel stream num-scaled-frames)
+                       (- height vertical-margin)
+                       :filled nil
+                       :ink (get-theme-color :grid))
+      ;; selection box border
+      (draw-rectangle* stream
+                       point-start-x vertical-margin
+                       point-end-x (- height vertical-margin)
+                       :filled nil
+                       :ink +yellow+))))
 
 (define-application-frame wave-editor ()
   ((second-px :initarg :second-px :initform 1000))
@@ -144,7 +202,11 @@ See also: `cached-frames-for'"
   (slot-value this 'second-px))
 
 (defmethod (setf second-px) (value (this wave-editor))
-  (let ((pane (find-pane-named this 'wave-editor-pane)))
+  (let* ((pane (find-pane-named this 'wave-editor-pane))
+         (max-second-px (if-let ((bdef (sound pane)))
+                          (* 16 (bdef-sample-rate bdef))
+                          192000))
+         (value (clamp value 1 max-second-px)))
     (setf (slot-value this 'second-px) value
           (slot-value pane 'second-px) value
           (pane-needs-redisplay pane) t)))
@@ -152,14 +214,23 @@ See also: `cached-frames-for'"
 (defmethod sound ((this wave-editor))
   (sound (find-pane-named this 'wave-editor-pane)))
 
-(defmethod (setf sound) (sound (this wave-editor))
-  (setf (sound (find-pane-named this 'wave-editor-pane)) sound)
+(defmethod (setf sound) ((bdef bdef) (this wave-editor))
+  (setf (sound (find-pane-named this 'wave-editor-pane)) bdef)
   (let* ((bdef (sound this))
          (key (bdef-key bdef))
          (name (etypecase key
                  (symbol key)
                  (string (concat (pathname-name key) "." (pathname-type key))))))
     (setf (frame-pretty-name *application-frame*) (concat "Wave-Editor: " name))))
+
+(defmethod (setf sound) ((sound string) (this wave-editor))
+  (setf (sound this) (bdef sound)))
+
+(defmethod (setf sound) ((sound symbol) (this wave-editor))
+  (setf (sound this) (bdef sound)))
+
+(defmethod (setf sound) ((sound pathname) (this wave-editor))
+  (setf (sound this) (namestring sound)))
 
 (define-command-table wave-editor-file-command-table
   :inherit-from (thundersnow-common-file-command-table)
@@ -211,11 +282,12 @@ See also: `cached-frames-for'"
   (let ((sound (etypecase wave
                  (string (bdef wave))
                  (bdef wave)
-                 (null nil))))
+                 (null nil)))
+        (frame (find-application-frame 'wave-editor)))
     ;; FIX: find-application-frame sometimes returns nil, which makes the `wave-editor' function's WAVE argument not work. maybe a mcclim bug?
-    (when-let* ((frame (find-application-frame 'wave-editor))
-                (pane (find-pane-named frame 'wave-editor-pane)))
-      (setf (sound pane) sound))
+    (when (and wave frame)
+      (when-let ((pane (find-pane-named frame 'wave-editor-pane)))
+        (setf (sound pane) sound)))
     frame))
 
 
