@@ -2,20 +2,12 @@
 
 ;;; utilities (FIX):
 
-(defun make-hsv-color (hue saturation value) ;; FIX: don't use this, just use make-ihs-color
-  (make-ihs-color value hue saturation)
-  ;; (let ((hue (clamp hue 0 1))
-  ;;       (saturation (clamp saturation 0 1))
-  ;;       (value (clamp value 0 1)))
-  ;;   (make-rgb-color ))
-  )
-
 (defun plist-value (plist key)
   "Get the value of KEY in PLIST. Returns the key the value was derived from as a second value."
   (loop :for (k v) :on plist :by #'cddr
-     :if (eql k key)
-     :return (values v k)
-     :finally (return-from plist-value (values nil nil))))
+        :if (eql k key)
+          :return (values v k)
+        :finally (return-from plist-value (values nil nil))))
 
 (defvar loop-detector nil)
 

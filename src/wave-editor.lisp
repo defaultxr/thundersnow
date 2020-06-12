@@ -30,13 +30,6 @@
 
 (define-presentation-type sound-frame ())
 
-;; (defmethod compose-space ((pane wave-editor-pane) &key width height)
-;;   (make-space-requirement :width 500
-;;                           :height 500))
-
-;; (defmethod handle-repaint :before ((pane wave-editor-pane) region)
-;;   nil)
-
 (defmethod sound ((this wave-editor-pane))
   (slot-value this 'sound))
 
@@ -291,8 +284,4 @@ See also: `sound-frame-pixel'"
     frame))
 
 
-;; cl-wav-synth
 
-#|
-(ql:quickload '(clim-listener cl-wav-synth cl-wav-synth-clim))
-|#

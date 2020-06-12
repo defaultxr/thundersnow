@@ -68,10 +68,7 @@
                      :filled nil)))
 
 (define-presentation-method present (event (type event) stream (view graphical-view) &key)
-  (let* ((region (sheet-region stream))
-         (stream-width (rectangle-width region))
-         (stream-height (rectangle-height region))
-         (frame (pane-frame stream))
+  (let* ((frame (pane-frame stream))
          (beat-size (slot-value frame 'beat-size))
          (x-start (* beat-size (beat event)))
          (y-size (slot-value frame 'y-size))
@@ -87,8 +84,6 @@
                 (note-text midinote)
                 x-start (* y-size (1+ midinote))
                 :align-y :top)))
-
-;; (define-gesture-name :move :pointer-button (:left))
 
 (defmethod frame-drag-and-drop-feedback
     ((frame standard-application-frame) from-presentation (stream output-recording-stream)
@@ -229,10 +224,6 @@
 (define-command (com-edit-event :name t :menu t
                                 :command-table piano-roll-edit-command-table)
     ((event 'event))
-  ;; (print 'hello (find-pane-named (find-application-frame 'piano-roll) 'interactor))
-  ;; (eseq-remove (slot-value *application-frame* 'eseq) event)
-  (with-swank-output
-    (print event))
   (let* ((*standard-input* (frame-standard-input *application-frame*))
          (plist (event-plist event))
          (pitch-type (find-any (list :midinote :freq :degree) plist)) ;; FIX: this should be standard functionality in cl-patterns
@@ -387,32 +378,6 @@
   :inherit-from (thundersnow-common-help-command-table)
   :inherit-menu t)
 
-;; (define-drag-and-drop-translator drag/move (event command %background piano-roll
-;;                                                   :gesture :select
-;;                                                   :priority 1
-;;                                                   :feedback draw-event-drag-feedback)
-;;     (ev destination-object frame presentation event x y)
-;;   ;; (setf tmp (list destination-object frame presentation event x y))
-;;   (with-slots (beat-size y-size) frame
-;;     (let ((new-beat (/ (pointer-event-x event) beat-size))
-;;           (new-y (/ (pointer-event-y event) y-size)))
-;;       (with-swank-output
-;;         (format t "new-beat: ~$; new-y: ~$; x: ~$; y: ~$~%" new-beat new-y x y))
-;;       `(com-move ,ev ,new-beat ,new-y))))
-
-;; (defun draw-event-drag-feedback (frame presentation stream x-from y-from x-to y-to state)
-;;   (declare (ignorable frame presentation stream x-from y-from x-to y-to state))
-;;   ;; (when (eql state :highlight))
-;;   (with-slots (beat-size y-size) frame
-;;     (let ((x-start (round-by-direction x-to (- beat-size)))
-;;           (y-start (round-by-direction y-to (- y-size)))
-;;           (event (presentation-object presentation)))
-;;       ;; (setf (output-record-end-cursor-position frame))
-;;       (with-output-recording-options (stream :record nil)
-;;         (draw-rectangle* stream
-;;                          x-start y-start (+ x-start (* beat-size (event-value event :dur))) (+ y-start y-size)
-;;                          :ink +pink+)))))
-
 (define-gesture-name :add :pointer-button (:left))
 
 (define-presentation-action add (%background nil piano-roll :gesture :add :pointer-documentation
@@ -435,43 +400,3 @@
 (defun piano-roll ()
   "Open a piano-roll."
   (find-application-frame 'piano-roll))
-
-;; (define-presentation-action edit (event nil piano-roll
-;;                                         :gesture :select
-;;                                         :tester ((object event)
-;;                                                  (when event
-;;                                                    (setf tmp event))
-;;                                                  t)
-;;                                         :priority -1
-;;                                         :pointer-documentation "Edit event")
-;;     (event)
-;;   (print 'hello (find-pane-named (find-application-frame 'piano-roll) 'interactor))
-;;   (with-swank-output
-;;     (print 'yo-yo)))
-
-;; (define-drag-and-drop-translator drag-file/move
-;;     (file command directory file-manager
-;;           :gesture t
-;;           :tester ((object) (not (typep object 'root)))
-;;           :destination-tester ((object destination-object event)
-;;                                (and (zerop (event-modifier-state event))
-;;                                     (not-same-or-old-parent
-;;                                      object destination-object)))
-;;           :feedback drag-file-feedback/move
-;;           :pointer-documentation ((object destination-object stream)
-;;                                   (drag-documentation
-;;                                    object destination-object nil "Move" stream)))
-;;     (object destination-object)
-;;   `(com-move-file ,object ,destination-object))
-
-;; (defclass tileset-pane (action-gadget application-pane immediate-repainting-mixin)
-;;   ())
-
-;; (defmethod handle-event ((this tileset-pane) (event pointer-button-press-event))
-;;   (setf tmp event)
-;;   (format *swank-output* "x: ~a y: ~a~%" (clim:pointer-event-x event) (clim:pointer-event-y event)))
-
-;; (defmethod handle-repaint ((this tileset-pane) region)
-;;   (print 'hi *swank-output*)
-;;   (draw-tileset (pane-frame this) this))
-
