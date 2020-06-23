@@ -310,11 +310,12 @@
     (event)
   nil)
 
-(define-presentation-to-command-translator event-dragging-translator ;; FIX: hide this from the right click menu
+(define-presentation-to-command-translator event-dragging-translator
     (event com-drag-event piano-roll
            :tester ((object presentation x)
                     (not (hovering-for-resize-p x presentation)))
-           :pointer-documentation "Move this event")
+           :pointer-documentation "Move this event"
+           :menu nil)
     (object presentation x y)
   (multiple-value-bind (old-x old-y) (output-record-position presentation)
     (list presentation (- x old-x) (- y old-y))))
@@ -332,7 +333,7 @@
     (event)
   nil)
 
-(define-presentation-to-command-translator event-resizing-translator ;; FIX: hide this from the right click menu
+(define-presentation-to-command-translator event-resizing-translator
     (event com-resize-event piano-roll
            :tester ((object presentation x)
                     (and (hovering-for-resize-p x presentation)
@@ -341,7 +342,8 @@
                           (find-pane-named (find-application-frame 'piano-roll) 'piano-roll)
                           :horizontal-scroll)
                          t))
-           :pointer-documentation "Resize this event")
+           :pointer-documentation "Resize this event"
+           :menu nil)
     (object presentation x y)
   (multiple-value-bind (old-x old-y) (output-record-position presentation)
     (list presentation (- x old-x) (- y old-y))))
