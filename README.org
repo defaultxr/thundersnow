@@ -1,6 +1,6 @@
 #+TITLE: thundersnow
 
-Lisp/CLIM-based digital audio workstation and live coding laboratory.
+Digital audio workstation and [[https://en.wikipedia.org/wiki/Live_coding][live coding]] laboratory in Common Lisp using the [[https://github.com/McCLIM/McCLIM/][McCLIM]] Common Lisp Interface Manager implementation.
 
 Contains various GUIs and functionality for working with audio in Lisp in real time. Primarily developed for use with [[https://github.com/defaultxr/cl-patterns][cl-patterns]] and [[https://github.com/defaultxr/bdef][bdef]], using audio servers like [[https://supercollider.github.io/][SuperCollider]] (via [[https://github.com/byulparan/cl-collider][cl-collider]]) and [[https://incudine.sf.net/][Incudine]].
 

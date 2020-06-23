@@ -94,13 +94,6 @@ See also: `*theme*'"
 
 (define-command-table thundersnow-common-help-command-table)
 
-(define-command (com-about :name t :menu t
-                           :command-table thundersnow-common-help-command-table)
-    ()
-  (let* ((system (asdf:find-system "thundersnow"))
-         (version (asdf:component-version system)))
-    (format t "~&thundersnow ~a~%digital audio workstation and live coding laboratory~%by modula t. worm~%" version)))
-
 (define-command (com-readme :name "README" :menu t
                             :command-table thundersnow-common-help-command-table)
     ()
@@ -109,4 +102,16 @@ See also: `*theme*'"
 (define-command (com-repo :name t :menu t
                           :command-table thundersnow-common-help-command-table)
     ()
-  (open-url "https://github.com/defaultxr/thundersnow"))
+  (open-url (asdf:system-homepage (asdf:find-system :thundersnow t))))
+
+(define-command (com-bugs :name t :menu t
+                          :command-table thundersnow-common-help-command-table)
+    ()
+  (open-url (asdf:system-bug-tracker (asdf:find-system :thundersnow t))))
+
+(define-command (com-about :name t :menu t
+                           :command-table thundersnow-common-help-command-table)
+    ()
+  (let* ((system (asdf:find-system "thundersnow"))
+         (version (asdf:component-version system)))
+    (format t "~&thundersnow ~a~%digital audio workstation and live coding laboratory~%a struct.ws project by modula t. worm and contributors~%" version)))

@@ -33,20 +33,21 @@
 (define-presentation-type event ())
 
 (defclass piano-roll-pane (application-pane)
-  ((%saved-extent :initform nil))
+  ((%saved-extent :initform nil :documentation "The saved scroll position to return to when redisplaying."))
   (:default-initargs
    :name 'piano-roll
-    :display-function 'draw-piano-roll
-    :display-time :command-loop
-    :default-view +graphical-view+
-    :foreground +white+
-    :background (make-rgb-color 0.3 0.3 0.4)))
+   :display-function 'draw-piano-roll
+   :display-time :command-loop
+   :default-view +graphical-view+
+   :foreground +white+
+   :background (make-rgb-color 0.3 0.3 0.4)))
 
 (defmethod compose-space ((pane piano-roll-pane) &key width height)
   (make-space-requirement :width 500
                           :height (* 128 (slot-value (pane-frame pane) 'y-size))))
 
 (defmethod handle-repaint :before ((pane piano-roll-pane) region)
+  ;; save the scroll position
   (with-slots (%saved-extent) pane
     (setf %saved-extent (pane-viewport-region pane))))
 
@@ -244,10 +245,10 @@
 (define-piano-roll-command (com-drag-event) ((record event) (offset-x real :default 0) (offset-y real :default 0))
   ;; offset-x and offset-y are the offset that the presentation was clicked.
   ;; for some reason (with-room-for-graphics (stream :first-quadrant t) ...) doesn't seem to work here?
+  (declare (ignorable offset-y))
   (let ((stream (find-pane-named (find-application-frame 'piano-roll) 'piano-roll))
         (event (presentation-object record))
         (record-width (rectangle-width record)))
-    (setf tmp record)
     (drag-output-record stream record
                         :feedback (lambda (record stream old-x old-y x y mode)
                                     (declare (ignorable record stream old-x old-y x y mode))
@@ -314,7 +315,7 @@
     (event com-drag-event piano-roll
            :tester ((object presentation x)
                     (not (hovering-for-resize-p x presentation)))
-           :pointer-documentation "Move this event"
+           :pointer-documentation "Move event"
            :menu nil)
     (object presentation x y)
   (multiple-value-bind (old-x old-y) (output-record-position presentation)
