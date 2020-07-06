@@ -16,11 +16,64 @@
 
 (defun event-presentation-equal (event1 event2)
   "False if EVENT1 and EVENT2 differ in their CLIM presentation representation. This is used in the `updating-output' for `draw-piano-roll'."
-  (and (eql (dur event1) (dur event2))
+  (and (eql (sustain event1) (sustain event2))
        (eql (beat event1) (beat event2))
        (eql (event-value event1 :midinote) (event-value event2 :midinote))))
 
 ;;; gui stuff
+
+(defun x-pixel-to-beat (x frame)
+  "Convert an x pixel in FRAME to a beat number."
+  (with-slots (beat-size) frame
+    (/ x beat-size)))
+
+(defun x-pixel-to-beat-quantized (x frame)
+  "Convert an x pixel in FRAME to a beat number, quantizing to the grid."
+  (with-slots (grid-size) frame
+    (round-by (x-pixel-to-beat x frame) grid-size)))
+
+(defun x-pixel-to-beat-floored (x frame)
+  "Convert an x pixel in FRAME to a beat number, quantizing to the grid."
+  (with-slots (grid-size) frame
+    (floor-by (x-pixel-to-beat x frame) grid-size)))
+
+(defun beat-to-x-pixel (beat frame)
+  "Convert a beat in FRAME to the relevant x pixel."
+  (with-slots (beat-size) frame
+    (* beat-size beat)))
+
+(defun y-pixel-to-pitch (y frame)
+  "Convert a y pixel in FRAME to the frame's pitch type."
+  (with-slots (y-size) frame
+    (/ (- (pane-real-height frame) y) y-size)))
+
+(defun y-pixel-to-pitch-quantized (y frame)
+  "Convert a y pixel in FRAME to the frame's pitch type, quantizing."
+  (with-slots (y-size) frame
+    (floor (y-pixel-to-pitch y frame))))
+
+(defun pitch-to-y-pixel (pitch frame)
+  "Convert a pitch value to a y pixel in FRAME."
+  (with-slots (y-size) frame
+    (- (* y-size 128) (* y-size pitch))))
+
+(defun pane-real-width (frame)
+  "Get the \"real\" width of the piano-roll gadget in FRAME, in pixels."
+  (let ((frame (if (typep frame 'pane)
+                   (pane-frame frame)
+                   frame)))
+    (with-slots (beat-size) frame
+      (* beat-size (+ 8 (dur frame)))))) ;; FIX: ensure that this is at least the width of the pane
+
+(defun pane-real-height (frame)
+  "Get the \"real\" height of the piano-roll gadget in FRAME, in pixels."
+  (pitch-to-y-pixel 0 (if (typep frame 'pane)
+                          (pane-frame frame)
+                          frame)))
+
+(defun hovering-for-resize-p (x presentation)
+  "True if the mouse (whose x position is provided as the X argument) is hovering over PRESENTATION's right side."
+  (>= (- x (output-record-position presentation)) (- (rectangle-width presentation) 8)))
 
 (defclass graphical-view (view)
   ())
@@ -33,85 +86,67 @@
 (define-presentation-type event ())
 
 (defclass piano-roll-pane (application-pane)
-  ((%saved-extent :initform nil :documentation "The saved scroll position to return to when redisplaying."))
+  ((%saved-extent :initform nil :documentation "The scroll position to return to when redisplaying."))
   (:default-initargs
    :name 'piano-roll
    :display-function 'draw-piano-roll
    :display-time :command-loop
    :default-view +graphical-view+
    :foreground +white+
-   :background (make-rgb-color 0.3 0.3 0.4)))
+   :background (get-theme-color :background)))
 
 (defmethod compose-space ((pane piano-roll-pane) &key width height)
-  (make-space-requirement :width 500
-                          :height (* 128 (slot-value (pane-frame pane) 'y-size))))
+  (declare (ignore width height))
+  (make-space-requirement :width (pane-real-width pane)
+                          :height (pane-real-height pane)))
 
 (defmethod handle-repaint :before ((pane piano-roll-pane) region)
   ;; save the scroll position
   (with-slots (%saved-extent) pane
     (setf %saved-extent (pane-viewport-region pane))))
 
-;; (defmethod handle-repaint ((pane piano-roll-pane) region)
-;;   (draw-piano-roll *application-frame* pane))
-
 ;; (defmethod handle-event ((pane piano-roll-pane) (event pointer-motion-event))
-;;   (when-let ((doc-pane (find-pane-named *application-frame* 'pointer-documentation-pane)))
-;;     ;; (redisplay-frame-pane *application-frame* doc-pane :force-p t)
-;;     (setf (pane-needs-redisplay doc-pane) t)
-;;     ))
 
 (define-presentation-method present (background (type %background) stream (view graphical-view) &key)
-  (let* ((region (sheet-region stream))
-         (width (rectangle-width region))
-         (height (rectangle-height region)))
-    (draw-rectangle* stream
-                     0 0 width height
-                     :filled nil)))
+  (draw-rectangle* stream
+                   0 0 (pane-real-width stream) (pane-real-height stream)
+                   :filled nil))
 
 (define-presentation-method present (event (type event) stream (view graphical-view) &key)
   (let* ((frame (pane-frame stream))
-         (beat-size (slot-value frame 'beat-size))
-         (x-start (* beat-size (beat event)))
-         (y-size (slot-value frame 'y-size))
+         (beat (beat event))
+         (x-start (beat-to-x-pixel beat frame))
+         (sustain (sustain event))
+         (x-end (beat-to-x-pixel (+ beat sustain) frame))
          (midinote (event-value event :midinote))
-         (y-top (* y-size midinote)))
-    (draw-rectangle* stream
-                     x-start
-                     y-top
-                     (+ x-start (* (event-value event :dur) beat-size))
-                     (+ y-top y-size)
-                     :ink +red+)
+         (y-bottom (pitch-to-y-pixel midinote frame))
+         (y-top (pitch-to-y-pixel (1+ midinote) frame))
+         (note-color (get-theme-color :note-fill))
+         (grid-color (get-theme-color :grid)))
+    (surrounding-output-with-border (stream :padding 0 :thickness 1 :ink (mix-colors note-color grid-color 1/2))
+      (draw-rectangle* stream
+                       x-start y-top x-end y-bottom
+                       :filled t
+                       :ink note-color))
     (draw-text* stream
                 (note-text midinote)
-                x-start (* y-size (1+ midinote))
-                :align-y :top)))
-
-(defmethod frame-drag-and-drop-feedback
-    ((frame standard-application-frame) from-presentation (stream output-recording-stream)
-     initial-x initial-y x y state)
-  (with-bounding-rectangle* (fp-x1 fp-y1 fp-x2 fp-y2)
-      from-presentation
-    ;; Offset from origin of presentation is preserved throughout
-    (with-identity-transformation (stream)
-      (ecase state
-        (:highlight
-         (with-output-recording-options (stream :record nil)
-           (draw-rectangle* stream highlite-x1 highlite-y1 highlite-x2 highlite-y2
-                            :filled nil :line-dashes #(4 4))))
-        (:unhighlight
-         (with-output-recording-options (stream :record nil)
-           (draw-rectangle* stream
-                            highlite-x1 highlite-y1
-                            (1+ highlite-x2) (1+ highlite-y2)
-                            :ink (medium-background (sheet-medium stream))))
-         (stream-replay stream (make-rectangle* highlite-x1 highlite-y1
-                                                (1+ highlite-x2) (1+ highlite-y2))))))))
+                x-start y-top
+                :align-y :top)
+    (draw-text* stream ;; FIX: hide this if the note isn't big enough to show it
+                (sustain-text event)
+                x-end y-bottom
+                :align-x :right
+                :align-y :bottom)
+    (draw-text* stream
+                (beat-text event)
+                x-start y-bottom
+                :align-y :bottom)))
 
 (define-application-frame piano-roll ()
   ((eseq :initarg :eseq :initform (eseq) :type eseq :documentation "The `eseq' instance.")
-   (beat-size :initarg :beat-size :initform 200 :documentation "The size of one beat, in pixels.") ;; FIX: make the initform change based on the beats-per-bar
-   (grid-size :initarg :beat-size :initform 1/4 :documentation "The grid size in beats.")
-   (y-size :initarg :y-size :initform 40))
+   (beat-size :initarg :beat-size :initform 200 :documentation "The width of one beat, in pixels.")
+   (grid-size :initarg :beat-size :initform 1/4 :documentation "The number of beats between each grid line.")
+   (y-size :initarg :y-size :initform 40 :documentation "The height of one pitch value (i.e. midinote), in pixels."))
   (:command-table (piano-roll
 		   :inherit-from (piano-roll-file-command-table
                                   piano-roll-edit-command-table
@@ -124,14 +159,7 @@
                           ("Tools" :menu piano-roll-tools-command-table)
 			  ("Help" :menu piano-roll-help-command-table))))
   (:panes
-   ;; (piano-roll-pane (make-clim-application-pane
-   ;;                   :name 'piano-roll
-   ;;                   :scroll-bars t
-   ;;                   :incremental-redisplay t
-   ;;                   :display-function 'draw-piano-roll
-   ;;                   :default-view +graphical-view+
-   ;;                   :foreground +white+
-   ;;                   :background (make-rgb-color 0.3 0.3 0.4)))
+   (piano-roll-pane (make-pane 'piano-roll-pane))
    (interactor-pane (make-clim-interactor-pane
                      :name 'interactor
                      :scroll-bar :vertical))
@@ -142,46 +170,46 @@
   (:layouts
    (default
     (vertically ()
-      (5/6 (scrolling ()
-             (make-pane 'piano-roll-pane)))
+      (5/6 (scrolling () piano-roll-pane))
       (1/6 interactor-pane)
       pointer-documentation-pane)))
   (:menu-bar t))
 
-;; - define-presentation-translator
-;; - define-presentation-to-command-translator
-;; - define-presentation-action
-;; - define-drag-and-drop-translator
-;; - menu-choose
-;; - menu-choose-from-drawer
+(defmethod dur ((piano-roll piano-roll))
+  (dur (slot-value piano-roll 'eseq)))
 
 (defun draw-piano-roll (frame stream)
-  (with-slots (eseq) frame
-    (let* ((region (sheet-region stream))
-           (beat-size (slot-value frame 'beat-size))
-           (stream-width (rectangle-width region))
-           (y-size (slot-value frame 'y-size))
-           (stream-height (* y-size 128))
-           (events (etypecase eseq
-                     (list eseq)
-                     (eseq (eseq-events eseq))
-                     (pattern (next-upto-n eseq)))))
-      (with-room-for-graphics (stream :first-quadrant t)
-        (present (make-instance '%background) '%background :stream stream)
-        (loop :for x :from 0 :upto (max (+ (dur eseq) 32) (/ stream-width beat-size))
-              :for xpos = (* x beat-size)
-              :do
-                 (draw-line* stream xpos 0 xpos stream-height :ink +gray+)
-                 (draw-text* stream (write-to-string x) (1+ xpos) 1 :ink +gray+))
-        (loop :for y :from 0 :upto 127
-              :for ypos := (* y y-size)
-              :for top-ypos := (* (1+ y) y-size)
-              :do
-                 (draw-line* stream 0 ypos stream-width ypos :ink +gray+)
-                 (draw-text* stream (note-text y) 1 top-ypos :align-y :top :ink +gray+))
-        (dolist (event events)
-          (updating-output (stream :unique-id event :cache-value event :cache-test #'event-presentation-equal)
-            (present event 'event :stream stream))))))
+  (let* ((stream-width (pane-real-width stream))
+         (stream-height (pane-real-height stream))
+         (grid-size (slot-value frame 'grid-size))
+         (beat-size (slot-value frame 'beat-size))
+         (y-size (slot-value frame 'y-size))
+         (eseq (slot-value frame 'eseq))
+         (events (etypecase eseq
+                   (list eseq)
+                   (eseq (eseq-events eseq))
+                   (pattern (next-upto-n eseq))))
+         (background-color (slot-value stream 'background))
+         (grid-color (get-theme-color :grid))
+         (bg-grid-mixed (mix-colors background-color grid-color 1/6)))
+    (present (make-instance '%background) '%background :stream stream)
+    ;; draw the vertical grid lines and beat numbers at the bottom
+    (loop :for beat :from 0 :by grid-size :upto (max (+ (dur frame) 32) (/ stream-width (* beat-size grid-size)))
+          :for xpos = (beat-to-x-pixel beat frame)
+          :do (draw-line* stream xpos 0 xpos stream-height :ink (if (= (round beat) beat) grid-color bg-grid-mixed))
+              (draw-text* stream (write-to-string beat) (1+ xpos) (1- stream-height) :ink grid-color))
+    ;; draw the horizontal grid lines and note names on the side
+    (loop :for y :from 0 :upto 127
+          :for ypos := (- stream-height (* y y-size))
+          :for top-ypos := (- stream-height (* (1+ y) y-size))
+          :do
+             (draw-line* stream 0 ypos stream-width ypos :ink grid-color)
+             (draw-text* stream (note-text y) 1 top-ypos :align-y :top :ink grid-color))
+    ;; draw the notes (events)
+    (dolist (event events)
+      (updating-output (stream :unique-id event :cache-value event :cache-test #'event-presentation-equal)
+        (present event 'event :stream stream))))
+  ;; make sure we don't lose our current scroll location after we redraw
   (with-slots (%saved-extent) stream
     (apply #'scroll-extent stream
            (if %saved-extent
@@ -237,82 +265,34 @@
       (fresh-line)
       (accept 'string :default (write-to-string (random 10))))))
 
-(define-presentation-to-command-translator erase-event (event erase-event piano-roll :gesture :erase :pointer-documentation "Erase this event") (event)
-  (with-swank-output
-    (print 'command-translator))
-  (list event))
-
-(define-piano-roll-command (com-drag-event) ((record event) (offset-x real :default 0) (offset-y real :default 0))
+(define-piano-roll-command (com-move-event) ((record event) (offset-x real :default 0) (offset-y real :default 0))
   ;; offset-x and offset-y are the offset that the presentation was clicked.
-  ;; for some reason (with-room-for-graphics (stream :first-quadrant t) ...) doesn't seem to work here?
-  (declare (ignorable offset-y))
-  (let ((stream (find-pane-named (find-application-frame 'piano-roll) 'piano-roll))
-        (event (presentation-object record))
-        (record-width (rectangle-width record)))
-    (drag-output-record stream record
-                        :feedback (lambda (record stream old-x old-y x y mode)
-                                    (declare (ignorable record stream old-x old-y x y mode))
-                                    (ecase mode
-                                      (:erase
-                                       (erase-output-record record stream))
-                                      (:draw
-                                       (with-slots (beat-size y-size) (pane-frame stream)
-                                         (let* ((max-y (rectangle-max-y (sheet-region stream)))
-                                                (inv-y (- max-y y))
-                                                (new-beat (floor (/ x beat-size)))
-                                                (new-y (floor (/ inv-y y-size)))
-                                                (act-x (round-by-direction x (- beat-size)))
-                                                (act-y (round-by-direction y (- y-size))))
-                                           (setf (output-record-position record) (values act-x act-y))
-                                           (let* ((event (presentation-object record))
-                                                  (dur (event-value event :dur)))
-                                             (setf (beat event) new-beat
-                                                   (event-value event :midinote) new-y)
-                                             (stream-add-output-record stream record)
-                                             (repaint-sheet stream (make-rectangle* act-x act-y (+ act-x (* dur beat-size)) (+ act-y y-size)))))))))
-                        :finish-on-release t :multiple-window nil)))
-
-(define-piano-roll-command (com-resize-event) ((record event) (offset-x real :default 0) (offset-y real :default 0))
-  ;; offset-x and offset-y are the offset that the presentation was clicked.
-  ;; for some reason (with-room-for-graphics (stream :first-quadrant t) ...) doesn't seem to work here?
-  (let ((stream (find-pane-named (find-application-frame 'piano-roll) 'piano-roll))
-        (event (presentation-object record))
-        (record-width (rectangle-width record)))
-    (setf tmp record)
-    (let ((old-sustain (event-value event :sustain)))
-      (multiple-value-bind (old-x old-y) (output-record-position record)
-        (drag-output-record stream record
-                            :feedback (lambda (record stream prev-x prev-y x y mode)
-                                        (declare (ignorable record stream prev-x prev-y x y mode))
-                                        (ecase mode
-                                          (:erase
-                                           (erase-output-record record stream))
-                                          (:draw
-                                           (with-slots (beat-size y-size) (pane-frame stream)
-                                             (let* ((sustain (+ old-sustain (- x offset-x)))
-                                                    (new-end (+ old-x (* sustain beat-size))))
-                                               ;; (with-swank-output
-                                               ;;   (print ))
-                                               (setf (output-record-hit-detection-rectangle* record) new-end)
-                                               ;; (setf (event-value event :sustain) sustain)
-                                               (stream-add-output-record stream record)
-                                               (repaint-sheet stream (make-rectangle* old-x old-y (+ old-x (* sustain beat-size)) (+ old-y y-size))))))))
-                            :finish-on-release t :multiple-window nil)))))
-
-(defun hovering-for-resize-p (x presentation)
-  "True if the mouse (whose x position is provided as the X argument) is hovering over PRESENTATION's right side."
-  (>= (- x (output-record-position presentation)) (- (rectangle-width presentation) 8)))
-
-(define-presentation-action move (event nil piano-roll
-                                        :tester ((object presentation x)
-                                                 (not (hovering-for-resize-p x presentation)))
-                                        :pointer-documentation
-                                        "Move event")
-    (event)
-  nil)
+  (declare (ignore offset-y))
+  (drag-output-record (find-pane-named *application-frame* 'piano-roll-pane) record
+                      :multiple-window nil
+                      :finish-on-release t
+                      :feedback
+                      (lambda (presentation stream old-x old-y x y mode)
+                        (declare (ignore old-x old-y))
+                        (ecase mode
+                          (:erase
+                           (erase-output-record presentation stream))
+                          (:draw
+                           (with-slots (beat-size y-size) *application-frame*
+                             (let* ((new-y (floor (/ (- (rectangle-max-y (sheet-region stream)) y) y-size)))
+                                    (new-beat (x-pixel-to-beat-quantized (- x offset-x) *application-frame*))
+                                    (act-x (* new-beat beat-size))
+                                    (act-y (round-by-direction y (- y-size))))
+                               (setf (output-record-position presentation) (values act-x act-y))
+                               (let* ((event (presentation-object presentation))
+                                      (sustain (event-value event :sustain)))
+                                 (setf (beat event) new-beat
+                                       (event-value event :midinote) new-y)
+                                 (stream-add-output-record stream presentation)
+                                 (repaint-sheet stream (make-rectangle* act-x act-y (+ act-x (* sustain beat-size)) (+ act-y y-size)))))))))))
 
 (define-presentation-to-command-translator event-dragging-translator
-    (event com-drag-event piano-roll
+    (event com-move-event piano-roll
            :tester ((object presentation x)
                     (not (hovering-for-resize-p x presentation)))
            :pointer-documentation "Move event"
@@ -321,33 +301,46 @@
   (multiple-value-bind (old-x old-y) (output-record-position presentation)
     (list presentation (- x old-x) (- y old-y))))
 
-(define-presentation-action resize (event nil piano-roll
-                                          :tester ((object presentation x)
-                                                   (and (hovering-for-resize-p x presentation)
-                                                        (clim-internals::set-sheet-pointer-cursor ; (setf pointer-cursor) doesn't seem to work, so we do this
-                                                         (find-port)
-                                                         (find-pane-named (find-application-frame 'piano-roll) 'piano-roll)
-                                                         :horizontal-scroll)
-                                                        t))
-                                          :pointer-documentation
-                                          "Resize event")
-    (event)
-  nil)
+(define-piano-roll-command (com-resize-event) ((record event) (offset-x real :default 0) (offset-y real :default 0))
+  (declare (ignorable record offset-x offset-y))
+  (let* ((stream (find-pane-named *application-frame* 'piano-roll-pane))
+         (damaged-region +nowhere+)
+         (event (presentation-object record))
+         (event-beat (beat event))
+         (old-sustain (event-value event :sustain)))
+    (erase-output-record record stream nil)
+    (block tracking-pointer
+      (tracking-pointer (stream)
+        (:pointer-motion (x)
+                         (let* ((x-beat (x-pixel-to-beat-quantized x *application-frame*))
+                                (new-sustain (max (slot-value *application-frame* 'grid-size) (- x-beat event-beat)))
+                                (rect (multiple-value-list (bounding-rectangle* record))))
+                           (when (/= old-sustain new-sustain)
+                             (handle-repaint stream damaged-region)
+                             (setf (elt rect 2) (* (slot-value *application-frame* 'beat-size)
+                                                   (+ new-sustain event-beat))
+                                   damaged-region (apply 'make-rectangle* rect)
+                                   (event-value event :sustain) new-sustain
+                                   old-sustain new-sustain)
+                             (with-output-recording-options (stream :record nil :draw t)
+                               (present event 'event :stream stream :view +graphical-view+)))))
+        (:pointer-button-release ()
+                                 (return-from tracking-pointer nil))))
+    (stream-add-output-record stream record)))
 
 (define-presentation-to-command-translator event-resizing-translator
     (event com-resize-event piano-roll
            :tester ((object presentation x)
-                    (and (hovering-for-resize-p x presentation)
-                         (clim-internals::set-sheet-pointer-cursor ; (setf pointer-cursor) doesn't seem to work, so we do this
-                          (find-port)
-                          (find-pane-named (find-application-frame 'piano-roll) 'piano-roll)
-                          :horizontal-scroll)
-                         t))
-           :pointer-documentation "Resize this event"
+                    (when (hovering-for-resize-p x presentation)
+                      (climi::set-sheet-pointer-cursor ; (setf pointer-cursor) doesn't seem to work, so we do this
+                       (find-port)
+                       (find-pane-named *application-frame* 'piano-roll-pane)
+                       :horizontal-scroll)
+                      t))
+           :pointer-documentation "Resize event"
            :menu nil)
-    (object presentation x y)
-  (multiple-value-bind (old-x old-y) (output-record-position presentation)
-    (list presentation (- x old-x) (- y old-y))))
+    (object presentation window x y)
+  (list presentation x y))
 
 (define-command-table piano-roll-view-command-table)
 
@@ -381,21 +374,13 @@
   :inherit-from (thundersnow-common-help-command-table)
   :inherit-menu t)
 
-(define-gesture-name :add :pointer-button (:left))
-
-(define-presentation-action add (%background nil piano-roll :gesture :add :pointer-documentation
-                                             ((%background x y stream frame)
-                                              (with-slots (beat-size grid-size) frame
-                                                (format stream "Add event at beat ~$, midinote ~a" (/ x beat-size) y))))
-    (%background)
-  nil)
 
 (define-gesture-name :erase :pointer-button (:middle))
 
 (define-presentation-action erase (event nil piano-roll :gesture :erase :pointer-documentation "Erase event")
     (event)
   (com-erase event)
-  (redisplay-frame-pane *application-frame* (find-pane-named *application-frame* 'piano-roll) :force-p t))
+  (redisplay-frame-pane *application-frame* (find-pane-named *application-frame* 'piano-roll-pane) :force-p t))
 
 ;; FIX:
 ;; (define-gesture-name :motion :pointer-motion (:left))
