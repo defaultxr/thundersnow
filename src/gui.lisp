@@ -9,6 +9,14 @@
   "Get the friendly text string for MIDINOTE."
   (concat (note-name midinote) (midinote-octave midinote) " (" midinote ")"))
 
+(defun beat-text (event)
+  "Get the beat text string for EVENT."
+  (concat "b: " (friendly-ratio-string (beat event))))
+
+(defun sustain-text (event)
+  "Get the sustain text string for EVENT."
+  (concat "s: " (friendly-ratio-string (sustain event))))
+
 ;;; views
 
 (defclass textual-view (view)
@@ -30,13 +38,26 @@
 (defvar *theme* (list
                  :background (make-rgb-color 0.3 0.3 0.4)
                  :foreground +black+
-                 :grid (make-gray-color 0.8)))
+                 :grid (make-gray-color 0.8)
+                 :note-fill +red+
+                 :selected-note-fill +blue+))
 
 (defun get-theme-color (element)
   "Get the theme's color for a type of GUI element, i.e. :foreground, :background, :accent, etc.
 
 See also: `*theme*'"
   (getf *theme* element))
+
+;;; drawing utils
+
+;; FIX: make it so the variable can be "pane" OR "stream"
+(defmacro with-border ((&optional (background +white+) (thickness 1) &rest additional-args) &body body)
+  (let ((padding 2))
+    (with-gensyms (background-sym thickness-sym)
+      `(let ((,background-sym ,background)
+             (,thickness-sym ,thickness))
+         (surrounding-output-with-border (pane :padding ,padding :padding-bottom ,(1- padding) :padding-top ,(1- padding) :background ,background-sym :thickness ,thickness-sym ,@additional-args)
+           ,@body)))))
 
 ;;; file commands
 

@@ -61,9 +61,11 @@ Roughly in descending order of priority. Not an exhaustive list, of course.
 - Make it actually look good (related to theming support, above)
 - Create the universe
   - Bake an apple pie from scratch
-- create site
-  - register a domain for it
+- Create a site
+  - Register a domain
 - Integration with [[https://freesound.org/][Freesound]]('s API)?
+- Integration with [[https://github.com/exaile/moodbar][Moodbar]] for sound file "thumbnails"?
+- Look into this page on [[http://www.personal.psu.edu/cab38/ColorSch/Schemes.html][color schemes]]
 - EVERYTHING ELSE!
 
 * Known Issues

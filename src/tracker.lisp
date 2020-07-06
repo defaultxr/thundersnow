@@ -166,14 +166,6 @@ See also: `ptracker'"))
 
 ;;; pattern drawing
 
-(defmacro with-border ((&optional (background +white+) (thickness 1) &rest additional-args) &body body)
-  (let ((padding 2))
-    (with-gensyms (background-sym thickness-sym)
-      `(let ((,background-sym ,background)
-             (,thickness-sym ,thickness))
-         (surrounding-output-with-border (pane :padding ,padding :padding-bottom ,(1- padding) :padding-top ,(1- padding) :background ,background-sym :thickness ,thickness-sym ,@additional-args)
-           ,@body)))))
-
 (defun draw-track (frame pane)
   "Draw the contents of `tracker'."
   (let ((ptracker (frame-ptracker frame)))
@@ -202,11 +194,11 @@ See also: `ptracker'"))
               ;; column headers
               (let ((col 1))
                 (doplist (key value header)
-                    (prog1
-                        (with-border ((cell-color t col))
-                          (formatting-cell (pane)
-                            (present (make-instance 'cell-column-header :frame frame :content (format nil "~s ~s" key value) :key key) 'cell-column-header :stream pane)))
-                      (incf col)))
+                  (prog1
+                      (with-border ((cell-color t col))
+                        (formatting-cell (pane)
+                          (present (make-instance 'cell-column-header :frame frame :content (format nil "~s ~s" key value) :key key) 'cell-column-header :stream pane)))
+                    (incf col)))
                 ;; new column button
                 (with-border ((cell-color t col))
                   (formatting-cell (pane)
