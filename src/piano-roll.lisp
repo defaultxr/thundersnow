@@ -282,7 +282,7 @@
                              (let* ((new-y (floor (/ (- (rectangle-max-y (sheet-region stream)) y) y-size)))
                                     (new-beat (x-pixel-to-beat-quantized (- x offset-x) *application-frame*))
                                     (act-x (* new-beat beat-size))
-                                    (act-y (round-by-direction y (- y-size))))
+                                    (act-y (ceiling-by y (- y-size))))
                                (setf (output-record-position presentation) (values act-x act-y))
                                (let* ((event (presentation-object presentation))
                                       (sustain (event-value event :sustain)))
