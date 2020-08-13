@@ -183,7 +183,7 @@
 (define-command (com-set-tempo :name t :menu t
                                :command-table thundersnow-file-command-table)
     ((tempo 'string :default (write-to-string (tempo *clock*)) :prompt "Tempo (default unit: bps)"))
-  (destructuring-bind (value &optional (unit "bps")) (split tempo)
+  (destructuring-bind (value &optional (unit "bps")) (split-string tempo)
     (let ((value (read-from-string value)))
       (assert (numberp value) (value) "The provided tempo must be a number; got ~s instead. If you want to specify a unit it must come after the number." value)
       (let ((unit (make-keyword (string-upcase unit))))
