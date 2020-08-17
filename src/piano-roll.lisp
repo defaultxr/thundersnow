@@ -175,6 +175,9 @@
       pointer-documentation-pane)))
   (:menu-bar t))
 
+(defmethod frame-standard-output ((frame piano-roll))
+  (find-pane-named frame 'interactor))
+
 (defmethod dur ((piano-roll piano-roll))
   (dur (slot-value piano-roll 'eseq)))
 
