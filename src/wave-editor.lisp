@@ -14,10 +14,7 @@
    (horizontal-margin :initarg :horizontal-margin :initform 10 :type (real 0) :documentation "The margin between the left/right edges of the pane and the start/end of the waveform.")
    (vertical-margin :initarg :y-margin :initform 40 :type (real 0) :documentation "The margin between the top/bottom of the pane and 1 and -1 of the waveform.")
    (%cached-frames :initform nil :documentation "Cached frames from the sound. Frames are cached since getting a buffer's contents from the server may take a long time.")
-   (%cached-second-px :initform nil :documentation "The value of second-px when the %cached-scaled-frames were calculated.")
-   (%cached-scaled-frames :initform nil :documentation "The calculated frames generated for the current zoom level.")
-   (%saved-extent :initform nil) ;; FIX: implement
-   )
+   (%saved-extent :initform nil :documentation "The scroll position to return to when redisplaying."))
   (:default-initargs
    :name 'wave-editor
    :display-function 'draw-wave-editor
@@ -26,9 +23,23 @@
    :foreground (get-theme-color :foreground)
    :background (get-theme-color :background)))
 
+(defmethod handle-event :after ((stream wave-editor-pane) (event climi::pointer-scroll-event))
+  (with-slots (%saved-extent) stream
+    (let* ((new-region (pane-viewport-region stream))
+           (should-redraw (or (/= (rectangle-min-x new-region) (rectangle-min-x %saved-extent))
+                              (/= (rectangle-max-x new-region) (rectangle-max-x %saved-extent)))))
+      (setf %saved-extent new-region)
+      (when should-redraw
+        (redisplay-frame-pane (pane-frame stream) stream :force-p t)))))
+
 (define-presentation-type wave-editor-point ())
 
 (define-presentation-type sound-frame ())
+
+(defmethod handle-repaint :before ((stream wave-editor-pane) region)
+  ;; save the scroll position
+  (with-slots (%saved-extent) stream
+    (setf %saved-extent (pane-viewport-region stream))))
 
 (defmethod sound ((this wave-editor-pane))
   (slot-value this 'sound))
@@ -51,36 +62,15 @@
   "Get and cache sound frame data for STREAM.
 
 See also: `scaled-frames-for'"
-  (with-slots (sound %cached-frames) stream
-    (or %cached-frames
-        (let ((frames (bdef-subseq sound 0 (bdef-length sound))))
-          (setf %cached-frames frames)
-          frames))))
-
-(defun scaled-frames-for (stream)
-  "Generate and store scaled frames for STREAM.
-
-See also: `cached-frames-for'"
-  (with-slots (sound second-px %cached-second-px %cached-scaled-frames) stream
-    (when (eql second-px %cached-second-px)
-      (return-from scaled-frames-for %cached-scaled-frames))
-    (let* ((cached-frames (cached-frames-for stream))
-           (cached-frames-length (length cached-frames))
-           (sound-duration (bdef-duration sound))
-           (array-length (ceiling (* sound-duration second-px)))
-           (array (make-array array-length))
-           (sound-length (bdef-length sound))
-           (frames-per-scaled-frame (max 1 (floor (/ sound-length array-length)))))
-      (if (= 1 frames-per-scaled-frame)
-          (setf array (copy-array cached-frames))
-          (dotimes (n array-length)
-            (setf (aref array n)
-                  (mean (subseq cached-frames
-                                (clamp (* n frames-per-scaled-frame) 0 cached-frames-length)
-                                (clamp (* (1+ n) frames-per-scaled-frame) 0 cached-frames-length))))))
-      (setf %cached-scaled-frames array
-            %cached-second-px second-px)
-      array)))
+  (etypecase stream
+    (wave-editor
+     (cached-frames-for (find-pane-named stream 'wave-editor-pane)))
+    (wave-editor-pane
+     (with-slots (sound %cached-frames) stream
+       (or %cached-frames
+           (let ((frames (bdef-subseq sound 0 (bdef-length sound))))
+             (setf %cached-frames frames)
+             frames))))))
 
 (defun sound-frame-pixel (wave-editor-pane sound-frame)
   "Get the pixel position of a WAVE-EDITOR-PANE's sound frame.
@@ -90,63 +80,76 @@ See also: `pixel-sound-frame'"
     (+ horizontal-margin (* (/ second-px (bdef-sample-rate sound)) sound-frame))))
 
 (defun pixel-sound-frame (wave-editor-pane pixel)
-  "Get the sound frame at PIXEL or nil if the pixel is out of range.
+  "Get the sound frame at PIXEL.
 
 See also: `sound-frame-pixel'"
   (with-slots (sound second-px horizontal-margin) wave-editor-pane
-    (when (<= horizontal-margin pixel (+ horizontal-margin (* second-px (bdef-duration sound))))
-      (* (/ (- pixel horizontal-margin) second-px) (bdef-sample-rate sound)))))
+    (* (/ (- pixel horizontal-margin) second-px) (bdef-sample-rate sound))))
 
-(defun draw-wave-editor (frame stream)
+(defun draw-wave-editor (frame stream) ;; visible frames only (fastest)
   (declare (ignore frame))
-  (with-slots (sound point second-px horizontal-margin vertical-margin) stream
+  (with-slots (sound point second-px horizontal-margin vertical-margin %saved-extent) stream
     (unless sound
       (return-from draw-wave-editor nil))
     (let* ((region (sheet-region stream))
            (height (rectangle-height region))
-           (waveform-height (- height (* 2 vertical-margin)))
-           (hd2 (- (/ height 2) vertical-margin))
+           (waveform-height (/ (- height (* 2 vertical-margin)) 2))
+           (center-y (/ height 2))
            (line-color (get-theme-color :foreground))
-           (background-color (get-theme-color :background))
-           (frames (scaled-frames-for stream))
-           (num-scaled-frames (length frames))
-           (sr (bdef-sample-rate sound))
-           (px-per-frame (max 1 ))
-           (sound-frame-scaling (/ sr num-scaled-frames))
+           (frames (cached-frames-for stream))
+           (num-frames (length frames))
+           (visible-region %saved-extent)
+           (left-frame (max 0 (truncate (pixel-sound-frame stream (rectangle-min-x visible-region)))))
+           (right-frame (max 0 (truncate (pixel-sound-frame stream (rectangle-max-x visible-region)))))
            (point (ensure-list point))
            (point-start (car point))
            (point-end (or (cadr point) (car point)))
            (point-start-x (sound-frame-pixel stream point-start))
            (point-end-x (sound-frame-pixel stream point-end)))
       ;; selection rectangle background
-      ;; (draw-rectangle* stream
-      ;;                  point-start-x vertical-margin
-      ;;                  point-end-x (- height vertical-margin)
-      ;;                  :ink +yellow-green+)
+      (draw-rectangle* stream
+                       point-start-x vertical-margin
+                       point-end-x (- height vertical-margin)
+                       :ink +yellow-green+)
       ;; line drawn at the end for the right margin
-      (let ((end-line-x (+ (* 2 horizontal-margin) (sound-frame-pixel stream num-scaled-frames))))
+      (let ((end-line-x (+ (* 2 horizontal-margin) (sound-frame-pixel stream num-frames))))
         (draw-line* stream end-line-x 0 end-line-x height))
-      ;; frames
-      (dotimes (i num-scaled-frames)
-        (let* ((val (aref frames i))
-               (actual-frame (* i sound-frame-scaling))
-               (x (sound-frame-pixel stream i))
-               (next-x (sound-frame-pixel stream (1+ i))))
-          (with-output-as-presentation (stream (round actual-frame) 'sound-frame)
-            (updating-output (stream :unique-id (round actual-frame))
-              ;; (draw-rectangle* stream x vertical-margin next-x (- height vertical-margin)
-              ;;                  :filled t
-              ;;                  :ink (if (<= point-start actual-frame point-end)
-              ;;                           +yellow-green+
-              ;;                           background-color))
-              (draw-rectangle* stream x hd2 next-x (+ hd2 (* val waveform-height))
-                               :filled t
-                               :ink line-color)))))
+      (let ((sfm (/ second-px (bdef-sample-rate sound))))
+        ;; zero line
+        (draw-line* stream horizontal-margin center-y (* sfm (1- num-frames)) center-y :ink +red+)
+        ;; frames
+        (if (>= sfm 1)
+            (loop :for i :from left-frame :below right-frame
+                  :do (draw-line* stream
+                                  (+ horizontal-margin (* sfm i))
+                                  (- center-y (* (aref frames i) waveform-height))
+                                  (+ horizontal-margin (* sfm (1+ i)))
+                                  (- center-y (* (aref frames (1+ i)) waveform-height))
+                                  :ink line-color))
+            (let ((sfmr (/ sfm))
+                  (min-x (rectangle-min-x visible-region))
+                  (max-x (rectangle-max-x visible-region)))
+              (loop :for x :from min-x :below max-x :do
+                (let ((sf (pixel-sound-frame stream x))
+                      (x-px (+ horizontal-margin x)))
+                  (unless (or (minusp sf) (>= sf num-frames))
+                    (let (min max)
+                      (dotimes (j (truncate sfmr))
+                        (let* ((idx (truncate (+ j sf)))
+                               (val (unless (>= idx num-frames)
+                                      (aref frames idx))))
+                          (when val
+                            (setf max (if max (max max val) val)
+                                  min (if min (min min val) val)))))
+                      (draw-line* stream
+                                  x-px (- center-y (* waveform-height max))
+                                  x-px (- center-y (* waveform-height min))
+                                  :ink line-color))))))))
       ;; border rectangle
       (draw-rectangle* stream
                        horizontal-margin
                        vertical-margin
-                       (sound-frame-pixel stream num-scaled-frames)
+                       (sound-frame-pixel stream num-frames)
                        (- height vertical-margin)
                        :filled nil
                        :ink (get-theme-color :grid))
@@ -155,7 +158,11 @@ See also: `sound-frame-pixel'"
                        point-start-x vertical-margin
                        point-end-x (- height vertical-margin)
                        :filled nil
-                       :ink +yellow+))))
+                       :ink +yellow+))
+    (apply #'scroll-extent stream
+           (if %saved-extent
+               (list (rectangle-min-x %saved-extent) (rectangle-min-y %saved-extent))
+               (list 0 0)))))
 
 (define-application-frame wave-editor ()
   ((second-px :initarg :second-px :initform 1000))
@@ -195,14 +202,18 @@ See also: `sound-frame-pixel'"
   (slot-value this 'second-px))
 
 (defmethod (setf second-px) (value (this wave-editor))
-  (let* ((pane (find-pane-named this 'wave-editor-pane))
-         (max-second-px (if-let ((bdef (sound pane)))
+  (let* ((stream (find-pane-named this 'wave-editor-pane))
+         (max-second-px (if-let ((bdef (sound stream)))
                           (* 16 (bdef-sample-rate bdef))
                           192000))
          (value (clamp value 1 max-second-px)))
     (setf (slot-value this 'second-px) value
-          (slot-value pane 'second-px) value
-          (pane-needs-redisplay pane) t)))
+          (slot-value stream 'second-px) value
+          (pane-needs-redisplay stream) t)
+    (with-slots (horizontal-margin) stream
+      (change-space-requirements stream
+                                 :min-width (+ (* 2 horizontal-margin)
+                                               (* value (bdef-duration (sound stream))))))))
 
 (defmethod sound ((this wave-editor))
   (sound (find-pane-named this 'wave-editor-pane)))
@@ -279,8 +290,8 @@ See also: `sound-frame-pixel'"
         (frame (find-application-frame 'wave-editor)))
     ;; FIX: find-application-frame sometimes returns nil, which makes the `wave-editor' function's WAVE argument not work. maybe a mcclim bug?
     (when (and wave frame)
-      (when-let ((pane (find-pane-named frame 'wave-editor-pane)))
-        (setf (sound pane) sound)))
+      (when-let ((stream (find-pane-named frame 'wave-editor-pane)))
+        (setf (sound stream) sound)))
     frame))
 
 
