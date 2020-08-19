@@ -14,7 +14,8 @@
   (:shadowing-import-from #:cl-collider
                           #:mean)
   (:shadowing-import-from #:mutility
-                          #:wrap)
+                          #:wrap
+                          #:fold)
   (:use #:alexandria
         #:mutility
         #:cl-patterns
