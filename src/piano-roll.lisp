@@ -22,39 +22,41 @@
 
 ;;; gui stuff
 
-(defun x-pixel-to-beat (x frame)
+(defun x-pixel-to-beat (x &optional (frame (or *application-frame* (piano-roll))))
   "Convert an x pixel in FRAME to a beat number."
   (with-slots (beat-size) frame
     (/ x beat-size)))
 
-(defun x-pixel-to-beat-quantized (x frame)
+(defun x-pixel-to-beat-quantized (x &optional (frame (or *application-frame* (piano-roll))))
   "Convert an x pixel in FRAME to a beat number, quantizing to the grid."
   (with-slots (grid-size) frame
     (round-by (x-pixel-to-beat x frame) grid-size)))
 
-(defun x-pixel-to-beat-floored (x frame)
+(defun x-pixel-to-beat-floored (x &optional (frame (or *application-frame* (piano-roll))))
   "Convert an x pixel in FRAME to a beat number, quantizing to the grid."
   (with-slots (grid-size) frame
     (floor-by (x-pixel-to-beat x frame) grid-size)))
 
-(defun beat-to-x-pixel (beat frame)
+(defun beat-to-x-pixel (beat &optional (frame (or *application-frame* (piano-roll))))
   "Convert a beat in FRAME to the relevant x pixel."
   (with-slots (beat-size) frame
     (* beat-size beat)))
 
-(defun y-pixel-to-pitch (y frame)
+(defun y-pixel-to-pitch (y &optional (frame (or *application-frame* (piano-roll))))
   "Convert a y pixel in FRAME to the frame's pitch type."
   (with-slots (y-size) frame
     (/ (- (pane-real-height frame) y) y-size)))
 
-(defun y-pixel-to-pitch-quantized (y frame)
+(defun y-pixel-to-pitch-quantized (y &optional (frame (or *application-frame* (piano-roll))))
   "Convert a y pixel in FRAME to the frame's pitch type, quantizing."
   (with-slots (y-size) frame
     (floor (y-pixel-to-pitch y frame))))
 
-(defun pitch-to-y-pixel (pitch frame)
+(defun pitch-to-y-pixel (pitch &optional (frame (or *application-frame* (piano-roll))))
   "Convert a pitch value to a y pixel in FRAME."
-  (with-slots (y-size) frame
+  (with-slots (y-size) (typecase frame
+                         (pane (pane-frame frame))
+                         (application-frame frame))
     (- (* y-size 128) (* y-size pitch))))
 
 (defun pane-real-width (frame)
