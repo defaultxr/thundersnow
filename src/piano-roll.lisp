@@ -45,7 +45,7 @@
 (defun y-pixel-to-pitch (y &optional (frame (or *application-frame* (piano-roll))))
   "Convert a y pixel in FRAME to the frame's pitch type."
   (with-slots (y-size) frame
-    (/ (- (pane-real-height frame) y) y-size)))
+    (/ (- (piano-roll-height frame) y) y-size)))
 
 (defun y-pixel-to-pitch-quantized (y &optional (frame (or *application-frame* (piano-roll))))
   "Convert a y pixel in FRAME to the frame's pitch type, quantizing."
@@ -59,19 +59,23 @@
                          (application-frame frame))
     (- (* y-size 128) (* y-size pitch))))
 
-(defun pane-real-width (frame)
-  "Get the \"real\" width of the piano-roll gadget in FRAME, in pixels."
-  (let ((frame (if (typep frame 'pane)
-                   (pane-frame frame)
-                   frame)))
-    (with-slots (beat-size) frame
-      (* beat-size (+ 8 (dur frame)))))) ;; FIX: ensure that this is at least the width of the pane
+(defun piano-roll-width (&optional (pane (piano-roll-pane)))
+  "Get the width in pixels of the sequence in the piano-roll. This will always be at least the width of the pane itself.
 
-(defun pane-real-height (frame)
-  "Get the \"real\" height of the piano-roll gadget in FRAME, in pixels."
-  (pitch-to-y-pixel 0 (if (typep frame 'pane)
-                          (pane-frame frame)
-                          frame)))
+See also: `piano-roll-height'"
+  (let* ((pane (etypecase pane
+                 (pane pane)
+                 (application-frame (find-pane-named pane 'piano-roll-pane))))
+         (frame (pane-frame pane)))
+    (with-slots (beat-size) frame
+      (max (* beat-size (+ 8 (dur frame)))
+           (rectangle-width (pane-viewport-region pane))))))
+
+(defun piano-roll-height (&optional (pane (piano-roll-pane)))
+  "Get the height in pixels of the piano-roll, i.e. the number of pixels that the full pitch range takes up.
+
+See also: `piano-roll-width'"
+  (pitch-to-y-pixel 0 pane))
 
 (defun hovering-for-resize-p (x presentation)
   "True if the mouse (whose x position is provided as the X argument) is hovering over PRESENTATION's right side."
@@ -99,8 +103,8 @@
 
 (defmethod compose-space ((pane piano-roll-pane) &key width height)
   (declare (ignore width height))
-  (make-space-requirement :width (pane-real-width pane)
-                          :height (pane-real-height pane)))
+  (make-space-requirement :width (piano-roll-width pane)
+                          :height (piano-roll-height pane)))
 
 (defmethod handle-repaint :before ((pane piano-roll-pane) region)
   ;; save the scroll position
@@ -111,7 +115,7 @@
 
 (define-presentation-method present (background (type %background) stream (view graphical-view) &key)
   (draw-rectangle* stream
-                   0 0 (pane-real-width stream) (pane-real-height stream)
+                   0 0 (piano-roll-width stream) (piano-roll-height stream)
                    :filled nil))
 
 (define-presentation-method present (event (type event) stream (view graphical-view) &key)
@@ -184,8 +188,8 @@
   (dur (slot-value piano-roll 'eseq)))
 
 (defun draw-piano-roll (frame stream)
-  (let* ((stream-width (pane-real-width stream))
-         (stream-height (pane-real-height stream))
+  (let* ((stream-width (piano-roll-width stream))
+         (stream-height (piano-roll-height stream))
          (grid-size (slot-value frame 'grid-size))
          (beat-size (slot-value frame 'beat-size))
          (y-size (slot-value frame 'y-size))
