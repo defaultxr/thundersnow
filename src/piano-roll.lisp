@@ -81,6 +81,32 @@ See also: `piano-roll-width'"
   "True if the mouse (whose x position is provided as the X argument) is hovering over PRESENTATION's right side."
   (>= (- x (output-record-position presentation)) (- (rectangle-width presentation) 8)))
 
+(defun scroll-top-to (pane pixel)
+  "Scroll PANE such that PIXEL is at the top of the view.
+
+See also: `scroll-center-to', `scroll-bottom-to', `scroll-focus-pitch'"
+  (scroll-extent pane 0 pixel)
+  (with-slots (%saved-extent) pane
+    (setf %saved-extent (pane-viewport-region pane))))
+
+(defun scroll-center-to (pane pixel)
+  "Scroll PANE such that PIXEL is in the vertical center of the view.
+
+See also: `scroll-top-to', `scroll-bottom-to', `scroll-focus-pitch'"
+  (scroll-top-to pane (- pixel (/ (truncate (rectangle-height (pane-viewport-region pane))) 2))))
+
+(defun scroll-bottom-to (pane pixel)
+  "Scroll PANE such that PIXEL is at the bottom of the view.
+
+See also: `scroll-top-to', `scroll-center-to', `scroll-focus-pitch'"
+  (scroll-top-to pane (- pixel (truncate (rectangle-height (pane-viewport-region pane))))))
+
+(defun scroll-focus-pitch (pane pitch)
+  "Scroll PANE such that PITCH is in the center of the view.
+
+See also: `scroll-top-to', `scroll-center-to', `scroll-bottom-to'"
+  (scroll-center-to pane (pitch-to-y-pixel pitch pane)))
+
 (defclass graphical-view (view)
   ())
 
