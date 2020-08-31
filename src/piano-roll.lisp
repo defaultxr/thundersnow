@@ -229,6 +229,13 @@ See also: `piano-roll-width'"
   :inherit-from (thundersnow-common-file-command-table)
   :inherit-menu t)
 
+(define-command (com-play :name t :menu t
+                          :command-table piano-roll-file-command-table
+                          ;; :keystroke (#\space) ;; FIX: this conflicts with command entry in the interactor
+                          )
+    ()
+  (play (slot-value *application-frame* 'eseq)))
+
 (define-command-table piano-roll-edit-command-table)
 
 ;; FIX: default to mouse's current position
