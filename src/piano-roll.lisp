@@ -388,6 +388,9 @@
 ;; FIX:
 ;; (define-gesture-name :motion :pointer-motion (:left))
 
+(defun piano-roll-pane ()
+  (find-pane-named (piano-roll) 'piano-roll-pane))
+
 (defun piano-roll ()
   "Open a piano-roll."
   (find-application-frame 'piano-roll))
