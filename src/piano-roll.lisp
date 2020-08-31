@@ -299,7 +299,8 @@
            :tester ((object presentation x)
                     (not (hovering-for-resize-p x presentation)))
            :pointer-documentation "Move event"
-           :menu nil)
+           :menu nil
+           :echo nil)
     (object presentation x y)
   (multiple-value-bind (old-x old-y) (output-record-position presentation)
     (list presentation (- x old-x) (- y old-y))))
