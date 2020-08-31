@@ -348,7 +348,8 @@ See also: `piano-roll-width'"
                        :horizontal-scroll)
                       t))
            :pointer-documentation "Resize event"
-           :menu nil)
+           :menu nil
+           :echo nil)
     (object presentation window x y)
   (list presentation x y))
 
