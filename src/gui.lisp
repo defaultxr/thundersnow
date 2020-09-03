@@ -6,15 +6,22 @@
 ;;; functions
 
 (defun note-text (midinote)
-  "Get the friendly text string for MIDINOTE."
-  (concat (note-name midinote) (midinote-octave midinote) " (" midinote ")"))
+  "Get the friendly text string for MIDINOTE.
+
+See also: `beat-text', `sustain-text'"
+  (let ((rounded (round midinote)))
+    (concat (unless (= midinote rounded) "~") (note-name rounded) (midinote-octave midinote) " (" midinote ")")))
 
 (defun beat-text (event)
-  "Get the beat text string for EVENT."
+  "Get the beat text string for EVENT.
+
+See also: `note-text', `sustain-text'"
   (concat "b: " (friendly-ratio-string (beat event))))
 
 (defun sustain-text (event)
-  "Get the sustain text string for EVENT."
+  "Get the sustain text string for EVENT.
+
+See also: `note-text', `beat-text'"
   (concat "s: " (friendly-ratio-string (sustain event))))
 
 ;;; views
