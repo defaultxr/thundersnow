@@ -255,6 +255,15 @@ See also: `scroll-top-to', `scroll-center-to', `scroll-bottom-to'"
   :inherit-from (thundersnow-common-file-command-table)
   :inherit-menu t)
 
+(define-command (com-open :name t :menu t
+                          :command-table piano-roll-file-command-table
+                          :keystroke (#\o :control))
+    ((pattern '(or pattern symbol) :prompt "Pattern or pdef name"))
+  (let ((pattern (typecase pattern
+                   (pattern pattern)
+                   (symbol (find-pdef pattern t)))))
+    (setf (slot-value *application-frame* 'eseq) (as-eseq pattern))))
+
 (define-command (com-play :name t :menu t
                           :command-table piano-roll-file-command-table
                           ;; :keystroke (#\space) ;; FIX: this conflicts with command entry in the interactor
