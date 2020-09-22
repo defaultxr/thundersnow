@@ -7,3 +7,10 @@
   `(let ((*standard-output* *swank-output*))
      ,@body))
 
+(defun sprint (object)
+  "Swank print; sugar to print to the swank output, avoiding any CLIM interactors."
+  (print object *swank-output*))
+
+(defun all-command-tables ()
+  "Get a list of all defined CLIM command tables."
+  (keys climi::*command-tables*))
