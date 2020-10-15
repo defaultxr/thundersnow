@@ -441,9 +441,14 @@ See also: `scroll-top-to', `scroll-center-to', `scroll-bottom-to'"
 ;; FIX:
 ;; (define-gesture-name :motion :pointer-motion (:left))
 
-(defun piano-roll-pane ()
-  (find-pane-named (piano-roll) 'piano-roll-pane))
+(defun piano-roll-pane (&optional frame)
+  "Get the piano-roll-pane of FRAME.
+
+See also: `piano-roll'"
+  (find-pane-named (or frame *application-frame* (piano-roll)) 'piano-roll-pane))
 
 (defun piano-roll ()
-  "Open a piano-roll."
+  "Open a piano-roll or get one of the instances already open.
+
+See also: `piano-roll-pane'"
   (find-application-frame 'piano-roll))
