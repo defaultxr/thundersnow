@@ -135,6 +135,9 @@ See also: `scroll-top-to', `scroll-center-to', `scroll-bottom-to'"
 (defmethod handle-repaint :before ((pane piano-roll-pane) region)
   ;; save the scroll position
   (with-slots (%saved-extent) pane
+    ;; default to focusing on the center of the pitch range
+    (unless %saved-extent
+      (scroll-focus-pitch (find-pane-named *application-frame* 'piano-roll-pane) 69))
     (setf %saved-extent (pane-viewport-region pane))))
 
 ;; (defmethod handle-event ((pane piano-roll-pane) (event pointer-motion-event))
