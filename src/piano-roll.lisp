@@ -289,7 +289,8 @@ See also: `scroll-top-to', `scroll-center-to', `scroll-bottom-to'"
 (define-command (com-erase :name t :menu t
                            :command-table piano-roll-edit-command-table)
     ((event '(or event integer)))
-  (eseq-remove (slot-value *application-frame* 'eseq) event))
+  (eseq-remove (slot-value *application-frame* 'eseq) event)
+  (redisplay-frame-pane *application-frame* (find-pane-named *application-frame* 'piano-roll-pane) :force-p t))
 
 (define-command (com-move :name t :menu t
                           :command-table piano-roll-edit-command-table)
@@ -435,8 +436,7 @@ See also: `scroll-top-to', `scroll-center-to', `scroll-bottom-to'"
 
 (define-presentation-action erase (event nil piano-roll :gesture :erase :pointer-documentation "Erase event")
     (event)
-  (com-erase event)
-  (redisplay-frame-pane *application-frame* (find-pane-named *application-frame* 'piano-roll-pane) :force-p t))
+  (com-erase event))
 
 ;; FIX:
 ;; (define-gesture-name :motion :pointer-motion (:left))
