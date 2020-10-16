@@ -334,10 +334,14 @@ See also: `scroll-top-to', `scroll-center-to', `scroll-bottom-to'"
                          :command-table piano-roll-edit-command-table
                          :keystroke (#\a :meta))
     ((event '(or event number) :prompt "Event or event start beat"))
-  (eseq-add (slot-value *application-frame* 'eseq)
-            (typecase event
-              (event event)
-              (number (event :beat event)))))
+  (let ((event (typecase event
+                 (event event)
+                 (number (event :beat event)))))
+    (eseq-add (eseq-of *application-frame*) event)
+    ;; if the new event is not visible, scroll so it is
+    (let ((pane (find-pane-named *application-frame* 'piano-roll-pane)))
+      (unless (event-vertically-visible-p event pane)
+        (scroll-focus-pitch pane (event-value event :midinote))))))
 
 (define-command (com-erase :name t :menu t
                            :command-table piano-roll-edit-command-table)
