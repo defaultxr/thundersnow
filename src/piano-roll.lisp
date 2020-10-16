@@ -22,6 +22,69 @@
 
 ;;; gui stuff
 
+(defun piano-roll-width (&optional (pane (piano-roll-pane)))
+  "Get the width in pixels of the sequence in the piano-roll. This will always be at least the width of the pane itself.
+
+See also: `piano-roll-height'"
+  (let* ((pane (etypecase pane
+                 (pane pane)
+                 (application-frame (find-pane-named pane 'piano-roll-pane))))
+         (frame (pane-frame pane)))
+    (with-slots (beat-size) frame
+      (max (* beat-size (+ 8 (dur frame)))
+           (rectangle-width (pane-viewport-region pane))))))
+
+(defun piano-roll-height (&optional (pane (piano-roll-pane)))
+  "Get the height in pixels of the piano-roll, i.e. the number of pixels that the full pitch range takes up.
+
+See also: `piano-roll-width'"
+  (pitch-to-y-pixel 0 pane))
+
+(defun pane-left-beat (pane)
+  "Get the leftmost visible beat in PANE.
+
+See also: `pane-right-beat'"
+  (x-pixel-to-beat (rectangle-min-x (pane-viewport-region pane)) (pane-frame pane)))
+
+(defun pane-right-beat (pane)
+  "Get the rightmost visible beat in PANE.
+
+See also: `pane-left-beat'"
+  (x-pixel-to-beat (rectangle-max-x (pane-viewport-region pane)) (pane-frame pane)))
+
+(defun event-vertically-visible-p (event &optional pane)
+  "True if EVENT is fully within the currently-visible pitch range of PANE.
+
+See also: `event-horizontally-visible-p', `event-visible-p'"
+  (let* ((pane (or pane (piano-roll-pane)))
+         (region (pane-viewport-region pane))
+         (frame (pane-frame pane))
+         (top-pitch (1- (y-pixel-to-pitch (rectangle-min-y region) frame)))
+         (bottom-pitch (y-pixel-to-pitch (rectangle-max-y region) frame)))
+    (> top-pitch (event-value event :midinote) bottom-pitch)))
+
+(defun event-horizontally-visible-p (event &optional pane)
+  "True if EVENT is fully within the currently-visible beat range of PANE.
+
+See also: `event-vertically-visible-p', `event-visible-p'"
+  (let* ((pane (or pane (piano-roll-pane)))
+         (left-beat (pane-left-beat pane))
+         (right-beat (pane-right-beat pane))
+         (beat (beat event)))
+    (and (>= beat left-beat)
+         (>= right-beat (+ beat (event-value event :sustain))))))
+
+(defun event-visible-p (event &optional pane)
+  "True if EVENT is fully visible in PANE.
+
+See also: `event-vertically-visible-p', `event-horizontally-visible-p'"
+  (and (event-vertically-visible-p event pane)
+       (event-horizontally-visible-p event pane)))
+
+(defun hovering-for-resize-p (x presentation)
+  "True if the mouse (whose x position is provided as the X argument) is hovering over PRESENTATION's right side."
+  (>= (- x (output-record-position presentation)) (- (rectangle-width presentation) 8)))
+
 (defun x-pixel-to-beat (x &optional (frame (or *application-frame* (piano-roll))))
   "Convert an x pixel in FRAME to a beat number."
   (with-slots (beat-size) frame
@@ -58,28 +121,6 @@
                          (pane (pane-frame frame))
                          (application-frame frame))
     (- (* y-size 128) (* y-size pitch))))
-
-(defun piano-roll-width (&optional (pane (piano-roll-pane)))
-  "Get the width in pixels of the sequence in the piano-roll. This will always be at least the width of the pane itself.
-
-See also: `piano-roll-height'"
-  (let* ((pane (etypecase pane
-                 (pane pane)
-                 (application-frame (find-pane-named pane 'piano-roll-pane))))
-         (frame (pane-frame pane)))
-    (with-slots (beat-size) frame
-      (max (* beat-size (+ 8 (dur frame)))
-           (rectangle-width (pane-viewport-region pane))))))
-
-(defun piano-roll-height (&optional (pane (piano-roll-pane)))
-  "Get the height in pixels of the piano-roll, i.e. the number of pixels that the full pitch range takes up.
-
-See also: `piano-roll-width'"
-  (pitch-to-y-pixel 0 pane))
-
-(defun hovering-for-resize-p (x presentation)
-  "True if the mouse (whose x position is provided as the X argument) is hovering over PRESENTATION's right side."
-  (>= (- x (output-record-position presentation)) (- (rectangle-width presentation) 8)))
 
 (defun scroll-top-to (pane pixel)
   "Scroll PANE such that PIXEL is at the top of the view.
@@ -213,8 +254,20 @@ See also: `scroll-top-to', `scroll-center-to', `scroll-bottom-to'"
 (defmethod frame-standard-output ((frame piano-roll))
   (find-pane-named frame 'interactor))
 
+(defmethod eseq-of ((piano-roll piano-roll))
+  (slot-value piano-roll 'eseq))
+
+(defmethod eseq-of ((piano-roll-pane piano-roll-pane))
+  (eseq-of (pane-frame piano-roll-pane)))
+
 (defmethod dur ((piano-roll piano-roll))
-  (dur (slot-value piano-roll 'eseq)))
+  (dur (eseq-of piano-roll)))
+
+(defmethod eseq-events ((piano-roll piano-roll))
+  (eseq-events (eseq-of piano-roll)))
+
+(defmethod eseq-events ((piano-roll-pane piano-roll-pane))
+  (eseq-events (eseq-of piano-roll-pane)))
 
 (defun draw-piano-roll (frame stream)
   (let* ((stream-width (piano-roll-width stream))
@@ -321,7 +374,7 @@ See also: `scroll-top-to', `scroll-center-to', `scroll-bottom-to'"
       (accept 'string :default (write-to-string (random 10))))))
 
 (define-piano-roll-command (com-move-event) ((record event) (offset-x real :default 0) (offset-y real :default 0))
-  ;; offset-x and offset-y are the offset that the presentation was clicked.
+  ;; offset-x and offset-y are where in the presentation that the click occurred.
   (declare (ignore offset-y))
   (drag-output-record (find-pane-named *application-frame* 'piano-roll-pane) record
                       :multiple-window nil
