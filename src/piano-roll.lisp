@@ -355,12 +355,7 @@ See also: `scroll-top-to', `scroll-center-to', `scroll-bottom-to'"
      (beat 'number)
      (y 'number))
   (with-swank-output
-    (print 'com-move)
-    (print event)
-    (print 'new-beat-number)
-    (print beat)
-    (print 'new-y-number)
-    (print y)))
+    (dprint 'com-move event beat y)))
 
 (define-command (com-edit-event :name t :menu t
                                 :command-table piano-roll-edit-command-table)

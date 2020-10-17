@@ -22,7 +22,7 @@
 ;;; initialization
 
 (defparameter *initialized* nil
-  "True after `thundersnow-initialize' has been run.")
+  "True after `thundersnow-initialize' has been run and the configuration has been loaded.")
 
 (defun load-config ()
   "Load the user's custom configurations by checking a few common locations."

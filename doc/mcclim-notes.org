@@ -2,6 +2,13 @@
 
 Just various notes I've collected about (Mc)CLIM, either by asking in #clim or randomly online.
 
+* useful mcclim macros/functions
+- define-presentation-translator
+- define-presentation-to-command-translator
+- define-presentation-action
+- define-drag-and-drop-translator
+- menu-choose
+- menu-choose-from-drawer
 * theming
 ** Feb 17, 2018
 18:23:01 mepian: does McCLIM support themes? was this proposal implemented? http://vintage-digital.com/hefner/mcclim/mcclim-theme-notes.txt
