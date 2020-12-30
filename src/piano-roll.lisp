@@ -22,6 +22,28 @@
 
 ;;; gui stuff
 
+(defun find-piano-roll-pane (pane &optional (errorp t))
+  "If PANE is a `piano-roll-pane', return it. If it's a frame, try to locate a piano-roll-pane in it. Otherwise, signal an error if ERRORP, or just return nil.
+
+See also: `find-piano-roll-frame'"
+  (or (typecase pane
+        (piano-roll-pane pane)
+        (application-frame (find-pane-named pane 'piano-roll-pane)))
+      (when errorp
+        (error "Could not find a piano-roll-pane in ~s." pane))))
+
+(defun find-piano-roll-frame (frame &optional (errorp t))
+  "If FRAME is a `piano-roll', return it. If it's a pane and its frame is a piano-roll, return the frame. Otherwise, signal an error if ERRORP, or just return nil.
+
+See also: `find-piano-roll-pane'"
+  (or (when (typep frame 'piano-roll)
+        frame)
+      (when (and (typep frame 'application-pane)
+                 (typep (pane-frame frame) 'piano-roll))
+        (pane-frame frame))
+      (when errorp
+        (error "Could not find a piano-roll in ~s." frame))))
+
 (defun piano-roll-width (&optional (pane (piano-roll-pane)))
   "Get the width in pixels of the sequence in the piano-roll. This will always be at least the width of the pane itself.
 
