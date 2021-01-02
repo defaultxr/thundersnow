@@ -384,6 +384,7 @@ See also: `scroll-top-to', `scroll-center-to', `scroll-bottom-to'"
                  (event event)
                  (number (event :beat event)))))
     (eseq-add (eseq-of *application-frame*) event)
+    (redisplay-frame-pane *application-frame* (find-pane-named *application-frame* 'piano-roll-pane) :force-p t)
     ;; if the new event is not visible, scroll so it is
     (let ((pane (find-pane-named *application-frame* 'piano-roll-pane)))
       (unless (event-vertically-visible-p event pane)
