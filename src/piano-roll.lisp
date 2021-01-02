@@ -181,7 +181,8 @@ See also: `scroll-top-to', `scroll-center-to', `scroll-bottom-to'"
 (define-presentation-type event ())
 
 (defclass piano-roll-pane (application-pane)
-  ((%saved-extent :initform nil :documentation "The scroll position to return to when redisplaying."))
+  ((%saved-extent :initform nil :documentation "The scroll position to return to when redisplaying.")
+   (%last-click-timestamp :initform -1000 :documentation "The timestamp of the last click the pane received."))
   (:default-initargs
    :name 'piano-roll
    :display-function 'draw-piano-roll
@@ -203,7 +204,30 @@ See also: `scroll-top-to', `scroll-center-to', `scroll-bottom-to'"
       (scroll-focus-pitch (find-pane-named *application-frame* 'piano-roll-pane) 69))
     (setf %saved-extent (pane-viewport-region pane))))
 
-;; (defmethod handle-event ((pane piano-roll-pane) (event pointer-motion-event))
+(defmethod handle-event ((pane piano-roll-pane) (event pointer-button-press-event))
+  ;; CLIM ports are not required to generate double click events: http://bauhh.dyndns.org:8000/clim-spec/8-2.html#_357
+  ;; mcclim doesn't generate these events, so we do it for it.
+  (with-slots (%last-click-timestamp) pane
+    (let ((ts (slot-value event 'climi::timestamp)))
+      (if (<= (/ (- ts %last-click-timestamp) 1000) climi::*double-click-delay*)
+	  (queue-event pane (make-instance 'pointer-double-click-event
+					   :button (slot-value event 'climi::button)
+					   :pointer (slot-value event 'climi::pointer)
+					   :graft-y (slot-value event 'climi::graft-y)
+					   :graft-x (slot-value event 'climi::graft-x)
+					   :y (slot-value event 'climi::y)
+					   :x (slot-value event 'climi::x)
+					   :modifier-state (slot-value event 'climi::modifier-state)
+					   :sheet pane
+					   :timestamp (slot-value event 'climi::timestamp)))
+          (call-next-method))
+      (setf %last-click-timestamp ts))))
+
+(defmethod handle-event ((pane piano-roll-pane) (event pointer-double-click-event))
+  (let* ((frame (pane-frame pane))
+	 (beat (x-pixel-to-beat-floored (slot-value event 'climi::sheet-x) frame))
+	 (pitch (y-pixel-to-pitch-quantized (slot-value event 'climi::sheet-y) frame)))
+    (com-add (event :beat beat :midinote pitch))))
 
 (define-presentation-method present (background (type %background) stream (view graphical-view) &key)
   (draw-rectangle* stream

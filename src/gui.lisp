@@ -3,6 +3,11 @@
 ;;;; common gui functionality
 ;;; stuff that is used by all guis; views, theming, commands, etc
 
+;; mcclim (or its X backend at least) does not provide this class so we define it here.
+(unless (find-class 'pointer-double-click-event nil)
+  (defclass pointer-double-click-event (pointer-button-event)
+    ()))
+
 ;;; functions
 
 (defun note-text (midinote)
