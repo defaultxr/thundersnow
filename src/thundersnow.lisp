@@ -68,8 +68,8 @@
   ((pattern :initarg :pattern :initform nil :accessor pane-pattern))
   (:default-initargs
    :name 'pattern
-    :display-function 'display-pattern
-    :default-view +textual-view+))
+   :display-function 'display-pattern
+   :default-view +textual-view+))
 
 (define-presentation-type pattern ())
 
@@ -182,7 +182,7 @@
 
 (define-command (com-set-tempo :name t :menu t
                                :command-table thundersnow-file-command-table)
-    ((tempo 'string :default (write-to-string (tempo *clock*)) :prompt "Tempo (default unit: bps)"))
+    ((tempo 'string :default (tempo *clock*) :prompt "Tempo (default unit: bps)"))
   (destructuring-bind (value &optional (unit "bps")) (split-string tempo)
     (let ((value (read-from-string value)))
       (assert (numberp value) (value) "The provided tempo must be a number; got ~s instead. If you want to specify a unit it must come after the number." value)
@@ -269,8 +269,7 @@
 
 (define-thundersnow-command (com-change-pattern :name t)
     ((pattern 'pattern :gesture :select))
-  (with-swank-output
-    (print 'changing-pattern))
+  (sprint 'changing-pattern)
   (let ((frame-input (frame-standard-input *application-frame*)))
     (setf tmp pattern)
     ;; (with-swank-output
