@@ -198,16 +198,19 @@
             (use-as-bpm ()
               :report "Use this value as beats per minute instead."
               (setf unit :bpm))
-            ;; FIX these:
-            ;; (specify-another-tempo ()
-            ;;   :report "Specify another value for the beats per second instead."
-            ;;   (com-set-tempo)
-            ;;   (abort))
-            ;; (abort ()
-            ;;   :report (lambda ()
-            ;;             (format nil "Cancel changing the tempo, leaving it at ~s (~s bpm)." (tempo *clock*) (* (tempo *clock*) 60)))
-            ;;   (invoke-restart 'abort))
-            ))
+            (specify-another-tempo ()
+              :report "Specify another value for the beats per second instead."
+              (execute-frame-command *application-frame*
+                                     (command-line-read-remaining-arguments-for-partial-command
+                                      (find-command-table 'thundersnow)
+                                      (frame-standard-output *application-frame*)
+                                      (list 'com-set-tempo *unsupplied-argument-marker*)
+                                      0))
+              (invoke-restart 'abort)) ;; FIX: is there some way to avoid the "Command aborted" message?
+            (abort ()
+              :report (lambda (stream)
+                        (format stream "Cancel changing the tempo, leaving it at ~s (~s bpm)." (tempo *clock*) (* (tempo *clock*) 60)))
+              (invoke-restart 'abort))))
         (setf (tempo *clock*) (if (eql unit :bps)
                                   value
                                   (/ value 60)))))))
