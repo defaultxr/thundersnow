@@ -1,5 +1,11 @@
 ;;;; thundersnow.lisp
 ;;; this file mostly contains the code for the main thundersnow gui; common gui functionality is in common.lisp
+;; other files:
+;; - browser.lisp
+;; - keyboard-gui.lisp
+;; - piano-roll.lisp
+;; - stepseq.lisp
+;; - tracker.lisp
 ;; NOTES:
 ;; - https://common-lisp.net/project/mcclim/static/manual/mcclim.html
 ;; - https://github.com/McCLIM/McCLIM/wiki/Default-Keyboard-and-Mouse-Gestures
@@ -9,8 +15,12 @@
 ;; arguments for define-drag-and-drop-translator can include:
 ;; - destination-object context-type frame presentation destination-presentation event window x y
 ;; zoom should be proportional; zoom series is: 1, 2, 3, 4, 6, 8, 12, 16, 24, 32
+;; to get the clim debugger on errors, wrap your code in (clim-debugger:with-debugger () ...)
+;; ... or add (:debugger t) to the define-application-frame when supported? (see https://www.youtube.com/watch?v=kfBmRsPRdGg&start=17m0s )
 
 (in-package #:thundersnow/thundersnow)
+
+(defvar tmp nil)
 
 ;;; tempo pane
 
@@ -77,8 +87,7 @@
   (print pattern stream))
 
 ;; (define-presentation-method present ((pattern pattern) (type pattern) stream (view textual-view) &key)
-;;   (with-swank-output
-;;     (print 'gen-pat-present))
+;;   (print 'gen-pat-present *debug-io*)
 ;;   ;; (closer-mop:class-direct-slots (find-class 'pbind))
 ;;   (format stream "~s" pattern))
 
@@ -166,9 +175,6 @@
    (find-pane-named frame 'scope) 'tick 0.1))
 
 (defmethod pane-pattern ((frame standard-application-frame))
-  (with-swank-output
-    (print 'pane-pattern)
-    (print frame))
   (pane-pattern (find-pane-named frame 'pattern-pane)))
 
 (defmethod (setf pane-pattern) (pattern (frame standard-application-frame))
@@ -186,7 +192,7 @@
   (destructuring-bind (value &optional (unit "bps")) (split-string tempo)
     (let ((value (read-from-string value)))
       (assert (numberp value) (value) "The provided tempo must be a number; got ~s instead. If you want to specify a unit it must come after the number." value)
-      (let ((unit (make-keyword (string-upcase unit))))
+      (let ((unit (my-intern unit :keyword)))
         (assert (member unit (list :bps :bpm)) (unit) "UNIT must be either bps or bpm; got ~s instead." unit)
         (when (and (eql unit :bps)
                    (>= value 10))
@@ -291,9 +297,9 @@
 ;;                     :name "tempo-box update thread"))
 ;;   (call-next-method))
 
-(when nil
-  (accepting-values (*query-io* :own-window t)
-    (accept '(member 1 2 3 4) :view +radio-box-view+ :stream *query-io*)))
+#+nil
+(accepting-values (*query-io* :own-window t)
+  (accept '(member 1 2 3 4) :view +radio-box-view+ :stream *query-io*))
 
 ;;; main
 

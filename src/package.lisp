@@ -1,4 +1,5 @@
 ;;;; package.lisp
+;;; FIX: maybe uiop:define-package can be used to make all this more succinct?
 
 (defpackage #:thundersnow/common
   (:shadowing-import-from #:alexandria

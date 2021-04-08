@@ -5,6 +5,8 @@
 ;; Prior art:
 ;; - cl-wav-synth; https://common-lisp.net/project/cl-wav-synth/
 
+(defvar tmp nil)
+
 ;;; gui stuff
 
 (defclass wave-editor-pane (application-pane)
@@ -243,8 +245,8 @@ See also: `sound-frame-pixel'"
 (define-command (com-open-file :name t :menu t
                                :command-table wave-editor-file-command-table
                                :keystroke (#\o :control))
-    ((file 'pathname :prompt "File"))
-  (setf (sound *application-frame*) (namestring file)))
+    ((file '(or pathname bdef) :prompt "File"))
+  (setf (sound *application-frame*) file))
 
 (define-command-table wave-editor-edit-command-table
   :inherit-from (thundersnow-common-edit-command-table)

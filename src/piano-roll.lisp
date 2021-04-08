@@ -181,7 +181,7 @@ See also: `scroll-top-to', `scroll-center-to', `scroll-bottom-to'"
 (define-presentation-type event ())
 
 (defclass piano-roll-pane (application-pane)
-  ((%saved-extent :initform nil :documentation "The scroll position to return to when redisplaying.")
+  ((%saved-extent :initform nil :documentation "The scroll position to return to when redisplaying.") ;; see https://github.com/McCLIM/McCLIM/issues/906 ; "No built-in way of preserving scrollbar positions from redisplay"
    (%last-click-timestamp :initform -1000 :documentation "The timestamp of the last click the pane received."))
   (:default-initargs
    :name 'piano-roll
@@ -270,16 +270,16 @@ See also: `scroll-top-to', `scroll-center-to', `scroll-bottom-to'"
    (grid-size :initarg :beat-size :initform 1/4 :documentation "The number of beats between each grid line.")
    (y-size :initarg :y-size :initform 40 :documentation "The height of one pitch value (i.e. midinote), in pixels."))
   (:command-table (piano-roll
-		   :inherit-from (piano-roll-file-command-table
+                   :inherit-from (piano-roll-file-command-table
                                   piano-roll-edit-command-table
                                   piano-roll-view-command-table
                                   piano-roll-tools-command-table
                                   piano-roll-help-command-table)
-		   :menu (("File" :menu piano-roll-file-command-table)
+                   :menu (("File" :menu piano-roll-file-command-table)
                           ("Edit" :menu piano-roll-edit-command-table)
                           ("View" :menu piano-roll-view-command-table)
                           ("Tools" :menu piano-roll-tools-command-table)
-			  ("Help" :menu piano-roll-help-command-table))))
+                          ("Help" :menu piano-roll-help-command-table))))
   (:panes
    (piano-roll-pane (make-pane 'piano-roll-pane))
    (interactor-pane (make-clim-interactor-pane
@@ -401,7 +401,7 @@ See also: `scroll-top-to', `scroll-center-to', `scroll-bottom-to'"
     ((event 'event)
      (beat 'number)
      (y 'number))
-  (with-swank-output
+  (let ((*standard-output* *debug-io*))
     (dprint 'com-move event beat y)))
 
 (define-command (com-edit-event :name t :menu t
@@ -447,11 +447,11 @@ See also: `scroll-top-to', `scroll-center-to', `scroll-bottom-to'"
 
 (define-presentation-to-command-translator event-dragging-translator
     (event com-move-event piano-roll
-           :tester ((object presentation x)
-                    (not (hovering-for-resize-p x presentation)))
-           :pointer-documentation "Move event"
-           :menu nil
-           :echo nil)
+     :tester ((object presentation x)
+              (not (hovering-for-resize-p x presentation)))
+     :pointer-documentation "Move event"
+     :menu nil
+     :echo nil)
     (object presentation x y)
   (multiple-value-bind (old-x old-y) (output-record-position presentation)
     (list presentation (- x old-x) (- y old-y))))
@@ -485,16 +485,16 @@ See also: `scroll-top-to', `scroll-center-to', `scroll-bottom-to'"
 
 (define-presentation-to-command-translator event-resizing-translator
     (event com-resize-event piano-roll
-           :tester ((object presentation x)
-                    (when (hovering-for-resize-p x presentation)
-                      (climi::set-sheet-pointer-cursor ; (setf pointer-cursor) doesn't seem to work, so we do this
-                       (find-port)
-                       (find-pane-named *application-frame* 'piano-roll-pane)
-                       :horizontal-scroll)
-                      t))
-           :pointer-documentation "Resize event"
-           :menu nil
-           :echo nil)
+     :tester ((object presentation x)
+              (when (hovering-for-resize-p x presentation)
+                (climi::set-sheet-pointer-cursor ; (setf pointer-cursor) doesn't seem to work, so we do this
+                 (find-port)
+                 (find-pane-named *application-frame* 'piano-roll-pane)
+                 :horizontal-scroll)
+                t))
+     :pointer-documentation "Resize event"
+     :menu nil
+     :echo nil)
     (object presentation window x y)
   (list presentation x y))
 
