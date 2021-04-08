@@ -16,14 +16,15 @@
                #:cl-patterns/supercollider ;; FIX: ensure thundersnow is backend-agnostic
                #:bdef
                #:mcclim)
+  :pathname "src/"
   :serial t
-  :components ((:file "src/package")
-               (:file "src/utility")
-               (:file "src/export")
-               (:file "src/thundersnow")
-               (:file "src/piano-roll")
-               (:file "src/tracker")
-               (:file "src/wave-editor"))
+  :components ((:file "package")
+               (:file "utility")
+               (:file "export")
+               (:file "thundersnow")
+               (:file "piano-roll")
+               (:file "tracker")
+               (:file "wave-editor"))
   :in-order-to ((test-op (test-op "thundersnow/tests"))))
 
 (asdf:defsystem #:thundersnow/tests
