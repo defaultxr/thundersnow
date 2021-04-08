@@ -19,8 +19,6 @@
   :serial t
   :components ((:file "src/package")
                (:file "src/utility")
-               (:file "src/common")
-               (:file "src/gui")
                (:file "src/export")
                (:file "src/thundersnow")
                (:file "src/piano-roll")
@@ -39,8 +37,6 @@
   :serial t
   :components ((:file "test")
                (:file "utility")
-               (:file "common")
-               (:file "gui")
                (:file "thundersnow")
                (:file "piano-roll")
                (:file "tracker"))
