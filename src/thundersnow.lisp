@@ -86,6 +86,10 @@
 (define-presentation-method present (pattern (type pattern) stream (view textual-view) &key)
   (print pattern stream))
 
+(define-gesture-name :select :pointer-button (:left))
+
+(define-gesture-name :erase :pointer-button (:middle))
+
 ;; (define-presentation-method present ((pattern pattern) (type pattern) stream (view textual-view) &key)
 ;;   (print 'gen-pat-present *debug-io*)
 ;;   ;; (closer-mop:class-direct-slots (find-class 'pbind))
@@ -117,7 +121,7 @@
 ;;; thundersnow frame
 
 (define-application-frame thundersnow ()
-  ()
+  ((inspect :initarg :inspect :initform nil :documentation "The item to inspect in the inspector pane."))
   (:command-table (thundersnow
 		   :inherit-from (thundersnow-file-command-table
                                   thundersnow-edit-command-table
@@ -172,13 +176,21 @@
   (clim-internals::schedule-timer-event
    (find-pane-named frame 'tempo) 'tick 0.1)
   (clim-internals::schedule-timer-event
-   (find-pane-named frame 'scope) 'tick 0.1))
+   (find-pane-named frame 'scope) 'tick 0.1)
+  (if-let ((pane (pattern-pane frame)))
+    (setf (pane-pattern pane) (slot-value frame 'inspect))
+    (sprint 'pane-is-nil)))
+
+(defmethod pattern-pane ((frame standard-application-frame))
+  (find-pane-named frame 'pattern-pane))
 
 (defmethod pane-pattern ((frame standard-application-frame))
   (pane-pattern (find-pane-named frame 'pattern-pane)))
 
 (defmethod (setf pane-pattern) (pattern (frame standard-application-frame))
-  (setf (pane-pattern (find-pane-named frame 'pattern-pane)) pattern))
+  (when-let ((pane (pattern-pane frame)))
+    (setf (pane-pattern pane) pattern))
+  (setf (slot-value frame 'inspect) pattern))
 
 ;;; commands
 
@@ -273,19 +285,26 @@
 ;;     ()
 ;;   (thundersnow-repo))
 
-(define-thundersnow-command (com-change-pattern :name t)
-    ((pattern 'pattern :gesture :select))
-  (sprint 'changing-pattern)
-  (let ((frame-input (frame-standard-input *application-frame*)))
-    (setf tmp pattern)
-    ;; (with-swank-output
-    ;;   (print
-    ;;    (accepting-values (frame-input)
-    ;;      (accept 'string :stream frame-input
-    ;;              :view +cell-unparsed-text-view+
-    ;;              :default (string cell)))))
-    )
   nil)
+
+(define-presentation-to-command-translator change-pattern
+    (pattern com-change-pattern thundersnow
+     :gesture :select
+     :pointer-documentation "Change pattern"
+     :menu nil
+     :echo t)
+    (object presentation)
+  (list presentation *unsupplied-argument-marker*))
+
+(define-command (com-change-pattern)
+    ((pattern 'presentation :prompt "Old pattern")
+     (new-pattern '(or pattern symbol string) :prompt "New pattern"))
+  (sprint 'new-com-change-pattern)
+  (sprint pattern)
+  (setf tmp (typecase new-pattern
+              (pattern new-pattern)
+              (symbol (find-pdef new-pattern t))
+              (string (eval new-pattern)))))
 
 (defmethod frame-standard-output ((frame thundersnow))
   (find-pane-named frame 'interactor))
@@ -303,8 +322,11 @@
 
 ;;; main
 
-(defun thundersnow (&rest args)
+(defun thundersnow (&rest args &key pattern)
   "Start thundersnow."
   (unless *initialized*
     (thundersnow-initialize))
-  (apply 'find-application-frame 'thundersnow args))
+  (let ((ts (apply #'make-or-find-application-frame 'thundersnow args)))
+    (when pattern
+      (setf (pane-pattern ts) pattern))
+    ts))
