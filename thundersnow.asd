@@ -12,10 +12,12 @@
   :source-control (:git "git@github.com:defaultxr/thundersnow.git")
   :depends-on (#:alexandria
                #:mutility
+               #:mutility/loopy
                #:closer-mop
                #:cl-patterns/supercollider ;; FIX: ensure thundersnow is backend-agnostic
                #:bdef
-               #:mcclim)
+               #:mcclim
+               #:drei-mcclim)
   :pathname "src/"
   :serial t
   :components ((:file "package")
