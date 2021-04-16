@@ -4,6 +4,7 @@
 ;; Notes:
 ;; Prior art:
 ;; - cl-wav-synth; https://common-lisp.net/project/cl-wav-synth/
+;; https://github.com/McCLIM/McCLIM/issues/927 - "proposal: display function performs no actual output"; possible performance gain for this, as it would avoid drawing items that are not on screen
 
 (defvar tmp nil)
 
@@ -33,6 +34,8 @@
       (setf %saved-extent new-region)
       (when should-redraw
         (redisplay-frame-pane (pane-frame stream) stream :force-p t)))))
+
+(define-presentation-type bdef ())
 
 (define-presentation-type wave-editor-point ())
 
@@ -197,6 +200,15 @@ See also: `sound-frame-pixel'"
       pointer-documentation-pane)))
   (:menu-bar t))
 
+(define-presentation-action select (sound-frame nil wave-editor
+                                    :gesture :select
+                                    :pointer-documentation
+                                    ((sound-frame stream)
+                                     (format stream "Select frame ~s" sound-frame)))
+                            (sound-frame stream)
+  (print sound-frame *debug-io*)
+  (setf (slot-value stream 'point) sound-frame))
+
 (defmethod frame-standard-output ((frame wave-editor))
   (find-pane-named frame 'interactor))
 
@@ -275,6 +287,14 @@ See also: `sound-frame-pixel'"
     ()
   (setf (second-px *application-frame*) (* 0.5 (second-px *application-frame*))))
 
+(define-command (com-zoom-to-fit :name t :menu t
+                                 :command-table wave-editor-view-command-table
+                                 ;; :keystroke (#\- :control)
+                                 )
+    ()
+  ()
+  (setf (second-px *application-frame*) (* 0.5 (second-px *application-frame*))))
+
 (define-command-table wave-editor-tools-command-table
   :inherit-from (thundersnow-common-tools-command-table)
   :inherit-menu t)
@@ -296,5 +316,17 @@ See also: `sound-frame-pixel'"
         (setf (sound stream) sound)))
     frame))
 
+;;; misc / testing
 
+(defun wave-editor-pane (&optional frame)
+  (find-pane-named (or frame (wave-editor)) 'wave-editor-pane))
 
+(defun test-wave-editor (&optional wave)
+  (let ((frame (find-application-frame 'wave-editor)))
+    (setf (sound frame) (bdef :cat32 "~/num.wav"))))
+
+(define-command (com-test :name t :menu t
+                          :command-table wave-editor-file-command-table)
+    ()
+  (when-let ((bdefs (all-bdefs)))
+    (present (bdef (random-elt bdefs)) 'bdef)))
