@@ -268,7 +268,8 @@ See also: `scroll-top-to', `scroll-center-to', `scroll-bottom-to'"
   ((eseq :initarg :eseq :initform (eseq) :type eseq :documentation "The `eseq' instance.")
    (beat-size :initarg :beat-size :initform 200 :documentation "The width of one beat, in pixels.")
    (grid-size :initarg :beat-size :initform 1/4 :documentation "The number of beats between each grid line.")
-   (y-size :initarg :y-size :initform 40 :documentation "The height of one pitch value (i.e. midinote), in pixels."))
+   (y-size :initarg :y-size :initform 40 :documentation "The height of one pitch value (i.e. midinote), in pixels.")
+   (scale :initarg :scale :initform :major :documentation "The scale whose notes should be highlighted."))
   (:command-table (piano-roll
                    :inherit-from (piano-roll-file-command-table
                                   piano-roll-edit-command-table
@@ -282,9 +283,12 @@ See also: `scroll-top-to', `scroll-center-to', `scroll-bottom-to'"
                           ("Help" :menu piano-roll-help-command-table))))
   (:panes
    (piano-roll-pane (make-pane 'piano-roll-pane))
-   (interactor-pane (make-clim-interactor-pane
-                     :name 'interactor
-                     :scroll-bar :vertical))
+   (interactor-pane (make-clim-stream-pane
+                     :name 'interactor-pane
+                     :type 'piano-roll-interactor-pane)
+                    #+nil (make-pane 'piano-roll-interactor-pane
+                                     :name 'interactor
+                                     :scroll-bar :vertical))
    (pointer-documentation-pane :pointer-documentation
                                :name 'doc
                                :display-time :command-loop
@@ -306,6 +310,18 @@ See also: `scroll-top-to', `scroll-center-to', `scroll-bottom-to'"
 (defmethod eseq-of ((piano-roll-pane piano-roll-pane))
   (eseq-of (pane-frame piano-roll-pane)))
 
+(defmethod (setf eseq-of) ((eseq eseq) (piano-roll piano-roll))
+  (setf (slot-value piano-roll 'eseq) eseq)
+  (let ((pane (find-pane-named piano-roll 'piano-roll-pane)))
+    (scroll-focus-pitch pane (print (midinote (car (eseq-events eseq)))))
+    (redisplay-frame-pane piano-roll pane :force-p t)))
+
+(defmethod (setf eseq-of) (value (piano-roll piano-roll))
+  (setf (eseq-of piano-roll) (as-eseq value)))
+
+(defmethod (setf eseq-of) (value (piano-roll-pane piano-roll-pane))
+  (setf (eseq-of (pane-frame piano-roll-pane)) value))
+
 (defmethod dur ((piano-roll piano-roll))
   (dur (eseq-of piano-roll)))
 
@@ -314,6 +330,11 @@ See also: `scroll-top-to', `scroll-center-to', `scroll-bottom-to'"
 
 (defmethod eseq-events ((piano-roll-pane piano-roll-pane))
   (eseq-events (eseq-of piano-roll-pane)))
+
+(defmethod (setf scale) (scale (piano-roll piano-roll))
+  (setf (slot-value piano-roll 'scale) scale)
+  ;; FIX: this resets the scrolling...
+  (redisplay-frame-pane piano-roll (find-pane-named piano-roll 'piano-roll-pane) :force-p t))
 
 (defun draw-piano-roll (frame stream)
   (let* ((stream-width (piano-roll-width stream))
@@ -328,7 +349,10 @@ See also: `scroll-top-to', `scroll-center-to', `scroll-bottom-to'"
                    (pattern (next-upto-n eseq))))
          (background-color (slot-value stream 'background))
          (grid-color (get-theme-color :grid))
-         (bg-grid-mixed (mix-colors background-color grid-color 1/6)))
+         (bg-grid-mixed (mix-colors background-color grid-color 1/6))
+         (grid-accent-color (make-rgb-color 1 1 1))
+         (scale (slot-value frame 'scale))
+         (scale-midinotes (when scale (scale-midinotes scale :octave :all))))
     (present (make-instance '%background) '%background :stream stream)
     ;; draw the vertical grid lines and beat numbers at the bottom
     (loop :for beat :from 0 :by grid-size :upto (max (+ (dur frame) 32) (/ stream-width (* beat-size grid-size)))
@@ -341,7 +365,9 @@ See also: `scroll-top-to', `scroll-center-to', `scroll-bottom-to'"
           :for top-ypos := (- stream-height (* (1+ y) y-size))
           :do
              (draw-line* stream 0 ypos stream-width ypos :ink grid-color)
-             (draw-text* stream (note-text y) 1 top-ypos :align-y :top :ink grid-color))
+             (draw-text* stream (note-text y) 1 top-ypos :align-y :top :ink (if (member y scale-midinotes)
+                                                                                grid-accent-color
+                                                                                grid-color)))
     ;; draw the notes (events)
     (dolist (event events)
       (updating-output (stream :unique-id event :cache-value event :cache-test #'event-presentation-equal)
@@ -352,6 +378,11 @@ See also: `scroll-top-to', `scroll-center-to', `scroll-bottom-to'"
            (if %saved-extent
                (list (rectangle-min-x %saved-extent) (rectangle-min-y %saved-extent))
                (list 0 0)))))
+
+(define-gesture-name :play :keyboard (#\space))
+
+(defclass piano-roll-interactor-pane (interactor-pane)
+  ())
 
 (define-command-table piano-roll-file-command-table
   :inherit-from (thundersnow-common-file-command-table)
@@ -530,6 +561,29 @@ See also: `scroll-top-to', `scroll-center-to', `scroll-bottom-to'"
   :inherit-from (thundersnow-common-help-command-table)
   :inherit-menu t)
 
+;; FIX:
+;; (define-gesture-name :add :pointer-double-click-event (:left))
+;; (define-gesture-name :add :pointer-button (:left :pointer-button-double-click))
+
+;; - destination-object context-type frame presentation destination-presentation event window x y
+
+(define-presentation-action add
+    (%background nil piano-roll
+     :gesture :add
+     :pointer-documentation
+     ((%background x y stream frame)
+      (with-slots (beat-size grid-size) frame
+        (format stream "Add event at beat ~$, midinote ~a" (x-pixel-to-beat-floored x frame) y)))
+     ;; :tester ((object event)
+     ;;          ;; (setf krovo::tmp (list object event))
+     ;;          t
+     ;;          )
+     )
+    (%background x y frame)
+  (let ((beat (x-pixel-to-beat-floored x frame))
+        (y-val (y-pixel-to-pitch-quantized y frame)))
+    (com-add (event :beat beat :midinote y-val))
+    (redisplay-frame-pane *application-frame* (find-pane-named *application-frame* 'piano-roll-pane) :force-p t)))
 
 (define-gesture-name :erase :pointer-button (:middle))
 
@@ -540,14 +594,65 @@ See also: `scroll-top-to', `scroll-center-to', `scroll-bottom-to'"
 ;; FIX:
 ;; (define-gesture-name :motion :pointer-motion (:left))
 
+;; mode allowing use of a computer keyboard as a piano keyboard
+
+(define-command-table music-keys :inherit-from nil)
+
+(define-command (music-note :name t :menu t
+                            :command-table music-keys)
+    ((note 'integer :default 0)
+     (octave 'integer :default 5))
+  "Play a musical note, recording it if recording is active."
+  (play (event :type :note ;; FIX: this should just be :play event type. :end should be implemented when it's available in cl-patterns.
+               ;; :instrument :spt
+               ;; :buffer (bdef-buffer :classic)
+               :midinote (+ note (* octave 12))
+               :quant 0
+               :latency 0)))
+
+(dolist* (key index (coerce "zsxdcvgbhnjm,l.;/" 'list))
+  (let ((key key) (index index))
+    (add-keystroke-to-command-table 'music-keys (list key)
+                                    :function (lambda (gesture arg)
+                                                (dprint 'hi-there index gesture arg)
+                                                (list 'music-note index 5))
+                                    :errorp nil)))
+
+;; (add-keystroke-to-command-table 'music-keys (list #\escape)
+;;                                 :function (lambda (gesture arg)
+;;                                             (sprint 'xxxxxxxx)
+;;                                             (list 'music-note 0 5))
+;;                                 :errorp nil)
+
+(define-command (com-test :name t :menu t
+                          :command-table piano-roll-file-command-table)
+    ()
+  (with-command-table-keystrokes (keys 'music-keys)
+    ;; (let (()))
+    (loop :while *true* :do
+      (let ((command (read-command-using-keystrokes 'music-keys
+                                                    (concatenate 'list
+                                                                 keys
+                                                                 (list (list :keyboard #\escape 0)
+                                                                       (list :keyboard #\g :control))))))
+        (if (characterp command)
+            (sprint command)
+            (execute-frame-command *application-frame* command))))))
+
 (defun piano-roll-pane (&optional frame)
   "Get the piano-roll-pane of FRAME.
 
 See also: `piano-roll'"
-  (find-pane-named (or frame *application-frame* (piano-roll)) 'piano-roll-pane))
+  (find-pane-named (or frame (piano-roll)) 'piano-roll-pane))
+
+(defun piano-roll-interactor-pane (&optional frame)
+  "Get the piano-roll-pane of FRAME.
+
+See also: `piano-roll'"
+  (find-pane-named (or frame (piano-roll)) 'interactor-pane))
 
 (defun piano-roll ()
   "Open a piano-roll or get one of the instances already open.
 
 See also: `piano-roll-pane'"
-  (find-application-frame 'piano-roll))
+  (make-or-find-application-frame 'piano-roll))
