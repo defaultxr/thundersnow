@@ -8,10 +8,9 @@
 
 (defun plist-value (plist key)
   "Get the value of KEY in PLIST. Returns the key the value was derived from as a second value."
-  (loop :for (k v) :on plist :by #'cddr
-        :if (eql k key)
-          :return (values v k)
-        :finally (return-from plist-value (values nil nil))))
+  (doplist (k v plist (values nil nil))
+    (when (eql k key)
+      (return-from plist-value (values v k)))))
 
 (defvar loop-detector nil)
 
@@ -29,8 +28,10 @@
 (defclass cell ()
   ((frame :initarg :frame :accessor frame)
    (row :initarg :row :initform nil :accessor row)
+   (column :initarg :column :initform nil :accessor column)
    (key :initarg :key :initform nil :accessor key)
-   (content :initarg :content)))
+   (content :initarg :content)
+   (table :initarg :table :initform nil)))
 
 (defmethod print-object ((cell cell) stream)
   (with-slots (row key) cell
@@ -52,15 +53,25 @@
     (let ((value (typecase value
                    (string value)
                    (t (write-to-string value)))))
-      (if (and row key)
-          (setf (ptracker-source-cell (frame-ptracker frame) row key) value)
-          (warn "Attempted to set ~s's content to ~s but no row or key set." cell value)))))
+      (if row
+          (if key
+              (setf (ptracker-source-cell frame row key) value)
+              (warn "Attempted to set ~s's content to ~s but no key set." cell value))
+          (setf (ptracker-source-cell frame :header key) value)))))
 
 (define-presentation-type cell ())
 
 (define-presentation-method present (cell (type cell) stream (view textual-view) &key)
-  (with-accessors ((content content)) cell
-    (format stream "~a" (if content content "     "))))
+  (with-accessors ((row row) (column column) (content content)) cell
+    (format stream "~a" (if content content "     "))
+    (when-let* ((table (slot-value cell 'table))
+                (col-width (when (and (integerp column)
+                                      (slot-boundp table 'climi::widths))
+                             (elt (slot-value table 'climi::widths) (1+ column))))
+                (row-height (when (and (integerp row)
+                                       (slot-boundp table 'climi::heights))
+                              (elt (slot-value table 'climi::heights) (1+ row)))))
+      (draw-line* stream 0 0 col-width row-height :ink +transparent-ink+))))
 
 (defclass cell-row-number (cell) ;; FIX: use this instead of just `cell' ?
   ()
@@ -96,6 +107,9 @@
 (define-presentation-method present (cell (type cell) stream (view cell-unparsed-text) &key)
   (format stream "~a" (content cell)))
 
+(define-presentation-method present (cell (type cell) stream (view cell-unparsed-text) &key)
+  (format stream "~a" (content cell)))
+
 (define-presentation-method accept ((type cell) stream (view cell-unparsed-text) &key)
   (let ((cell (make-cell))) ;; FIX?
     (setf (content cell) (read stream))))
@@ -104,7 +118,8 @@
 
 (defun draw-track (frame pane)
   "Draw the contents of `tracker'."
-  (let ((ptracker (frame-ptracker frame)))
+  (let ((ptracker (frame-ptracker frame))
+        tcols)
     (labels ((gen-color (column)
                (case column
                  (0
@@ -121,10 +136,12 @@
                      color
                      (clim-internals::highlight-shade color)))))
       (with-slots ((header cl-patterns::header) (rows cl-patterns::rows)) ptracker
-        (let ((keys (keys header)))
+        (let ((keys (keys header))
+              table)
           (formatting-table (pane)
+            (setf table (stream-current-output-record pane))
             (formatting-row (pane)
-              (with-border (+black+ 1 :ink +white+)
+              (with-border (+black+ 1)
                 (formatting-cell (pane)
                   (present (make-instance 'cell-pattern-id :frame frame :content "p 0") 'cell-pattern-id :stream pane)))
               ;; column headers
@@ -132,9 +149,12 @@
                 (doplist (key value header)
                   (prog1
                       (with-border ((cell-color t col))
-                        (formatting-cell (pane)
-                          (present (make-instance 'cell-column-header :frame frame :content (format nil "~s ~s" key value) :key key) 'cell-column-header :stream pane)))
+                        (let ((tcell (formatting-cell (pane)
+                                       (present (make-instance 'cell-column-header :frame frame :content (format nil "~s ~s" key value) :key key) 'cell-column-header :stream pane))))
+                          (push tcell tcols)
+                          tcell))
                     (incf col)))
+                (reverse tcols)
                 ;; new column button
                 (with-border ((cell-color t col))
                   (formatting-cell (pane)
@@ -146,12 +166,12 @@
                 ;; row numbers
                 (with-border ((cell-color nil 0))
                   (formatting-cell (pane)
-                    (present (make-instance 'cell-row-number :frame frame :content row-num :row row-num) 'cell-row-number :stream pane)))
+                    (present (make-instance 'cell-row-number :frame frame :content row-num :row row-num :column 0 :table table) 'cell-row-number :stream pane)))
                 ;; ptracker cells
                 (dolist* (key col-num keys)
-                  (with-border ((cell-color nil (1+ col-num)) (random-range 1 5))
+                  (with-border ((cell-color nil (1+ col-num)))
                     (formatting-cell (pane)
-                      (present (make-cell :frame frame :row row-num :key key) 'cell :stream pane)))))))))
+                      (present (make-cell :frame frame :row row-num :column (1+ col-num) :key key :table table) 'cell :stream pane)))))))))
       (fresh-line))))
 
 (define-application-frame tracker ()
@@ -198,68 +218,77 @@
 
 ;;; ptracker methods
 
-(defgeneric ptracker-cell (ptracker row &optional key)
-  (:documentation "Get the text of a cell from ptracker. Can be used on a ptracker-pstream too to get the generated values from it. Returns four values:
+(defun ptracker-does-not-exist (ptracker type name if-does-not-exist)
+  (etypecase if-does-not-exist
+    ((member :error) (error "No ~a at ~s exists in ~s." (string-downcase type) name ptracker))
+    (null nil)))
+
+(defun ptracker-row-raw (ptracker row &key (if-does-not-exist :error))
+  "Get the plist for ROW from PTRACKER."
+  (typecase row
+    ((member :header :head :h nil)
+     (slot-value ptracker 'cl-patterns::header))
+    ((integer 0)
+     (let ((rows (slot-value ptracker 'cl-patterns::rows)))
+       (elt rows row))) ;; FIX: check if exists
+    (t
+     (ptracker-does-not-exist ptracker 'row row if-does-not-exist))))
+
+(defgeneric ptracker-cell-raw (ptracker row key &key if-does-not-exist)
+  (:documentation "Get the raw contents of a cell from a ptracker."))
+
+(defmethod ptracker-cell-raw ((ptracker ptracker) row key &key (if-does-not-exist :error))
+  (let ((row (ptracker-row-raw ptracker row :if-does-not-exist if-does-not-exist)))
+    (doplist (k v row (ptracker-does-not-exist ptracker 'cell key if-does-not-exist))
+      (when (eql k key)
+        (return-from ptracker-cell-raw v)))))
+
+(defmethod (setf ptracker-cell-raw) (value (ptracker ptracker) row key &key)
+  (let ((row-plist (ptracker-row-raw ptracker row)))
+    (setf (getf row-plist key) value)))
+
+(defgeneric ptracker-row (ptracker row &key if-does-not-exist))
+
+(defgeneric ptracker-cell (ptracker row key) ;; FIX: make sure the extra values are actually returned
+  (:documentation "Get the value of a cell from ptracker (i.e. the value at that location if specified, or the generated value if not specified). Can be used on a ptracker-pstream too to get the generated values from it. Returns three values:
 
 - the value at that row/key
 - the name of the key that the specified KEY was derived from, nil if it was not found, or t if it was not provided
-- whether the row exists ;; FIX: doesn't work if the row does exist
-- whether the output was derived from the a header pattern, or the row itself ;; FIX: doesn't work at all yet
+- t if the output was derived from the header pattern, or nil if from the row itself
 
 See also: `ptracker-source-cell', `ptracker'"))
 
-(defmethod ptracker-cell ((tracker tracker) row &optional key)
-  (apply #'ptracker-cell (frame-ptracker tracker) row (when key (list key))))
+(defmethod ptracker-cell ((tracker tracker) row key)
+  (ptracker-cell (frame-ptracker tracker) row key))
 
-(defmethod ptracker-cell ((ptracker ptracker) row &optional key)
-  (etypecase row
-    (symbol
-     (ecase row
-       ((:header :head :h nil)
-        (with-slots ((header cl-patterns::header)) ptracker
-          (plist-value header key)))))
-    (integer
-     (with-slots ((rows cl-patterns::rows)) ptracker
-       (if-let ((row (elt rows row)))
-         (plist-value row key)
-         (values nil nil nil))))))
+(defmethod ptracker-cell ((ptracker ptracker) row (key null))
+  ;; if key is null, get the whole row
+  (ptracker-row ptracker row))
 
-(defmethod ptracker-cell ((ptracker ptracker-pstream) row &optional key)
-  (etypecase row
-    (symbol
-     (ptracker-cell ptracker nil row))
-    (integer
-     (if-let ((event (elt ptracker row)))
-       (if key
-           (event-value event key)
-           event)
-       (values nil nil nil)))))
+(defmethod ptracker-cell ((ptracker ptracker) row key)
+  (if-let ((res (ptracker-cell-raw ptracker row key :if-does-not-exist nil)))
+    (values res key nil)
+    (etypecase row
+      ((integer 0)
+       (let ((res (lastcar (next-n ptracker (1+ row)))))
+         (values-list (append (multiple-value-list (event-value res key))
+                              (list t))))))))
 
-(defmethod ptracker-cell ((ptracker ptracker-pstream) row &optional key)
+(defmethod ptracker-cell ((ptracker ptracker-pstream) row key)
   (etypecase row
     (symbol
      (ptracker-cell ptracker nil row))
     (integer
      (if-let ((event (elt ptracker row)))
-       (if key
-           (event-value event key)
-           event)
+       (event-value event key)
        (values nil nil nil)))))
 
-(defgeneric (setf ptracker-cell) (value ptracker row &optional key))
+(defgeneric (setf ptracker-cell) (value ptracker row key))
 
-(defmethod (setf ptracker-cell) (value ptracker row &optional key)
-  (if (not (member row (list :header :head :h nil)))
-      (if key
-          (with-slots ((rows cl-patterns::rows)) ptracker
-            (setf (nth row rows) (cl-patterns::plist-set (elt rows row) key value)))
-          (error "KEY is currently required."))
-      (with-slots ((header cl-patterns::header)) ptracker
-        (if key
-            (setf (getf header key) value)
-            (setf header value)))))
+(defmethod (setf ptracker-cell) (value ptracker row key)
+  (setf (ptracker-cell-raw ptracker row key) value))
 
-(defgeneric ptracker-source-cell (ptracker row key)
+(defgeneric ptracker-source-cell (ptracker row key) ;; FIX: don't defer if it doesn't exist?
   (:documentation "Get the text the user entered for ROW and KEY from PTRACKER's metadata. If it doesn't exist, defer to `ptracker-cell'.
 
 See also: `ptracker-cell', `ptracker'"))
@@ -403,14 +432,13 @@ See also: `ptracker-cell', `ptracker'"))
 (define-command (com-edit-cell :name t :menu t
                                :command-table tracker-edit-command-table)
     ((cell 'cell))
-  (sprint 'com-edit-cell)
   (setf tmp cell)
   (with-slots (key row) cell
     (let ((prompt (format nil "~a ~a" key row))
           string)
       (accepting-values ()
         (setf string (apply #'accept 'string
-                            ;; :view +cell-unparsed-text-view+
+                            :view +cell-unparsed-text-view+
                             :prompt prompt ;; for some reason this doesn't work if i put the format here directly?
                             (when-let ((default (ptracker-source-cell *application-frame* (row cell) (key cell))))
                               (list :default default)))))
@@ -459,7 +487,7 @@ See also: `ptracker-cell', `ptracker'"))
 
 (defun tracker (&optional ptracker)
   "Open a tracker."
-  (apply 'find-application-frame 'tracker (when ptracker (list :ptracker ptracker))))
+  (apply #'make-or-find-application-frame 'tracker (when ptracker (list :ptracker ptracker))))
 
 ;;; testing out the layout switching bug(?)
 
