@@ -17,7 +17,8 @@
                #:cl-patterns/supercollider ;; FIX: ensure thundersnow is backend-agnostic
                #:bdef
                #:mcclim
-               #:drei-mcclim)
+               #:drei-mcclim
+               #:nodgui)
   :pathname "src/"
   :serial t
   :components ((:file "package")
