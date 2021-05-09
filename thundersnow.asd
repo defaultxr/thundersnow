@@ -24,11 +24,13 @@
   :components ((:file "package")
                (:file "utility")
                (:file "common-clim")
+               (:file "common-nod")
                (:file "export")
                (:file "thundersnow")
                (:file "piano-roll")
                (:file "tracker")
-               (:file "wave-editor"))
+               (:file "wave-editor")
+               (:file "wave-editor-nod"))
   :in-order-to ((test-op (test-op "thundersnow/tests"))))
 
 (asdf:defsystem #:thundersnow/tests
