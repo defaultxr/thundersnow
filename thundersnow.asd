@@ -23,6 +23,7 @@
   :serial t
   :components ((:file "package")
                (:file "utility")
+               (:file "common-clim")
                (:file "export")
                (:file "thundersnow")
                (:file "piano-roll")
