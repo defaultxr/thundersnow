@@ -73,7 +73,7 @@ See also: `scaled-frames-for'"
     (wave-editor-pane
      (with-slots (sound %cached-frames) stream
        (or %cached-frames
-           (let ((frames (bdef-subseq sound 0 (bdef-length sound))))
+           (let ((frames (bdef-frames sound)))
              (setf %cached-frames frames)
              frames))))))
 

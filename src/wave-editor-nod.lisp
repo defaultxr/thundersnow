@@ -33,7 +33,7 @@
 
 (defun cache-buffer-data (wave-editor)
   (with-slots (bdef cached-buffer-data) wave-editor
-    (setf cached-buffer-data (bdef-subseq bdef 0 (bdef-length bdef) 0))
+    (setf cached-buffer-data (bdef-frames bdef :channels 0))
     (let ((*wish* (wave-editor-wish wave-editor)))
       (send-wish-line "event generate . <<data-cached>>"))))
 
