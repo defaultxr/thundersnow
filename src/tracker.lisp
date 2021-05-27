@@ -50,20 +50,21 @@
 
 (defmethod (setf content) (value (cell cell))
   (with-slots (frame row key) cell
-    (let ((value (typecase value
-                   (string value)
-                   (t (write-to-string value)))))
+    (let ((string (typecase value
+                    (string value)
+                    (t (write-to-string value)))))
       (if row
           (if key
-              (setf (ptracker-source-cell frame row key) value)
+              (setf (ptracker-cell frame row key) value
+                    (ptracker-source-cell frame row key) string)
               (warn "Attempted to set ~s's content to ~s but no key set." cell value))
-          (setf (ptracker-source-cell frame :header key) value)))))
+          (setf (ptracker-source-cell frame :header key) string)))))
 
 (define-presentation-type cell ())
 
 (define-presentation-method present (cell (type cell) stream (view textual-view) &key)
   (with-accessors ((row row) (column column) (content content)) cell
-    (format stream "~a" (if content content "     "))
+    (format stream "~a" (or content "     "))
     (when-let* ((table (slot-value cell 'table))
                 (col-width (when (and (integerp column)
                                       (slot-boundp table 'climi::widths))
@@ -72,6 +73,10 @@
                                        (slot-boundp table 'climi::heights))
                               (elt (slot-value table 'climi::heights) (1+ row)))))
       (draw-line* stream 0 0 col-width row-height :ink +transparent-ink+))))
+
+(define-presentation-method present (cell (type cell) (stream string-stream) (view textual-view) &key)
+  (with-accessors ((content content)) cell
+    (format stream "~a" (or content ""))))
 
 (defclass cell-row-number (cell) ;; FIX: use this instead of just `cell' ?
   ()
@@ -199,6 +204,9 @@
   (:menu-bar t)
   (:pointer-documentation t))
 
+(defgeneric frame-ptracker (frame)
+  (:documentation "The `ptracker' associated with FRAME."))
+
 (defmethod frame-ptracker ((symbol symbol))
   (frame-ptracker (find-application-frame symbol)))
 
@@ -218,75 +226,15 @@
 
 ;;; ptracker methods
 
-(defun ptracker-does-not-exist (ptracker type name if-does-not-exist)
-  (etypecase if-does-not-exist
-    ((member :error) (error "No ~a at ~s exists in ~s." (string-downcase type) name ptracker))
-    (null nil)))
-
-(defun ptracker-row-raw (ptracker row &key (if-does-not-exist :error))
-  "Get the plist for ROW from PTRACKER."
-  (typecase row
-    ((member :header :head :h nil)
-     (slot-value ptracker 'cl-patterns::header))
-    ((integer 0)
-     (let ((rows (slot-value ptracker 'cl-patterns::rows)))
-       (elt rows row))) ;; FIX: check if exists
-    (t
-     (ptracker-does-not-exist ptracker 'row row if-does-not-exist))))
-
-(defgeneric ptracker-cell-raw (ptracker row key &key if-does-not-exist)
-  (:documentation "Get the raw contents of a cell from a ptracker."))
-
-(defmethod ptracker-cell-raw ((ptracker ptracker) row key &key (if-does-not-exist :error))
-  (let ((row (ptracker-row-raw ptracker row :if-does-not-exist if-does-not-exist)))
-    (doplist (k v row (ptracker-does-not-exist ptracker 'cell key if-does-not-exist))
-      (when (eql k key)
-        (return-from ptracker-cell-raw v)))))
-
-(defmethod (setf ptracker-cell-raw) (value (ptracker ptracker) row key &key)
-  (let ((row-plist (ptracker-row-raw ptracker row)))
-    (setf (getf row-plist key) value)))
-
-(defgeneric ptracker-row (ptracker row &key if-does-not-exist))
-
-(defgeneric ptracker-cell (ptracker row key) ;; FIX: make sure the extra values are actually returned
-  (:documentation "Get the value of a cell from ptracker (i.e. the value at that location if specified, or the generated value if not specified). Can be used on a ptracker-pstream too to get the generated values from it. Returns three values:
-
-- the value at that row/key
-- the name of the key that the specified KEY was derived from, nil if it was not found, or t if it was not provided
-- t if the output was derived from the header pattern, or nil if from the row itself
-
-See also: `ptracker-source-cell', `ptracker'"))
-
-(defmethod ptracker-cell ((tracker tracker) row key)
+(defmethod ptracker-cell ((tracker tracker) row key &key (if-does-not-exist :error))
   (ptracker-cell (frame-ptracker tracker) row key))
 
-(defmethod ptracker-cell ((ptracker ptracker) row (key null))
-  ;; if key is null, get the whole row
-  (ptracker-row ptracker row))
+(defmethod (setf ptracker-cell) (value (tracker tracker) row key &key)
+  (setf (ptracker-cell (frame-ptracker tracker) row key) value))
 
-(defmethod ptracker-cell ((ptracker ptracker) row key)
-  (if-let ((res (ptracker-cell-raw ptracker row key :if-does-not-exist nil)))
-    (values res key nil)
-    (etypecase row
-      ((integer 0)
-       (let ((res (lastcar (next-n ptracker (1+ row)))))
-         (values-list (append (multiple-value-list (event-value res key))
-                              (list t))))))))
+(defmethod ptracker-cell ((tracker tracker) row key &key if-does-not-exist)
+  (ptracker-cell (frame-ptracker tracker) row key))
 
-(defmethod ptracker-cell ((ptracker ptracker-pstream) row key)
-  (etypecase row
-    (symbol
-     (ptracker-cell ptracker nil row))
-    (integer
-     (if-let ((event (elt ptracker row)))
-       (event-value event key)
-       (values nil nil nil)))))
-
-(defgeneric (setf ptracker-cell) (value ptracker row key))
-
-(defmethod (setf ptracker-cell) (value ptracker row key)
-  (setf (ptracker-cell-raw ptracker row key) value))
 
 (defgeneric ptracker-source-cell (ptracker row key) ;; FIX: don't defer if it doesn't exist?
   (:documentation "Get the text the user entered for ROW and KEY from PTRACKER's metadata. If it doesn't exist, defer to `ptracker-cell'.
@@ -326,8 +274,7 @@ See also: `ptracker-cell', `ptracker'"))
     (if (member row (list :header :head :h nil))
         (setf (nth 0 (pattern-metadata ptracker :source-code))
               (cl-patterns::plist-set (nth 0 (pattern-metadata ptracker :source-code)) key value))
-        (setf (nth (/ (position key header) 2) (nth (1+ row) (pattern-metadata ptracker :source-code))) value))
-    (setf (ptracker-cell ptracker row key) (read-from-string value))))
+        (setf (nth (/ (position key header) 2) (nth (1+ row) (pattern-metadata ptracker :source-code))) value))))
 
 (define-presentation-to-command-translator change-pattern
     (cell-pattern-id com-pattern-id tracker
@@ -442,15 +389,7 @@ See also: `ptracker-cell', `ptracker'"))
                             :prompt prompt ;; for some reason this doesn't work if i put the format here directly?
                             (when-let ((default (ptracker-source-cell *application-frame* (row cell) (key cell))))
                               (list :default default)))))
-      (sprint 'here)
-      (sprint string)
-      (setf (content cell) (if (equal "" string)
-                               (progn
-                                 (sprint 'fuck)
-                                 nil)
-                               (progn
-                                 (sprint 'you)
-                                 string))))))
+      (setf (content cell) (read-from-string string nil nil)))))
 
 (define-command-table tracker-view-command-table
   :inherit-from (thundersnow-common-view-command-table)
@@ -522,5 +461,3 @@ See also: `ptracker-cell', `ptracker'"))
 (define-foo-command (com-foo-change :name t)
     ((string 'string :gesture :select))
   (notify-user *application-frame* "HEYO"))
-
-
