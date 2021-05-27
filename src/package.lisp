@@ -44,7 +44,13 @@
            #:*theme*
            #:get-theme-color
 
-           #:with-border)
+           #:with-border
+
+           #:thundersnow-common-file-command-table
+           #:thundersnow-common-edit-command-table
+           #:thundersnow-common-view-command-table
+           #:thundersnow-common-tools-command-table
+           #:thundersnow-common-help-command-table)
   (:local-nicknames (:a :alexandria)
                     (:clp :cl-patterns)))
 
