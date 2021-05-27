@@ -45,7 +45,7 @@
                 (/ width 2) (/ height 2)
                 :align-x :center
                 :align-y :center))
-  (clim-internals::schedule-timer-event pane 'tick 0.01))
+  (clime:schedule-event pane (make-instance 'timer-event :sheet pane) 0.01))
 
 (defmethod handle-event ((pane tempo-pane) (event climi::pointer-button-press-event))
   (if *clock*
@@ -70,7 +70,7 @@
          (hd2 (/ height 2)))
     (draw-rectangle* pane 0 0 width height :filled t :ink (make-gray-color 0.2))
     (draw-line* pane 0 hd2 width hd2 :ink +white+))
-  (climi::schedule-timer-event pane 'tick 0.01))
+  (clime:schedule-event pane (make-instance 'timer-event :sheet pane) 0.01))
 
 ;;; pattern pane
 
@@ -173,10 +173,10 @@
   )
 
 (defmethod enable-frame :after ((frame thundersnow))
-  (clim-internals::schedule-timer-event
-   (find-pane-named frame 'tempo) 'tick 0.1)
-  (clim-internals::schedule-timer-event
-   (find-pane-named frame 'scope) 'tick 0.1)
+  (let ((tempo-pane (find-pane-named frame 'tempo))
+        (scope-pane (find-pane-named frame 'scope)))
+    (clime:schedule-event tempo-pane (make-instance 'timer-event :sheet tempo-pane) 0.1)
+    (clime:schedule-event scope-pane (make-instance 'timer-event :sheet scope-pane) 0.1))
   (if-let ((pane (pattern-pane frame)))
     (setf (pane-pattern pane) (slot-value frame 'inspect))
     (sprint 'pane-is-nil)))
