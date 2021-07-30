@@ -610,7 +610,7 @@ See also: `scroll-top-to', `scroll-center-to', `scroll-bottom-to'"
                :quant 0
                :latency 0)))
 
-(dolist* (key index (coerce "zsxdcvgbhnjm,l.;/" 'list))
+(dolist* (index key (coerce "zsxdcvgbhnjm,l.;/" 'list))
   (let ((key key) (index index))
     (add-keystroke-to-command-table 'music-keys (list key)
                                     :function (lambda (gesture arg)

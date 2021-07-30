@@ -165,7 +165,7 @@
                   (formatting-cell (pane)
                     (present (make-instance 'cell-column-header :frame frame :content "+" :row :insert-column) 'cell-column-header :stream pane)))))
             ;; FIX: alternate color for every N rows, where N is determined by the beats per bar
-            (dolist* (row row-num rows)
+            (dolist* (row-num row rows)
               (declare (ignore row))
               (formatting-row (pane)
                 ;; row numbers
@@ -173,7 +173,7 @@
                   (formatting-cell (pane)
                     (present (make-instance 'cell-row-number :frame frame :content row-num :row row-num :column 0 :table table) 'cell-row-number :stream pane)))
                 ;; ptracker cells
-                (dolist* (key col-num keys)
+                (dolist* (col-num key keys)
                   (with-border ((cell-color nil (1+ col-num)))
                     (formatting-cell (pane)
                       (present (make-cell :frame frame :row row-num :column (1+ col-num) :key key :table table) 'cell :stream pane)))))))))
