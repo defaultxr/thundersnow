@@ -33,6 +33,12 @@
         #:clim-lisp
         #:clim-extensions
         #:thundersnow/common)
+  (:shadowing-import-from #:cl-patterns
+                          #:pattern
+                          #:event
+                          #:stop
+                          #:play
+                          #:quant)
   (:reexport #:clim
              #:clim-lisp
              #:clim-extensions
