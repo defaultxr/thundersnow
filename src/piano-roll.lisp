@@ -206,7 +206,7 @@ See also: `scroll-top-to', `scroll-center-to', `scroll-bottom-to'"
 
 (defmethod handle-event ((pane piano-roll-pane) (event pointer-button-press-event))
   ;; CLIM ports are not required to generate double click events: http://bauhh.dyndns.org:8000/clim-spec/8-2.html#_357
-  ;; mcclim doesn't generate these events, so we do it for it.
+  ;; McCLIM doesn't generate these events, so we do it for it.
   (with-slots (%last-click-timestamp) pane
     (let ((ts (slot-value event 'climi::timestamp)))
       (if (<= (/ (- ts %last-click-timestamp) 1000) climi::*double-click-delay*)
@@ -356,18 +356,17 @@ See also: `scroll-top-to', `scroll-center-to', `scroll-bottom-to'"
     (present (make-instance '%background) '%background :stream stream)
     ;; draw the vertical grid lines and beat numbers at the bottom
     (loop :for beat :from 0 :by grid-size :upto (max (+ (dur frame) 32) (/ stream-width (* beat-size grid-size)))
-          :for xpos = (beat-to-x-pixel beat frame)
+          :for xpos := (beat-to-x-pixel beat frame)
           :do (draw-line* stream xpos 0 xpos stream-height :ink (if (= (round beat) beat) grid-color bg-grid-mixed))
               (draw-text* stream (write-to-string beat) (1+ xpos) (1- stream-height) :ink grid-color))
     ;; draw the horizontal grid lines and note names on the side
     (loop :for y :from 0 :upto 127
           :for ypos := (- stream-height (* y y-size))
           :for top-ypos := (- stream-height (* (1+ y) y-size))
-          :do
-             (draw-line* stream 0 ypos stream-width ypos :ink grid-color)
-             (draw-text* stream (note-text y) 1 top-ypos :align-y :top :ink (if (member y scale-midinotes)
-                                                                                grid-accent-color
-                                                                                grid-color)))
+          :do (draw-line* stream 0 ypos stream-width ypos :ink grid-color)
+              (draw-text* stream (note-text y) 1 top-ypos :align-y :top :ink (if (member y scale-midinotes)
+                                                                                 grid-accent-color
+                                                                                 grid-color)))
     ;; draw the notes (events)
     (dolist (event events)
       (updating-output (stream :unique-id event :cache-value event :cache-test #'event-presentation-equal)

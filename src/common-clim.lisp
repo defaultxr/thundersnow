@@ -140,6 +140,6 @@ See also: `*theme*'"
     ()
   (let* ((system (asdf:find-system "thundersnow"))
          (version (asdf:component-version system)))
-    (format t "~&thundersnow ~a~%digital audio workstation and live coding laboratory~%a struct.ws project by modula t. worm and contributors~%" version)))
+    (format t "~&thundersnow ~a~%digital audio workstation and live coding laboratory~%a struct.ws project by modula t. worm and contributors~%https://w.struct.ws/thundersnow~%" version)))
 
 ;;; knob gadget

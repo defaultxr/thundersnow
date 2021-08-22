@@ -71,6 +71,7 @@ Roughly in descending order of priority. Not an exhaustive list, of course.
 - Integration with [[http://sox.sourceforge.net/][SoX]] to generate soundfile thumbnails (spectrograms):
 ~sox input.wav -n channels 1 spectrogram -r -o output.png~
 - Look into this page on [[http://www.personal.psu.edu/cab38/ColorSch/Schemes.html][color schemes]]
+- Consider using [[https://github.com/szos/defconfig][defconfig]] for customization/options/etc.
 - EVERYTHING ELSE!
 
 * Known Issues
