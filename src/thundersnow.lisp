@@ -267,6 +267,18 @@
 ;;     ()
 ;;   (thundersnow-repo))
 
+(define-presentation-action change (pattern nil thundersnow :gesture :select :pointer-documentation "Change pattern")
+                            (pattern presentation)
+  (sprint 'hi)
+  (sprint pattern)
+  (sprint presentation)
+  (redisplay-frame-pane *application-frame* (find-pane 'patterns-pane) :force-p t)
+  nil)
+
+(define-presentation-action play-or-end (pattern nil thundersnow :gesture :select :pointer-documentation "Play or end")
+                            (pattern presentation)
+  (play-or-end pattern)
+  (redisplay-frame-pane *application-frame* (find-pane 'patterns-pane) :force-p t)
   nil)
 
 (define-presentation-to-command-translator change-pattern
