@@ -154,7 +154,9 @@
         #:thundersnow/thundersnow
         #:thundersnow/piano-roll
         #:thundersnow/tracker
-        #:thundersnow/wave-editor)
+        #:thundersnow/stepseq
+        #:thundersnow/wave-editor
+        #:thundersnow/keyboard-gui)
   (:local-nicknames (:a :alexandria)
                     (:clp :cl-patterns))
   (:export #:thundersnow
