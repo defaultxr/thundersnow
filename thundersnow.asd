@@ -27,6 +27,7 @@
                (:file "common-nod")
                (:file "export")
                (:file "thundersnow")
+               (:file "keyboard-gui")
                (:file "piano-roll")
                (:file "stepseq")
                (:file "tracker")
