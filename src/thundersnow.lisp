@@ -22,55 +22,6 @@
 
 (defvar tmp nil)
 
-;;; tempo pane
-
-(defclass tempo-pane (basic-gadget)
-  ())
-
-(defmethod handle-event ((pane tempo-pane) (event timer-event))
-  (let* ((rect (bounding-rectangle (sheet-region pane)))
-         (width (rectangle-width rect))
-         (height (rectangle-height rect))
-         (clock cl-patterns:*clock*))
-    (draw-rectangle* pane 0 0 width height
-                     :filled t
-                     :ink (if clock
-                              (let ((c (expt (- 1 (mod (- (beat *clock*) (time-dur (clock-latency clock))) 1.0)) 3)))
-                                (make-rgb-color (* c 0.5) (+ 0.5 (* 0.5 c)) (* c 0.5)))
-                              (make-gray-color 0.5)))
-    (draw-text* pane
-                (if clock
-                    (format nil "BPM: ~f" (* 60 (cl-patterns:tempo clock)))
-                    (format nil "null *clock*~%(click to create)"))
-                (/ width 2) (/ height 2)
-                :align-x :center
-                :align-y :center))
-  (clime:schedule-event pane (make-instance 'timer-event :sheet pane) 0.01))
-
-(defmethod handle-event ((pane tempo-pane) (event climi::pointer-button-press-event))
-  (if *clock*
-      (com-set-tempo)
-      (start-clock-loop :tempo 110/60)))
-
-(defmethod handle-event ((pane tempo-pane) (event climi::pointer-scroll-event))
-  (when *clock*
-    (incf (tempo *clock*) (* 1/600 (slot-value event 'climi::delta-y)))))
-
-;;; scope pane
-
-(defparameter *scope-wave* (make-array 200 :element-type 'double-float :initial-element 0d0))
-
-(defclass scope-pane (basic-gadget)
-  ())
-
-(defmethod handle-event ((pane scope-pane) (event timer-event))
-  (let* ((rect (bounding-rectangle (sheet-region pane)))
-         (width (rectangle-width rect))
-         (height (rectangle-height rect))
-         (hd2 (/ height 2)))
-    (draw-rectangle* pane 0 0 width height :filled t :ink (make-gray-color 0.2))
-    (draw-line* pane 0 hd2 width hd2 :ink +white+))
-  (clime:schedule-event pane (make-instance 'timer-event :sheet pane) 0.01))
 
 ;;; pattern pane
 

@@ -12,14 +12,6 @@
 
 (defparameter tmp nil)
 
-;;; eseq / event stuff
-
-(defun event-presentation-equal (event1 event2)
-  "False if EVENT1 and EVENT2 differ in their CLIM presentation representation. This is used in the `updating-output' for `draw-piano-roll'."
-  (and (eql (sustain event1) (sustain event2))
-       (eql (beat event1) (beat event2))
-       (eql (event-value event1 :midinote) (event-value event2 :midinote))))
-
 ;;; gui stuff
 
 (defun find-piano-roll-pane (pane &optional (errorp t))

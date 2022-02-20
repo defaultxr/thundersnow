@@ -43,8 +43,16 @@
              #:clim-lisp
              #:clim-extensions
              #:thundersnow/common)
-  (:export #:all-command-tables
+  (:export #:all-frames
            #:make-or-find-application-frame
+           #:frame-all-panes
+           #:find-pane
+           #:all-command-tables
+
+           #:textual-view
+           #:+textual-view+
+           #:graphical-view
+           #:+graphical-view+
 
            #:mix-colors
            #:*theme*
@@ -52,11 +60,16 @@
 
            #:with-border
 
+           #:event-presentation-equal
+
            #:thundersnow-common-file-command-table
            #:thundersnow-common-edit-command-table
            #:thundersnow-common-view-command-table
            #:thundersnow-common-tools-command-table
-           #:thundersnow-common-help-command-table)
+           #:thundersnow-common-help-command-table
+
+           #:tempo-pane
+           #:scope-pane)
   (:local-nicknames (:a :alexandria)
                     (:clp :cl-patterns)))
 

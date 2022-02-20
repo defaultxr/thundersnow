@@ -2,17 +2,16 @@
 
 ;;;; common-clim.lisp - common functionality for the mcclim-based interfaces
 
-(defun all-command-tables ()
-  "Get a list of all defined CLIM command tables."
-  (keys climi::*command-tables*))
+;;; clim utility functions
 
-;;;; common gui functionality
-;;; stuff that is used by all guis; views, theming, commands, etc
-
-;; mcclim (or its X backend at least) does not provide this class so we define it here.
-(unless (find-class 'pointer-double-click-event nil)
-  (defclass pointer-double-click-event (pointer-button-event)
-    ()))
+(defun all-frames (&key port frame-manager)
+  "Get a list of all application frames currently open."
+  (let (res)
+    (apply 'map-over-frames
+           (fn (push _ res))
+           `(,@(when port (list :port port))
+             ,@(when frame-manager (list :frame-manager frame-manager))))
+    res))
 
 (defun make-or-find-application-frame (frame-name &rest args)
   "Make a frame for FRAME-NAME, or return it (without raising it) if one already exists."
@@ -21,12 +20,53 @@
          (return-from make-or-find-application-frame _))))
   (apply #'find-application-frame frame-name :activate t args))
 
+(defun frame-all-panes (frame)
+  "Get all panes of FRAME.
+
+See also: `clim:frame-panes'"
+  (flatten
+   (etypecase frame
+     (application-frame
+      (when-let ((panes (ensure-list (frame-panes frame))))
+        (cons panes (mapcan 'frame-all-panes panes))))
+     (pane
+      (when-let ((children (sheet-children frame)))
+        (cons children (mapcan 'frame-all-panes children)))))))
+
+(defun find-pane (name &optional (frame *application-frame*))
+  "Find any pane named NAME."
+  (if frame
+      (or (find-pane-named frame name)
+          (find-pane-named frame (ensure-symbol (concat name '-pane) (package-name (symbol-package name)))))
+      (map-over-frames
+       (fn (when-let ((pane (find-pane name _)))
+             (return-from find-pane pane))))))
+
+(defun all-command-tables ()
+  "Get a list of all defined CLIM command tables."
+  (keys climi::*command-tables*))
+
+;;; mcclim "monkey patching"
+
+;; McCLIM (or its X backend at least) does not provide this class yet so we define it here.
+;; McCLIM's lack of this event is tracked in this issue: https://github.com/McCLIM/McCLIM/issues/78
+(unless (find-class 'pointer-double-click-event nil)
+  (defclass pointer-double-click-event (pointer-button-event)
+    ()))
+
 ;;; views
 
-;; (defclass textual-view (view)
-;;   ())
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (defclass textual-view (view)
+    ()))
 
-;; (defconstant +textual-view+ (make-instance 'textual-view))
+(defconstant +textual-view+ (make-instance 'textual-view))
+
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (defclass graphical-view (view)
+    ()))
+
+(defconstant +graphical-view+ (make-instance 'graphical-view))
 
 ;;; color functions
 
@@ -63,6 +103,14 @@ See also: `*theme*'"
              (,thickness-sym ,thickness))
          (surrounding-output-with-border (pane :padding ,padding :padding-bottom ,(1- padding) :padding-top ,(1- padding) :background ,background-sym :thickness ,thickness-sym ,@additional-args)
            ,@body)))))
+
+;;; presentation utilities
+
+(defun event-presentation-equal (event1 event2) ;; used in `updating-output' for `draw-piano-roll'
+  "False if EVENT1 and EVENT2 differ in their CLIM presentation representation."
+  (and (eql (sustain event1) (sustain event2))
+       (eql (beat event1) (beat event2))
+       (eql (event-value event1 :midinote) (event-value event2 :midinote))))
 
 ;;; file commands
 
@@ -101,15 +149,20 @@ See also: `*theme*'"
     ()
   (thundersnow/thundersnow:thundersnow))
 
+(define-command (com-tracker :name t :menu t
+                             :command-table thundersnow-common-tools-command-table)
+    ()
+  (thundersnow/tracker:tracker))
+
 (define-command (com-piano-roll :name t :menu t
                                 :command-table thundersnow-common-tools-command-table)
     ()
   (thundersnow/piano-roll:piano-roll))
 
-(define-command (com-tracker :name t :menu t
+(define-command (com-stepseq :name t :menu t
                              :command-table thundersnow-common-tools-command-table)
     ()
-  (thundersnow/tracker:tracker))
+  (thundersnow/stepseq:stepseq))
 
 (define-command (com-wave-editor :name t :menu t
                                  :command-table thundersnow-common-tools-command-table)
@@ -143,3 +196,54 @@ See also: `*theme*'"
     (format t "~&thundersnow ~a~%digital audio workstation and live coding laboratory~%a struct.ws project by modula t. worm and contributors~%https://w.struct.ws/thundersnow~%" version)))
 
 ;;; knob gadget
+
+;;; tempo pane
+
+(defclass tempo-pane (basic-gadget)
+  ())
+
+(defmethod handle-event ((pane tempo-pane) (event timer-event))
+  (let* ((rect (bounding-rectangle (sheet-region pane)))
+         (width (rectangle-width rect))
+         (height (rectangle-height rect))
+         (clock cl-patterns:*clock*))
+    (draw-rectangle* pane 0 0 width height
+                     :filled t
+                     :ink (if clock
+                              (let ((c (expt (- 1 (mod (- (beat *clock*) (time-dur (clock-latency clock))) 1.0)) 3)))
+                                (make-rgb-color (* c 0.5) (+ 0.5 (* 0.5 c)) (* c 0.5)))
+                              (make-gray-color 0.5)))
+    (draw-text* pane
+                (if clock
+                    (format nil "BPM: ~f" (* 60 (cl-patterns:tempo clock)))
+                    (format nil "null *clock*~%(click to create)"))
+                (/ width 2) (/ height 2)
+                :align-x :center
+                :align-y :center))
+  (clime:schedule-event pane (make-instance 'timer-event :sheet pane) 0.01))
+
+(defmethod handle-event ((pane tempo-pane) (event climi::pointer-button-press-event))
+  (if *clock*
+      (com-set-tempo)
+      (start-clock-loop :tempo 110/60)))
+
+(defmethod handle-event ((pane tempo-pane) (event climi::pointer-scroll-event))
+  (when *clock*
+    (incf (tempo *clock*) (* 1/600 (slot-value event 'climi::delta-y)))))
+
+;;; scope pane
+
+(defparameter *scope-wave* (make-array 200 :element-type 'double-float :initial-element 0d0))
+
+(defclass scope-pane (basic-gadget)
+  ())
+
+(defmethod handle-event ((pane scope-pane) (event timer-event))
+  (let* ((rect (bounding-rectangle (sheet-region pane)))
+         (width (rectangle-width rect))
+         (height (rectangle-height rect))
+         (hd2 (/ height 2)))
+    (draw-rectangle* pane 0 0 width height :filled t :ink (make-gray-color 0.2))
+    (draw-line* pane 0 hd2 width hd2 :ink +white+))
+  (clime:schedule-event pane (make-instance 'timer-event :sheet pane) 0.01))
+
