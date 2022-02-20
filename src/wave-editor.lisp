@@ -102,7 +102,7 @@ See also: `sound-frame-pixel'"
            (center-y (/ height 2))
            (line-color (get-theme-color :foreground))
            (frames (cached-frames-for stream))
-           (num-frames (length frames))
+           (num-frames (bdef-length sound))
            (visible-region %saved-extent)
            (left-frame (max 0 (truncate (pixel-sound-frame stream (rectangle-min-x visible-region)))))
            (right-frame (max 0 (truncate (pixel-sound-frame stream (rectangle-max-x visible-region)))))
@@ -127,9 +127,9 @@ See also: `sound-frame-pixel'"
             (loop :for i :from left-frame :below right-frame
                   :do (draw-line* stream
                                   (+ horizontal-margin (* sfm i))
-                                  (- center-y (* (aref frames i) waveform-height))
+                                  (- center-y (* (aref frames 0 i) waveform-height))
                                   (+ horizontal-margin (* sfm (1+ i)))
-                                  (- center-y (* (aref frames (1+ i)) waveform-height))
+                                  (- center-y (* (aref frames 0 (1+ i)) waveform-height))
                                   :ink line-color))
             (let ((sfmr (/ sfm))
                   (min-x (rectangle-min-x visible-region))
@@ -142,7 +142,7 @@ See also: `sound-frame-pixel'"
                       (dotimes (j (truncate sfmr))
                         (let* ((idx (truncate (+ j sf)))
                                (val (unless (>= idx num-frames)
-                                      (aref frames idx))))
+                                      (aref frames 0 idx))))
                           (when val
                             (setf max (if max (max max val) val)
                                   min (if min (min min val) val)))))
