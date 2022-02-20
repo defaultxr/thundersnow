@@ -28,6 +28,7 @@
                (:file "export")
                (:file "thundersnow")
                (:file "piano-roll")
+               (:file "stepseq")
                (:file "tracker")
                (:file "wave-editor")
                (:file "wave-editor-nod"))
