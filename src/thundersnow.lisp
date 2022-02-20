@@ -22,6 +22,34 @@
 
 (defvar tmp nil)
 
+;;; patterns pane
+
+(defclass patterns-pane (application-pane)
+  ((dictionary :initarg :dictionary :initform cl-patterns::*pdef-dictionary* :accessor pane-dictionary))
+  (:default-initargs
+   :name 'pattern
+   :display-function 'display-patterns
+   ;; :default-view +textual-view+
+   ))
+
+(define-presentation-method present (pattern (type pattern) (stream patterns-pane) (view textual-view) &key)
+  (with-room-for-graphics (stream)
+    (draw-rectangle* stream 0 0 16 16 :ink (if (playing-p pattern)
+                                               +green+
+                                               +red+))
+    (draw-text* stream (format nil "~S" pattern) 16 0 )))
+
+(defun display-patterns (frame stream)
+  "Display all defined patterns in STREAM."
+  (declare (ignorable frame))
+  (bind (((:accessors dictionary) stream)
+         (*package* (find-package 'thundersnow/thundersnow))) ;; FIX: there is probably a better way to change the *package* of a frame or stream
+    ;; (format-textual-list (all-pdefs) (lambda (p str)
+    ;;                                    (present p 'pattern :stream stream)))
+    (dolist (pdef (all-pdefs))
+      (with-output-as-presentation (stream pdef 'pattern)
+        (updating-output (stream :unique-id pdef)
+          (present pdef 'pattern :stream stream))))))
 
 ;;; pattern pane
 
@@ -95,6 +123,7 @@
          )
    (tempo (make-pane 'tempo-pane :name 'tempo-pane))
    (scope (make-pane 'scope-pane :name 'scope-pane))
+   (patterns-pane (make-pane 'patterns-pane :name 'patterns-pane))
    (pattern-pane (make-pane 'pattern-pane :name 'pattern-pane))
    ;; (input :text-editor)
    ;; (pattern-view :application
@@ -110,7 +139,9 @@
                 ;; FIX: add server status pane with cpu load, number of active ugens, active synths, active groups, and number of synthdefs
                 (1/10 tempo)
                 (1/10 scope)))
-        (7/10 pattern-pane
+        (7/10 (horizontally ()
+                (1/2 patterns-pane)
+                (1/2 pattern-pane))
               ;; (labelling (:label "Options")
               ;;   input)
               )
