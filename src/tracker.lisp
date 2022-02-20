@@ -21,7 +21,7 @@
           (error "Evaluation loop detected.")
           (progn
             (setf (aref loop-detector h w) t)
-            (eval (content (aref (frame-ptracker *application-frame*) h w)))))))
+            (eval (content (aref (frame-ptrack *application-frame*) h w)))))))
 
 ;;; gui
 
@@ -44,7 +44,7 @@
 (defmethod content ((cell cell))
   (with-slots (frame row key) cell
     (if (and row key)
-        (ptracker-cell frame row key)
+        (ptrack-cell frame row key)
         (when (slot-boundp cell 'content)
           (slot-value cell 'content)))))
 
@@ -55,10 +55,10 @@
                     (t (write-to-string value)))))
       (if row
           (if key
-              (setf (ptracker-cell frame row key) value
-                    (ptracker-source-cell frame row key) string)
+              (setf (ptrack-cell frame row key) value
+                    (ptrack-source-cell frame row key) string)
               (warn "Attempted to set ~s's content to ~s but no key set." cell value))
-          (setf (ptracker-source-cell frame :header key) string)))))
+          (setf (ptrack-source-cell frame :header key) string)))))
 
 (define-presentation-type cell ())
 
@@ -123,7 +123,7 @@
 
 (defun draw-track (frame pane)
   "Draw the contents of `tracker'."
-  (let ((ptracker (frame-ptracker frame))
+  (let ((ptrack (frame-ptrack frame))
         tcols)
     (labels ((gen-color (column)
                (case column
@@ -133,14 +133,14 @@
                   (make-ihs-color 1 (mod (/ (1- column) 12) 1.0) 0.9))))
              (cell-color (header-p column)
                (let ((color
-                       (if-let ((meta (pattern-metadata (frame-ptracker (find-application-frame 'tracker)) :columns)))
+                       (if-let ((meta (pattern-metadata (frame-ptrack (find-application-frame 'tracker)) :columns)))
                          (or (ignore-errors (elt meta column))
                              (gen-color column))
                          (gen-color column))))
                  (if header-p
                      color
                      (clim-internals::highlight-shade color)))))
-      (with-slots ((header cl-patterns::header) (rows cl-patterns::rows)) ptracker
+      (with-slots ((header cl-patterns::header) (rows cl-patterns::rows)) ptrack
         (let ((keys (keys header))
               table)
           (formatting-table (pane)
@@ -172,7 +172,7 @@
                 (with-border ((cell-color nil 0))
                   (formatting-cell (pane)
                     (present (make-instance 'cell-row-number :frame frame :content row-num :row row-num :column 0 :table table) 'cell-row-number :stream pane)))
-                ;; ptracker cells
+                ;; ptrack cells
                 (dolist* (col-num key keys)
                   (with-border ((cell-color nil (1+ col-num)))
                     (formatting-cell (pane)
@@ -180,10 +180,9 @@
       (fresh-line))))
 
 (define-application-frame tracker ()
-  ((ptracker :initarg :ptracker
-             ;; :accessor frame-ptracker
-             :initform (ptracker (list :degree (pseries 0 (pwhite 0 4) 16) :dur 1/4)
-                                 (make-list 16))))
+  ((ptrack :initarg :ptrack :reader frame-ptrack :initform (ptrack (list :degree (pseries 0 (pwhite 0 4) 16)
+                                                                         :dur 1/4)
+                                                                   (make-list 16))))
   (:command-table (tracker
 		   :inherit-from (tracker-file-command-table
                                   tracker-edit-command-table
@@ -204,77 +203,73 @@
   (:menu-bar t)
   (:pointer-documentation t))
 
-(defgeneric frame-ptracker (frame)
-  (:documentation "The `ptracker' associated with FRAME."))
+(defgeneric frame-ptrack (frame)
+  (:documentation "The `ptrack' associated with FRAME."))
 
-(defmethod frame-ptracker ((symbol symbol))
-  (frame-ptracker (find-application-frame symbol)))
+(defmethod frame-ptrack ((symbol symbol))
+  (frame-ptrack (find-application-frame symbol)))
 
-(defmethod frame-ptracker ((frame application-frame))
-  (slot-value frame 'ptracker))
-
-(defmethod (setf frame-ptracker) (value (frame tracker))
-  (setf (slot-value frame 'ptracker) (etypecase value
-                                       (symbol (if (pdef-pattern value)
-                                                   value
-                                                   (error "No pdef found with the name ~s" value))))))
+(defmethod (setf frame-ptrack) (value (frame tracker))
+  (setf (slot-value frame 'ptrack) (etypecase value
+                                     (symbol (if (pdef-pattern value)
+                                                 value
+                                                 (error "No pdef found with the name ~s" value))))))
 
 (defmethod frame-standard-output ((frame tracker))
   (find-pane-named frame 'interactor))
 
 (define-command-table enhanced-accept-values :inherit-from 'accept-values)
 
-;;; ptracker methods
+;;; ptrack methods
 
-(defmethod ptracker-cell ((tracker tracker) row key &key (if-does-not-exist :error))
-  (ptracker-cell (frame-ptracker tracker) row key))
+(defmethod ptrack-cell ((tracker tracker) row key &key (if-does-not-exist :error))
+  (ptrack-cell (frame-ptrack tracker) row key))
 
-(defmethod (setf ptracker-cell) (value (tracker tracker) row key &key)
-  (setf (ptracker-cell (frame-ptracker tracker) row key) value))
+(defmethod (setf ptrack-cell) (value (tracker tracker) row key &key)
+  (setf (ptrack-cell (frame-ptrack tracker) row key) value))
 
-(defmethod ptracker-cell ((tracker tracker) row key &key if-does-not-exist)
-  (ptracker-cell (frame-ptracker tracker) row key))
+(defmethod ptrack-cell ((tracker tracker) row key &key if-does-not-exist)
+  (ptrack-cell (frame-ptrack tracker) row key))
 
+(defgeneric ptrack-source-cell (ptrack row key) ;; FIX: don't defer if it doesn't exist?
+  (:documentation "Get the text the user entered for ROW and KEY from PTRACK's metadata. If it doesn't exist, defer to `ptrack-cell'.
 
-(defgeneric ptracker-source-cell (ptracker row key) ;; FIX: don't defer if it doesn't exist?
-  (:documentation "Get the text the user entered for ROW and KEY from PTRACKER's metadata. If it doesn't exist, defer to `ptracker-cell'.
+See also: `ptrack-cell', `ptrack'"))
 
-See also: `ptracker-cell', `ptracker'"))
+(defmethod ptrack-source-cell ((tracker tracker) row key)
+  (ptrack-source-cell (frame-ptrack tracker) row key))
 
-(defmethod ptracker-source-cell ((tracker tracker) row key)
-  (ptracker-source-cell (frame-ptracker tracker) row key))
-
-(defmethod ptracker-source-cell (ptracker row key)
-  (or (when-let* ((meta (pattern-metadata ptracker :source-code))
+(defmethod ptrack-source-cell (ptrack row key)
+  (or (when-let* ((meta (pattern-metadata ptrack :source-code))
                   (found-row (ignore-errors
                               (elt meta (etypecase row
                                           (null 0)
                                           (number (1+ row))))))
-                  (header (slot-value ptracker 'cl-patterns::header))
+                  (header (slot-value ptrack 'cl-patterns::header))
                   (key-index (/ (position key header) 2)))
         (nth key-index found-row))
-      ;; FIX: in the future perhaps we can automatically prettify results from `ptracker-cell'? i.e. by lowercasing?
-      (ptracker-cell ptracker row key)))
+      ;; FIX: in the future perhaps we can automatically prettify results from `ptrack-cell'? i.e. by lowercasing?
+      (ptrack-cell ptrack row key)))
 
-(defmethod (setf ptracker-source-cell) (value (tracker tracker) row key)
-  (setf (ptracker-source-cell (frame-ptracker tracker) row key) value))
+(defmethod (setf ptrack-source-cell) (value (tracker tracker) row key)
+  (setf (ptrack-source-cell (frame-ptrack tracker) row key) value))
 
 ;; FIX: need to update this when rows are added/removed
-(defmethod (setf ptracker-source-cell) (value (ptracker ptracker) row key)
-  (format *debug-io* "setf ptracker-source-cell r ~s k ~s val ~s~%" row key value)
-  (with-slots ((header cl-patterns::header) (rows cl-patterns::rows)) ptracker
+(defmethod (setf ptrack-source-cell) (value (ptrack ptrack) row key)
+  (format *debug-io* "setf ptrack-source-cell r ~s k ~s val ~s~%" row key value)
+  (with-slots ((header cl-patterns::header) (rows cl-patterns::rows)) ptrack
     ;; generate the source-code metadata if it doesn't yet exist
-    (unless (pattern-metadata ptracker :source-code)
-      (setf (pattern-metadata ptracker :source-code) (make-list (1+ (length rows))))
+    (unless (pattern-metadata ptrack :source-code)
+      (setf (pattern-metadata ptrack :source-code) (make-list (1+ (length rows))))
       (dotimes (row (1+ (length rows)))
-        (setf (nth row (pattern-metadata ptracker :source-code))
+        (setf (nth row (pattern-metadata ptrack :source-code))
               (if (= 0 row)
                   (make-list (length header))
                   (make-list (/ (length header) 2))))))
     (if (member row (list :header :head :h nil))
-        (setf (nth 0 (pattern-metadata ptracker :source-code))
-              (cl-patterns::plist-set (nth 0 (pattern-metadata ptracker :source-code)) key value))
-        (setf (nth (/ (position key header) 2) (nth (1+ row) (pattern-metadata ptracker :source-code))) value))))
+        (setf (nth 0 (pattern-metadata ptrack :source-code))
+              (cl-patterns::plist-set (nth 0 (pattern-metadata ptrack :source-code)) key value))
+        (setf (nth (/ (position key header) 2) (nth (1+ row) (pattern-metadata ptrack :source-code))) value))))
 
 (define-presentation-to-command-translator change-pattern
     (cell-pattern-id com-pattern-id tracker
@@ -321,11 +316,11 @@ See also: `ptracker-cell', `ptracker'"))
                         ((cell stream)
                          (format stream "Insert new column")))
     (object)
-  (list (with-slots (ptracker) *application-frame*
+  (list (with-slots (ptrack) *application-frame*
           (with-slots (row) object
             (case row
               (:insert-column
-               (/ (length (slot-value ptracker 'cl-patterns::header)) 2))
+               (/ (length (slot-value ptrack 'cl-patterns::header)) 2))
               (nil 0)
               (t (1+ row)))))))
 
@@ -366,11 +361,11 @@ See also: `ptracker-cell', `ptracker'"))
                                  :command-table tracker-file-command-table
                                  :keystroke (#\o :control))
     ((pattern t));; (cell 'cell :gesture :select)
-  (setf (frame-ptracker *application-frame*) (etypecase pattern
-                                               (pattern pattern)
-                                               (symbol (if (pdef-pattern pattern)
-                                                           pattern
-                                                           (error ""))))))
+  (setf (frame-ptrack *application-frame*) (etypecase pattern
+                                             (pattern pattern)
+                                             (symbol (if (pdef-pattern pattern)
+                                                         pattern
+                                                         (error ""))))))
 
 (define-command-table tracker-edit-command-table
   :inherit-from (thundersnow-common-edit-command-table)
@@ -387,7 +382,7 @@ See also: `ptracker-cell', `ptracker'"))
         (setf string (apply #'accept 'string
                             :view +cell-unparsed-text-view+
                             :prompt prompt ;; for some reason this doesn't work if i put the format here directly?
-                            (when-let ((default (ptracker-source-cell *application-frame* (row cell) (key cell))))
+                            (when-let ((default (ptrack-source-cell *application-frame* (row cell) (key cell))))
                               (list :default default)))))
       (setf (content cell) (read-from-string string nil nil)))))
 
@@ -422,11 +417,11 @@ See also: `ptracker-cell', `ptracker'"))
   :inherit-menu t)
 
 (defmethod play ((tracker tracker))
-  (play (frame-ptracker tracker)))
+  (play (frame-ptrack tracker)))
 
-(defun tracker (&optional ptracker)
+(defun tracker (&optional ptrack)
   "Open a tracker."
-  (apply #'make-or-find-application-frame 'tracker (when ptracker (list :ptracker ptracker))))
+  (apply #'make-or-find-application-frame 'tracker (when ptrack (list :ptrack ptrack))))
 
 ;;; testing out the layout switching bug(?)
 

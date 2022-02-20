@@ -24,10 +24,10 @@ The main GUIs included with thundersnow are the following. Note none of these ha
 
 ** Thundersnow
 The main interface; gives a general overview of all synths, patterns, routines, etc, that are playing, buffers that are loaded, etc, and makes it easier to control or modify them.
+** Tracker
+A tracker-inspired interface over cl-patterns' ~ptrack~ pattern.
 ** Piano roll
 A piano roll interface for editing sequences of notes via cl-patterns' ~eseq~. Will eventually become a more general pattern/data plotting interface.
-** Tracker
-A tracker-inspired interface over cl-patterns' ~ptracker~ pattern.
 ** Stepseq
 A simple drum machine-style interface for editing and sequencing drum patterns.
 ** Wave editor
