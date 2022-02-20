@@ -37,7 +37,7 @@
                                   (+ c1 (* mix (- c2 c1))))
                                 (mapcar (lambda (c) (multiple-value-list (color-rgb c))) (list color-1 color-2)))))
 
-;;; theming/color functionality (FIX: just move to mutility?)
+;;; theming/color functionality (FIX: generalize and move to mutility?)
 ;; see also: https://github.com/McCLIM/McCLIM/issues/842 ; "Sort out the gadget color situation"
 
 (defvar *theme* (list
@@ -53,7 +53,7 @@
 See also: `*theme*'"
   (getf *theme* element))
 
-;;; drawing utils
+;;; drawing utilities
 
 ;; FIX: make it so the variable can be "pane" OR "stream"
 (defmacro with-border ((&optional (background +white+) (thickness 1) &rest additional-args) &body body)

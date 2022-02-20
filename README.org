@@ -40,7 +40,7 @@ Not implemented at all yet. GUIs for showing the structure of nested patterns an
 ** Synth GUIs
 Not implemented at all yet. Interfaces to controlling synths as well as generating synthdefs. Will likely use template macros to generate the synthdefs.
 ** File/object browser
-Not implemented at all yet. Fast/efficient interface to find a file or object.
+Not implemented at all yet. Fast/efficient interface to find a file (local or potentially remote) or object (i.e. a ~bdef~).
 
 * Features
 
