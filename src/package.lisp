@@ -2,6 +2,7 @@
 ;;; FIX: maybe uiop:define-package can be used to make all this more succinct?
 
 (uiop:define-package #:thundersnow/common
+  (:nicknames #:ts/c #:ts/common)
   (:use)
   (:mix #:cl
         #:alexandria
@@ -28,6 +29,7 @@
                     (:clp :cl-patterns)))
 
 (uiop:define-package #:thundersnow/common-clim
+  (:nicknames #:ts/c-c #:ts/cc #:ts/clim)
   (:use)
   (:mix #:clim
         #:clim-lisp
@@ -74,6 +76,7 @@
                     (:clp :cl-patterns)))
 
 (uiop:define-package #:thundersnow/common-nod
+  (:nicknames #:ts/nod #:ts/common-nod)
   (:use #:cl)
   (:mix #:nodgui
         #:thundersnow/common)
@@ -83,6 +86,7 @@
                     (:clp :cl-patterns)))
 
 (uiop:define-package #:thundersnow/thundersnow
+  (:nicknames #:ts/ts)
   (:use)
   (:mix #:thundersnow/common-clim
         #:cl)
@@ -91,6 +95,7 @@
   (:export :thundersnow))
 
 (uiop:define-package #:thundersnow/keyboard-gui
+  (:nicknames #:ts/kg)
   (:use)
   (:mix #:thundersnow/common-clim
         #:cl)
@@ -99,6 +104,7 @@
   (:export :keyboard-gui))
 
 (uiop:define-package #:thundersnow/piano-roll
+  (:nicknames #:ts/pr)
   (:use)
   (:mix #:thundersnow/common-clim
         #:cl)
@@ -107,6 +113,7 @@
   (:export :piano-roll))
 
 (uiop:define-package #:thundersnow/stepseq
+  (:nicknames #:ts/ss)
   (:use)
   (:mix #:thundersnow/common-clim
         #:cl)
@@ -115,6 +122,7 @@
   (:export :stepseq))
 
 (uiop:define-package #:thundersnow/tracker
+  (:nicknames #:ts/tr)
   (:use)
   (:mix #:thundersnow/common-clim
         #:cl)
@@ -123,6 +131,7 @@
   (:export :tracker))
 
 (uiop:define-package #:thundersnow/wave-editor
+  (:nicknames #:ts/we)
   (:use)
   (:mix #:thundersnow/common-clim
         #:cl)
@@ -131,6 +140,7 @@
   (:export :wave-editor))
 
 (uiop:define-package #:thundersnow/wave-editor-nod
+  (:nicknames #:ts/wen #:ts/wave-editor-nod)
   (:use)
   (:mix #:thundersnow/common-nod
         #:cl)
@@ -139,6 +149,7 @@
   (:export :wave-editor))
 
 (uiop:define-package #:thundersnow
+  (:nicknames #:ts)
   (:use #:thundersnow/common-clim
         #:thundersnow/thundersnow
         #:thundersnow/piano-roll
