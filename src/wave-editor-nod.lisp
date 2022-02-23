@@ -28,8 +28,8 @@
    (canvas :initarg :canvas :initform nil :accessor wave-editor-canvas)
    (status :initarg :status :initform nil :accessor wave-editor-status)
    (cached-buffer-data :initform nil :accessor wave-editor-cached-buffer-data)
-   (rendered-canvas-pixels :initform nil :accessor wave-editor-rendered-canvas-pixels)
-   (render-timer :initform nil :accessor wave-editor-render-timer)))
+   (rendered-canvas-pixels :initform nil :accessor render-projected-canvas-pixels)
+   (render-timer :initform nil :accessor render-project-timer)))
 
 (defun cache-buffer-data (wave-editor)
   (with-slots (bdef cached-buffer-data) wave-editor
@@ -58,14 +58,14 @@
 (defun update-sel-rect (&optional (wave-editor *wave-editor*))
   (with-slots (canvas) wave-editor
     (set-coords* canvas "sel-rect"
-                 (frame-canvas-x (wave-editor-selection-start wave-editor) wave-editor)
+                 (frame-canvas-x (selection-start wave-editor) wave-editor)
                  0
                  (frame-canvas-x (wave-editor-selection-end wave-editor) wave-editor)
                  (window-height canvas)))
   ;; (tag-configure (wave-editor-canvas wave-editor) "sel-rect" :)
   )
 
-(defmethod wave-editor-draw-canvas ((wave-editor wave-editor))
+(defmethod draw-canvas ((wave-editor wave-editor))
   (with-slots (bdef zoom window canvas cached-buffer-data render-timer) wave-editor
     (clear canvas)
     (after-cancel render-timer)
@@ -74,16 +74,16 @@
                 (canvas-length (ceiling (* zoom (bdef-length bdef)))))
       (scrollregion canvas 0 0 canvas-length ch)
       (let ((sel-rect (create-rectangle canvas
-                                        (frame-canvas-x (wave-editor-selection-start wave-editor) wave-editor)
+                                        (frame-canvas-x (selection-start wave-editor) wave-editor)
                                         0
                                         (frame-canvas-x (wave-editor-selection-end wave-editor) wave-editor)
                                         ch)))
         (item-configure canvas sel-rect :fill "#ffaaaa")
         (item-configure canvas sel-rect :tag "sel-rect"))
-      (setf (wave-editor-rendered-canvas-pixels wave-editor) (make-array (list canvas-length) :initial-element nil))
-      (wave-editor-draw-wave wave-editor))))
+      (setf (render-projected-canvas-pixels wave-editor) (make-array (list canvas-length) :initial-element nil))
+      (draw-wave wave-editor))))
 
-(defun wave-editor-draw-wave (wave-editor)
+(defun draw-wave (wave-editor)
   "Draw one screen worth of canvas pixels, starting from any currently visible. Afterwards, set a timer to continue drawing more pixels outside the screen."
   (format t "dw ")
   (with-slots (bdef zoom window canvas cached-buffer-data rendered-canvas-pixels render-timer) wave-editor
@@ -121,46 +121,44 @@
             (draw-pixel (- backward-from (* n (truncate zoom)))))))
       (when (or forward-from backward-from)
         (setf render-timer (after-idle (lambda ()
-                                         (wave-editor-draw-wave wave-editor)))))
+                                         (draw-wave wave-editor)))))
       (format t " we end dw~%"))))
 
-(defun wave-editor-status-text (&optional (wave-editor *wave-editor*))
+(defun status-text (&optional (wave-editor *wave-editor*))
   (when-let* ((bdef (wave-editor-bdef wave-editor))
               (canvas (wave-editor-canvas wave-editor))
-              ;; (mouse-x (screen-mouse-x canvas))
-              ;; (mouse-frame (window-x-frame mouse-x wave-editor))
-              ;; (duration (bdef-duration bdef))
-              ;; (length (bdef-length bdef))
-              ;; (start (wave-editor-selection-start wave-editor))
-              ;; (end (wave-editor-selection-end wave-editor))
-              )
-    #+nil (format nil "(bdef ~s ~s); D: ~a/~a; F: ~s/~s-~s/~s; ~s metadata; C: ~s; SR: ~s; Zoom: ~s"
-                  (car (remove (bdef-file bdef) (bdef::bdef-keys bdef) :test #'string=))
-                  (or (bdef-metadata bdef :original-file) (bdef-file bdef))
-                  (friendly-duration-string (* (/ mouse-frame length) duration) :include-ms t)
-                  (friendly-duration-string duration :include-ms t)
-                  mouse-frame
-                  start
-                  end
-                  length
-                  (hash-table-count (bdef-metadata bdef))
-                  (bdef-channels bdef)
-                  (bdef-sample-rate bdef)
-                  (wave-editor-zoom wave-editor))
-    ""))
+              (mouse-x (screen-mouse-x canvas))
+              (mouse-frame (window-x-frame mouse-x wave-editor))
+              (duration (bdef-duration bdef))
+              (length (bdef-length bdef))
+              (start (selection-start wave-editor))
+              (end (wave-editor-selection-end wave-editor)))
+    (format nil "(bdef ~s ~s); D: ~a/~a; F: ~s/~s-~s/~s; ~s metadata; C: ~s; SR: ~s; Zoom: ~s"
+            (car (remove (bdef-file bdef) (bdef-names bdef) :test #'string=))
+            (or (bdef-metadata bdef :original-file) (bdef-file bdef))
+            (friendly-duration-string (* (/ mouse-frame length) duration) :include-ms t)
+            (friendly-duration-string duration :include-ms t)
+            mouse-frame
+            start
+            end
+            length
+            (hash-table-count (bdef-metadata bdef))
+            (bdef-channels bdef)
+            (bdef-sample-rate bdef)
+            (wave-editor-zoom wave-editor))))
 
 (defun update-status-text (wave-editor)
-  (format t "ust-1 ")
+  ;; (format t "ust-1 ")
   (let ((status (wave-editor-status wave-editor))
-        (_ (format t "ust-2 "))
-        (txt (wave-editor-status-text wave-editor)))
-    (format t "ust-3~%")
+        ;; (_ (format t "ust-2 "))
+        (txt (status-text wave-editor)))
+    ;; (format t "ust-3~%")
     (setf (text status) txt)))
 
-(defun wave-editor-selection-start (&optional (wave-editor *wave-editor*))
+(defun selection-start (&optional (wave-editor *wave-editor*))
   (slot-value wave-editor 'selection-start))
 
-(defun (setf wave-editor-selection-start) (frame &optional (wave-editor *wave-editor*))
+(defun (setf selection-start) (frame &optional (wave-editor *wave-editor*))
   (format t "we-setf-ss~%")
   (let ((length (bdef-length (wave-editor-bdef wave-editor))))
     (assert (typep frame (list 'integer 0 length))
@@ -194,7 +192,7 @@
   (with-slots (bdef zoom window) wave-editor
     (prog1
         (setf zoom new-zoom)
-      (wave-editor-draw-canvas wave-editor)
+      (draw-canvas wave-editor)
       (update-status-text wave-editor))))
 
 (defun zoom-in (wave-editor)
@@ -203,45 +201,45 @@
 (defun zoom-out (wave-editor)
   (setf (wave-editor-zoom wave-editor) (/ (wave-editor-zoom wave-editor) 2)))
 
-(defun wave-editor-play (&optional (wave-editor *wave-editor*) &key loop-p)
+(defun play-sound (&optional (wave-editor *wave-editor*) &key loop-p)
   (let* ((bdef (wave-editor-bdef wave-editor))
          (length (bdef-length bdef))
-         (start (/ (wave-editor-selection-start wave-editor) length))
+         (start (/ (selection-start wave-editor) length))
          (end (/ (wave-editor-selection-end wave-editor) length)))
     (play (cl-patterns:event :instrument :sp :buffer bdef :start start :end end :quant 0 :latency 0.01 :beat 1/10))))
 
-(defun wave-editor-save (&optional (wave-editor *wave-editor*))
+(defun save-project (&optional (wave-editor *wave-editor*))
   (format t "Save pressed (but not done yet).~%"))
 
-(defun wave-editor-save-as (&optional (wave-editor *wave-editor*))
+(defun save-project-as (&optional (wave-editor *wave-editor*))
   (format t "Save As pressed (but not done yet).~%")
   (format t "Selected ~s.~%" (get-save-file)))
 
-(defun wave-editor-load (&optional (wave-editor *wave-editor*))
+(defun load-object (&optional (wave-editor *wave-editor*))
   (format t "Load pressed (but not done yet).~%")
   (format t "Selected ~s.~%" (get-open-file)))
 
-(defun wave-editor-render (&optional (wave-editor *wave-editor*))
+(defun render-project (&optional (wave-editor *wave-editor*))
   (format t "Render pressed (but not done yet).~%")
   (format t "Selected ~s.~%" (get-save-file)))
 
-(defun wave-editor-render-selection (&optional (wave-editor *wave-editor*))
+(defun render-project-selection (&optional (wave-editor *wave-editor*))
   (format t "Render Selection pressed (but not done yet).~%")
   (format t "Selected ~s.~%" (get-save-file)))
 
-(defun wave-editor-exit (&optional (wave-editor *wave-editor*))
+(defun exit-wave-editor (&optional (wave-editor *wave-editor*))
   (case (message-box "Save changes before exiting?" "Save?" :yesnocancel :warning)
-    (:yes (do-msg "I'm gay"))
-    (:no (do-msg "I'm.... NOT gay"))
-    (:cancel (do-msg "You're gay"))))
+    (:yes (do-msg "Saving changes is not yet implemented :("))
+    (:no (do-msg "Not saving changes!"))
+    (:cancel (do-msg "Canceling."))))
 
-(defun wave-editor-select-all (&optional (wave-editor *wave-editor*))
-  (setf (wave-editor-selection-start wave-editor) 0
+(defun select-all (&optional (wave-editor *wave-editor*))
+  (setf (selection-start wave-editor) 0
         (wave-editor-selection-end wave-editor) (bdef-length (wave-editor-bdef wave-editor))))
 
-(defun wave-editor-click (x &optional (wave-editor *wave-editor*))
+(defun click (x &optional (wave-editor *wave-editor*))
   (format t "we-click~%")
-  (setf (wave-editor-selection-start wave-editor) (window-x-frame x)))
+  (setf (selection-start wave-editor) (window-x-frame x)))
 
 (defmethod make-window ((wave-editor wave-editor))
   (with-slots (bdef window (thundersnow/wave-editor-nod::scrolled-canvas scrolled-canvas) canvas status) wave-editor
@@ -249,17 +247,17 @@
       (let* ((frame (make-instance 'frame :pack (list :fill :both :expand t)))
              (mb (make-menubar))
              (mfile (make-menu mb "File" :underline 0))
-             (mf-play (make-menubutton mfile "Play" 'wave-editor-play :underline 0 :accelerator "SPC"))
-             (mf-save (make-menubutton mfile "Save" 'wave-editor-save :underline 0 :accelerator "C-s"))
-             (mf-save-as (make-menubutton mfile "Save As..." 'wave-editor-save-as :underline 1 :accelerator "C-S"))
-             (mf-load (make-menubutton mfile "Load..." 'wave-editor-load :underline 0 :accelerator "C-o"))
+             (mf-play (make-menubutton mfile "Play" 'play-sound :underline 0 :accelerator "SPC"))
+             (mf-save (make-menubutton mfile "Save" 'save-project :underline 0 :accelerator "C-s"))
+             (mf-save-as (make-menubutton mfile "Save As..." 'save-project-as :underline 1 :accelerator "C-S"))
+             (mf-load (make-menubutton mfile "Load..." 'load-object :underline 0 :accelerator "C-o"))
              (mf-sep1 (add-separator mfile))
-             (mf-render (make-menubutton mfile "Render..." 'wave-editor-render :underline 0 :accelerator "C-M-r"))
-             (mf-render-selection (make-menubutton mfile "Render Selection..." 'wave-editor-render-selection :underline 2 :accelerator "C-M-R"))
+             (mf-render (make-menubutton mfile "Render..." 'render-project :underline 0 :accelerator "C-M-r"))
+             (mf-render-selection (make-menubutton mfile "Render Selection..." 'render-project-selection :underline 2 :accelerator "C-M-R"))
              (mf-sep2 (add-separator mfile))
-             (mf-exit (make-menubutton mfile "Exit..." 'wave-editor-exit :underline 0 :accelerator "C-q"))
+             (mf-exit (make-menubutton mfile "Exit..." 'exit-wave-editor :underline 0 :accelerator "C-q"))
              (medit (make-menu mb "Edit" :underline 0))
-             (me-select-all (make-menubutton medit "Select All" 'wave-editor-select-all :underline 0 :accelerator "C-A"))
+             (me-select-all (make-menubutton medit "Select All" 'select-all :underline 0 :accelerator "C-A"))
              (mview (make-menu mb "View" :underline 0))
              (mv-zoom-in (make-menubutton mview "Zoom In" (fn (zoom-in wave-editor)) :accelerator "C-="))
              (mv-zoom-out (make-menubutton mview "Zoom Out" (fn (zoom-out wave-editor)) :accelerator "C--"))
@@ -268,7 +266,7 @@
              (mh-about (make-menubutton mhelp "About..." 'wave-editor-about :underline 0))
              (sc (make-instance 'scrolled-canvas :master frame :pack (list :fill :both :expand t)))
              (c (canvas sc))
-             (st (make-instance 'label :text (wave-editor-status-text wave-editor) :pack (list :fill :x))))
+             (st (make-instance 'label :text (status-text wave-editor) :pack (list :fill :x))))
         (declare (ignore mf-play mf-save mf-save-as mf-load mf-sep1 mf-render mf-render-selection mf-sep2 mf-exit
                          me-select-all
                          mv-zoom-in mv-zoom-out
@@ -282,20 +280,20 @@
         (configure c :cursor :cross)
         (configure c :background "#aaffaa")
         (create-text c 0 0 "Loading...")
-        (bind *tk* "<space>" (fn _ (wave-editor-play wave-editor)))
-        (bind *tk* "<Control-A>" (fn _ (wave-editor-select-all wave-editor)))
+        (bind *tk* "<space>" (fn _ (play-sound wave-editor)))
+        (bind *tk* "<Control-A>" (fn _ (select-all wave-editor)))
         (bind *tk* "<Control-equal>" (fn _ (zoom-in wave-editor)))
         (bind *tk* "<Control-minus>" (fn _ (zoom-out wave-editor)))
-        (bind *tk* "<Control-q>" (fn _ (wave-editor-exit wave-editor)))
-        (bind *tk* "<<data-cached>>" (fn _ (wave-editor-draw-canvas wave-editor)))
-        (bind c "<ButtonPress-1>" (fn (wave-editor-click (event-x _) wave-editor)))
+        (bind *tk* "<Control-q>" (fn _ (exit-wave-editor wave-editor)))
+        (bind *tk* "<<data-cached>>" (fn _ (draw-canvas wave-editor)))
+        (bind c "<ButtonPress-1>" (fn (click (event-x _) wave-editor)))
         (bind c "<Motion>" (fn _ (update-status-text wave-editor)))
         ;; (bind *tk* "<Configure>" (fn (setf *tmp* _)))
         ;; (bind *tk* "<<Scroll>>" (fn (print 'scroll) (setf *tmp* _)))
         (bt:make-thread (lambda () (cache-buffer-data wave-editor)))))))
 
 (defun wave-editor (&optional bdef &key)
-  (setf *wave-editor* (make-instance 'wave-editor :bdef bdef))
+  (setf *wave-editor* (make-instance 'wave-editor :bdef (bdef bdef)))
   (make-window *wave-editor*)
   *wave-editor*)
 
