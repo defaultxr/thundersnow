@@ -32,16 +32,16 @@
 (define-application-frame stepseq ()
   ()
   (:command-table (stepseq
-		   :inherit-from (stepseq-file-command-table
+                   :inherit-from (stepseq-file-command-table
                                   stepseq-edit-command-table
                                   stepseq-view-command-table
                                   stepseq-tools-command-table
                                   stepseq-help-command-table)
-		   :menu (("File" :menu stepseq-file-command-table)
+                   :menu (("File" :menu stepseq-file-command-table)
                           ("Edit" :menu stepseq-edit-command-table)
                           ("View" :menu stepseq-view-command-table)
                           ("Tools" :menu stepseq-tools-command-table)
-			  ("Help" :menu stepseq-help-command-table))))
+                          ("Help" :menu stepseq-help-command-table))))
   (:default-initargs
    :pretty-name "stepseq")
   (:panes

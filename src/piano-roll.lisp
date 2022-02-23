@@ -202,23 +202,23 @@ See also: `scroll-top-to', `scroll-center-to', `scroll-bottom-to'"
   (with-slots (%last-click-timestamp) pane
     (let ((ts (slot-value event 'climi::timestamp)))
       (if (<= (/ (- ts %last-click-timestamp) 1000) climi::*double-click-delay*)
-	  (queue-event pane (make-instance 'pointer-double-click-event
-					   :button (slot-value event 'climi::button)
-					   :pointer (slot-value event 'climi::pointer)
-					   :graft-y (slot-value event 'climi::graft-y)
-					   :graft-x (slot-value event 'climi::graft-x)
-					   :y (slot-value event 'climi::y)
-					   :x (slot-value event 'climi::x)
-					   :modifier-state (slot-value event 'climi::modifier-state)
-					   :sheet pane
-					   :timestamp (slot-value event 'climi::timestamp)))
+          (queue-event pane (make-instance 'pointer-double-click-event
+                                           :button (slot-value event 'climi::button)
+                                           :pointer (slot-value event 'climi::pointer)
+                                           :graft-y (slot-value event 'climi::graft-y)
+                                           :graft-x (slot-value event 'climi::graft-x)
+                                           :y (slot-value event 'climi::y)
+                                           :x (slot-value event 'climi::x)
+                                           :modifier-state (slot-value event 'climi::modifier-state)
+                                           :sheet pane
+                                           :timestamp (slot-value event 'climi::timestamp)))
           (call-next-method))
       (setf %last-click-timestamp ts))))
 
 (defmethod handle-event ((pane piano-roll-pane) (event pointer-double-click-event))
   (let* ((frame (pane-frame pane))
-	 (beat (x-pixel-to-beat-floored (slot-value event 'climi::sheet-x) frame))
-	 (pitch (y-pixel-to-pitch-quantized (slot-value event 'climi::sheet-y) frame)))
+         (beat (x-pixel-to-beat-floored (slot-value event 'climi::sheet-x) frame))
+         (pitch (y-pixel-to-pitch-quantized (slot-value event 'climi::sheet-y) frame)))
     (com-add (event :beat beat :midinote pitch))))
 
 (define-presentation-method present (background (type %background) stream (view graphical-view) &key)
@@ -579,7 +579,7 @@ See also: `scroll-top-to', `scroll-center-to', `scroll-bottom-to'"
 (define-gesture-name :erase :pointer-button (:middle))
 
 (define-presentation-action erase (event nil piano-roll :gesture :erase :pointer-documentation "Erase event")
-    (event)
+                            (event)
   (com-erase event))
 
 ;; FIX:

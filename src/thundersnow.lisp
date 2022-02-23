@@ -102,16 +102,16 @@
 (define-application-frame thundersnow ()
   ((inspect :initarg :inspect :initform nil :documentation "The item to inspect in the inspector pane."))
   (:command-table (thundersnow
-		   :inherit-from (thundersnow-file-command-table
+                   :inherit-from (thundersnow-file-command-table
                                   thundersnow-edit-command-table
                                   thundersnow-view-command-table
                                   thundersnow-tools-command-table
                                   thundersnow-help-command-table)
-		   :menu (("File" :menu thundersnow-file-command-table)
+                   :menu (("File" :menu thundersnow-file-command-table)
                           ("Edit" :menu thundersnow-edit-command-table)
                           ("View" :menu thundersnow-view-command-table)
                           ("Tools" :menu thundersnow-tools-command-table)
-			  ("Help" :menu thundersnow-help-command-table))))
+                          ("Help" :menu thundersnow-help-command-table))))
   (:default-initargs
    :pretty-name "thundersnow")
   (:panes

@@ -53,16 +53,16 @@
 (define-application-frame keyboard-gui ()
   ()
   (:command-table (keyboard-gui
-		   :inherit-from (keyboard-gui-file-command-table
+                   :inherit-from (keyboard-gui-file-command-table
                                   keyboard-gui-edit-command-table
                                   keyboard-gui-view-command-table
                                   keyboard-gui-tools-command-table
                                   keyboard-gui-help-command-table)
-		   :menu (("File" :menu keyboard-gui-file-command-table)
+                   :menu (("File" :menu keyboard-gui-file-command-table)
                           ("Edit" :menu keyboard-gui-edit-command-table)
                           ("View" :menu keyboard-gui-view-command-table)
                           ("Tools" :menu keyboard-gui-tools-command-table)
-			  ("Help" :menu keyboard-gui-help-command-table))))
+                          ("Help" :menu keyboard-gui-help-command-table))))
   (:panes
    (keyboard-gui-pane (make-pane 'keyboard-gui-pane))
    (interactor-pane (make-clim-interactor-pane

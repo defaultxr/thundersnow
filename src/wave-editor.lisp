@@ -172,16 +172,16 @@ See also: `sound-frame-pixel'"
 (define-application-frame wave-editor ()
   ((second-px :initarg :second-px :initform 1000))
   (:command-table (wave-editor
-		   :inherit-from (wave-editor-file-command-table
+                   :inherit-from (wave-editor-file-command-table
                                   wave-editor-edit-command-table
                                   wave-editor-view-command-table
                                   wave-editor-tools-command-table
                                   wave-editor-help-command-table)
-		   :menu (("File" :menu wave-editor-file-command-table)
+                   :menu (("File" :menu wave-editor-file-command-table)
                           ("Edit" :menu wave-editor-edit-command-table)
                           ("View" :menu wave-editor-view-command-table)
                           ("Tools" :menu wave-editor-tools-command-table)
-			  ("Help" :menu wave-editor-help-command-table))))
+                          ("Help" :menu wave-editor-help-command-table))))
   (:panes
    (wave-editor-pane (make-pane 'wave-editor-pane))
    (interactor-pane (make-clim-interactor-pane

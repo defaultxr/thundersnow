@@ -184,16 +184,16 @@
                                                                          :dur 1/4)
                                                                    (make-list 16))))
   (:command-table (tracker
-		   :inherit-from (tracker-file-command-table
+                   :inherit-from (tracker-file-command-table
                                   tracker-edit-command-table
                                   tracker-view-command-table
                                   tracker-tools-command-table
                                   tracker-help-command-table)
-		   :menu (("File" :menu tracker-file-command-table)
+                   :menu (("File" :menu tracker-file-command-table)
                           ("Edit" :menu tracker-edit-command-table)
                           ("View" :menu tracker-view-command-table)
                           ("Tools" :menu tracker-tools-command-table)
-			  ("Help" :menu tracker-help-command-table))))
+                          ("Help" :menu tracker-help-command-table))))
   (:panes
    (track :application :display-function 'draw-track)
    (interactor :interactor))
@@ -309,12 +309,12 @@ See also: `ptrack-cell', `ptrack'"))
 
 (define-presentation-to-command-translator insert-column
     (cell-column-header com-insert-column tracker
-                        :tester
-                        ((cell)
-                         (eql (slot-value cell 'row) :insert-column))
-                        :pointer-documentation
-                        ((cell stream)
-                         (format stream "Insert new column")))
+     :tester
+     ((cell)
+      (eql (slot-value cell 'row) :insert-column))
+     :pointer-documentation
+     ((cell stream)
+      (format stream "Insert new column")))
     (object)
   (list (with-slots (ptrack) *application-frame*
           (with-slots (row) object
