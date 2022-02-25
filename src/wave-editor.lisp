@@ -6,7 +6,8 @@
 ;; - cl-wav-synth; https://common-lisp.net/project/cl-wav-synth/
 ;; https://github.com/McCLIM/McCLIM/issues/927 - "proposal: display function performs no actual output"; possible performance gain for this, as it would avoid drawing items that are not on screen
 
-(defvar tmp nil)
+(defvar *tmp* nil
+  "Temporary variable for convenience during development.")
 
 ;;; gui stuff
 

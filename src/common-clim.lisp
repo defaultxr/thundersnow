@@ -2,6 +2,11 @@
 
 ;;;; common-clim.lisp - common functionality for the mcclim-based interfaces
 
+;;; debug conveniences
+
+(defvar *tmp* nil
+  "Temporary variable for convenience during development.")
+
 ;;; clim utility functions
 
 (defun all-frames (&key port frame-manager)

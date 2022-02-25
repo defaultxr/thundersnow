@@ -4,9 +4,8 @@
 
 ;;; utility
 
-(defparameter *tmp* nil)
-
-(defparameter *tmp2* nil)
+(defvar *tmp* nil
+  "Temporary variable for convenience during development.")
 
 (defparameter *wave-editor* nil)
 

@@ -10,7 +10,8 @@
 
 ;;; util
 
-(defparameter tmp nil)
+(defvar *tmp* nil
+  "Temporary variable for convenience during development.")
 
 ;;; gui stuff
 

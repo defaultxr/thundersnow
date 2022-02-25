@@ -2,7 +2,8 @@
 
 ;;; misc
 
-(defparameter tmp nil)
+(defvar *tmp* nil
+  "Temporary variable for convenience during development.")
 
 ;;; utilities (FIX):
 
@@ -374,7 +375,7 @@ See also: `ptrack-cell', `ptrack'"))
 (define-command (com-edit-cell :name t :menu t
                                :command-table tracker-edit-command-table)
     ((cell 'cell))
-  (setf tmp cell)
+  (setf *tmp* cell)
   (with-slots (key row) cell
     (let ((prompt (format nil "~a ~a" key row))
           string)

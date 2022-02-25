@@ -20,7 +20,8 @@
 
 (in-package #:thundersnow/thundersnow)
 
-(defvar tmp nil)
+(defvar *tmp* nil
+  "Temporary variable for convenience during development.")
 
 ;;; patterns pane
 
@@ -295,10 +296,10 @@
      (new-pattern '(or pattern symbol string) :prompt "New pattern"))
   (sprint 'new-com-change-pattern)
   (sprint pattern)
-  (setf tmp (typecase new-pattern
-              (pattern new-pattern)
-              (symbol (find-pdef new-pattern t))
-              (string (eval new-pattern)))))
+  (setf *tmp* (typecase new-pattern
+                (pattern new-pattern)
+                (symbol (find-pdef new-pattern t))
+                (string (eval new-pattern)))))
 
 (defmethod frame-standard-output ((frame thundersnow))
   (find-pane-named frame 'interactor))
