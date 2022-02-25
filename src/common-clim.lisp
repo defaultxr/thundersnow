@@ -51,6 +51,23 @@ See also: `clim:frame-panes'"
   "Get a list of all defined CLIM command tables."
   (keys climi::*command-tables*))
 
+(defun bounding-rectangle-center* (rectangle)
+  "Get numbers (as multiple values) for the center of RECTANGLE.
+
+See also: `bounding-rectangle-center'"
+  (values (/ (- (bounding-rectangle-max-x rectangle)
+                (bounding-rectangle-min-x rectangle))
+             2)
+          (/ (- (bounding-rectangle-max-y rectangle)
+                (bounding-rectangle-min-y rectangle))
+             2)))
+
+(defun bounding-rectangle-center (rectangle)
+  "Get a `clim:point' for the center of RECTANGLE.
+
+See also: `bounding-rectangle-center*'"
+  (multiple-value-call #'make-point (bounding-rectangle-center* rectangle)))
+
 ;;; mcclim "monkey patching"
 
 ;; McCLIM (or its X backend at least) does not provide this class yet so we define it here.

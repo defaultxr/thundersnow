@@ -50,6 +50,8 @@
            #:frame-all-panes
            #:find-pane
            #:all-command-tables
+           #:bounding-rectangle-center*
+           #:bounding-rectangle-center
 
            #:textual-view
            #:+textual-view+
