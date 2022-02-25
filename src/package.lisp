@@ -58,7 +58,7 @@
 
            #:mix-colors
            #:*theme*
-           #:get-theme-color
+           #:theme-color
 
            #:with-border
 

@@ -87,7 +87,7 @@ See also: `clim:frame-panes'"
                  :note-fill +red+
                  :selected-note-fill +blue+))
 
-(defun get-theme-color (element)
+(defun theme-color (element) ;; FIX: define setf as well
   "Get the theme's color for a type of GUI element, i.e. :foreground, :background, :accent, etc.
 
 See also: `*theme*'"

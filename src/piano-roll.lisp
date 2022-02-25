@@ -181,7 +181,7 @@ See also: `scroll-top-to', `scroll-center-to', `scroll-bottom-to'"
    :display-time :command-loop
    :default-view +graphical-view+
    :foreground +white+
-   :background (get-theme-color :background)))
+   :background (theme-color :background)))
 
 (defmethod compose-space ((pane piano-roll-pane) &key width height)
   (declare (ignore width height))
@@ -235,8 +235,8 @@ See also: `scroll-top-to', `scroll-center-to', `scroll-bottom-to'"
          (midinote (event-value event :midinote))
          (y-bottom (pitch-to-y-pixel midinote frame))
          (y-top (pitch-to-y-pixel (1+ midinote) frame))
-         (note-color (get-theme-color :note-fill))
-         (grid-color (get-theme-color :grid)))
+         (note-color (theme-color :note-fill))
+         (grid-color (theme-color :grid)))
     (surrounding-output-with-border (stream :padding 0 :thickness 1 :ink (mix-colors note-color grid-color 1/2))
       (draw-rectangle* stream
                        x-start y-top x-end y-bottom
@@ -340,7 +340,7 @@ See also: `scroll-top-to', `scroll-center-to', `scroll-bottom-to'"
                    (eseq (eseq-events eseq))
                    (pattern (next-upto-n eseq))))
          (background-color (slot-value stream 'background))
-         (grid-color (get-theme-color :grid))
+         (grid-color (theme-color :grid))
          (bg-grid-mixed (mix-colors background-color grid-color 1/6))
          (grid-accent-color (make-rgb-color 1 1 1))
          (scale (slot-value frame 'scale))

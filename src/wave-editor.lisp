@@ -23,8 +23,8 @@
    :display-function 'draw-wave-editor
    :display-time :command-loop
    ;; :default-view +graphical-view+
-   :foreground (get-theme-color :foreground)
-   :background (get-theme-color :background)))
+   :foreground (theme-color :foreground)
+   :background (theme-color :background)))
 
 (defmethod handle-event :after ((stream wave-editor-pane) (event climi::pointer-scroll-event))
   (with-slots (%saved-extent) stream
@@ -100,7 +100,7 @@ See also: `sound-frame-pixel'"
            (height (rectangle-height region))
            (waveform-height (/ (- height (* 2 vertical-margin)) 2))
            (center-y (/ height 2))
-           (line-color (get-theme-color :foreground))
+           (line-color (theme-color :foreground))
            (frames (cached-frames-for stream))
            (num-frames (bdef-length sound))
            (visible-region %saved-extent)
@@ -157,7 +157,7 @@ See also: `sound-frame-pixel'"
                        (sound-frame-pixel stream num-frames)
                        (- height vertical-margin)
                        :filled nil
-                       :ink (get-theme-color :grid))
+                       :ink (theme-color :grid))
       ;; selection box border
       (draw-rectangle* stream
                        point-start-x vertical-margin

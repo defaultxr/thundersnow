@@ -10,7 +10,7 @@
    :display-time :command-loop
    :default-view +graphical-view+
    :foreground +white+
-   :background (get-theme-color :background)))
+   :background (theme-color :background)))
 
 (defun draw-keyboard-gui (frame stream)
   (let* ((stream-width (pane-real-width stream))
@@ -24,7 +24,7 @@
                    (eseq (eseq-events eseq))
                    (pattern (next-upto-n eseq))))
          (background-color (slot-value stream 'background))
-         (grid-color (get-theme-color :grid))
+         (grid-color (theme-color :grid))
          (bg-grid-mixed (mix-colors background-color grid-color 1/6)))
     (present (make-instance '%background) '%background :stream stream)
     ;; draw the vertical grid lines and beat numbers at the bottom
