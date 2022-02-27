@@ -1,5 +1,24 @@
 (in-package #:thundersnow/common)
 
+;;; convenience constants
+
+(defconstant pi/2 (/ pi 2)
+  "Half of pi.")
+
+(defconstant 0.5pi (* pi 0.5)
+  "0.5x pi.")
+
+(defconstant 1/2pi (* pi 0.5)
+  "0.5x pi.")
+
+(defconstant 1.5pi (* pi 1.5)
+  "1.5x pi.")
+
+(defconstant 2pi (* pi 2)
+  "2x pi.")
+
+;;; utility/debug functions
+
 (defun sprint (object)
   "Swank print; sugar to print to the swank output, avoiding any CLIM interactors."
   (print object *debug-io*))
