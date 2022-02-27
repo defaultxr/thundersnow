@@ -1,5 +1,5 @@
 (in-package #:thundersnow/tests)
 
-;;;; t/tracker.lisp -
+;;;; t/wave-editor.lisp -
 
 (in-suite thundersnow-tests)

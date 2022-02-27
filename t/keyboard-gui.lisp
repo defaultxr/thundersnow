@@ -1,5 +1,5 @@
 (in-package #:thundersnow/tests)
 
-;;;; t/tracker.lisp -
+;;;; t/keyboard-gui.lisp -
 
 (in-suite thundersnow-tests)

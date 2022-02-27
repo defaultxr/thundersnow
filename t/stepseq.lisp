@@ -1,5 +1,5 @@
 (in-package #:thundersnow/tests)
 
-;;;; t/tracker.lisp -
+;;;; t/stepseq.lisp -
 
 (in-suite thundersnow-tests)

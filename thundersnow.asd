@@ -44,11 +44,18 @@
                #:fiveam)
   :pathname "t/"
   :serial t
-  :components ((:file "test")
+  :components ((:file "package")
+               (:file "test")
                (:file "utility")
+               (:file "common-clim")
+               (:file "common-nod")
                (:file "thundersnow")
+               (:file "keyboard-gui")
                (:file "piano-roll")
-               (:file "tracker"))
+               (:file "stepseq")
+               (:file "tracker")
+               (:file "wave-editor")
+               (:file "wave-editor-nod"))
   :perform (test-op (op c)
                     (uiop:symbol-call :fiveam :run!
                                       (uiop:find-symbol* '#:thundersnow-tests
