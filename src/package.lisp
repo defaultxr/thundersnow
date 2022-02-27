@@ -4,20 +4,18 @@
 (uiop:define-package #:thundersnow/common
   (:nicknames #:ts/c #:ts/common)
   (:use)
-  (:mix #:cl
-        #:alexandria
-        #:mutility
-        #:cl-patterns
-        #:bdef
-        #+#.(cl:if (cl:find-package "CL-COLLIDER") '(:and) '(:or))
-        #:cl-collider)
-  (:reexport #:alexandria
-             #:mutility
-             #:cl-patterns
-             #:bdef
-             #+#.(cl:if (cl:find-package "CL-COLLIDER") '(:and) '(:or))
-             #:cl-collider)
-  (:export #:sprint
+  (:mix-reexport #:cl
+                 #:alexandria
+                 #:mutility
+                 #:metabang-bind
+                 #:cl-patterns
+                 #:bdef
+                 ;; #+#.(cl:if (cl:find-package "CL-COLLIDER") '(:and) '(:or))
+                 ;; #:cl-collider
+                 )
+  (:export #:pi/2 #:0.5pi #:1/2pi #:1.5pi #:2pi
+
+           #:sprint
            #:note-text
            #:beat-text
            #:sustain-text
@@ -31,20 +29,16 @@
 (uiop:define-package #:thundersnow/common-clim
   (:nicknames #:ts/c-c #:ts/cc #:ts/clim)
   (:use)
-  (:mix #:clim
-        #:clim-lisp
-        #:clim-extensions
-        #:thundersnow/common)
+  (:mix-reexport #:clim-lisp
+                 #:clim
+                 #:clim-extensions
+                 #:thundersnow/common)
   (:shadowing-import-from #:cl-patterns
                           #:pattern
                           #:event
                           #:stop
                           #:play
                           #:quant)
-  (:reexport #:clim
-             #:clim-lisp
-             #:clim-extensions
-             #:thundersnow/common)
   (:export #:all-frames
            #:make-or-find-application-frame
            #:frame-all-panes
@@ -67,23 +61,45 @@
            #:event-presentation-equal
 
            #:thundersnow-common-file-command-table
+           #:com-set-tempo
+           #:com-quit
+
            #:thundersnow-common-edit-command-table
+
            #:thundersnow-common-view-command-table
+           #:com-refresh
+
            #:thundersnow-common-tools-command-table
+           #:com-thundersnow
+           #:com-tracker
+           #:com-piano-roll
+           #:com-stepseq
+           #:com-wave-editor
+
            #:thundersnow-common-help-command-table
+           #:com-readme
+           #:com-repo
+           #:com-bugs
+           #:com-about
+
+           #:knob
+           #:knob-angle-clim-angle
+           #:clim-angle-knob-angle
+           #:knob-angle-point*
+           #:knob-angle-point
+           #:knob-value-angle
+           #:knob-value-point*
+           #:knob-value-point
 
            #:tempo-pane
            #:scope-pane)
   (:local-nicknames (:a :alexandria)
                     (:clp :cl-patterns)))
 
-(uiop:define-package #:thundersnow/common-nod
-  (:nicknames #:ts/nod #:ts/common-nod)
+(uiop:define-package #:thundersnow/indexer
+  (:nicknames #:ts/i)
   (:use #:cl)
-  (:mix #:nodgui
-        #:thundersnow/common)
-  (:reexport #:nodgui
-             #:thundersnow/common)
+  (:mix #:thundersnow/common)
   (:local-nicknames (:a :alexandria)
                     (:clp :cl-patterns)))
 
@@ -136,15 +152,6 @@
   (:nicknames #:ts/we)
   (:use)
   (:mix #:thundersnow/common-clim
-        #:cl)
-  (:local-nicknames (:a :alexandria)
-                    (:clp :cl-patterns))
-  (:export :wave-editor))
-
-(uiop:define-package #:thundersnow/wave-editor-nod
-  (:nicknames #:ts/wen #:ts/wave-editor-nod)
-  (:use)
-  (:mix #:thundersnow/common-nod
         #:cl)
   (:local-nicknames (:a :alexandria)
                     (:clp :cl-patterns))
