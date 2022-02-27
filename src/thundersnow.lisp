@@ -181,41 +181,6 @@
   :inherit-from (thundersnow-common-file-command-table)
   :inherit-menu t)
 
-(define-command (com-set-tempo :name t :menu t
-                               :command-table thundersnow-file-command-table)
-    ((tempo 'string :default (tempo *clock*) :prompt "Tempo (default unit: bps)"))
-  (destructuring-bind (value &optional (unit "bps")) (string-split tempo)
-    (let ((value (read-from-string value)))
-      (assert (numberp value) (value) "The provided tempo must be a number; got ~s instead. If you want to specify a unit it must come after the number." value)
-      (let ((unit (my-intern unit :keyword)))
-        (assert (member unit (list :bps :bpm)) (unit) "UNIT must be either bps or bpm; got ~s instead." unit)
-        (when (and (eql unit :bps)
-                   (>= value 10))
-          (restart-case
-              (error "The provided beats per second value was abnormally high (~s beats per second = ~s beats per minute)!~%Are you sure you want to proceed?" value (* value 60))
-            (continue ()
-              :report "Use this value for the beats per second anyway."
-              nil)
-            (use-as-bpm ()
-              :report "Use this value as beats per minute instead."
-              (setf unit :bpm))
-            (specify-another-tempo ()
-              :report "Specify another value for the beats per second instead."
-              (execute-frame-command *application-frame*
-                                     (command-line-read-remaining-arguments-for-partial-command
-                                      (find-command-table 'thundersnow)
-                                      (frame-standard-output *application-frame*)
-                                      (list 'com-set-tempo *unsupplied-argument-marker*)
-                                      0))
-              (invoke-restart 'abort)) ;; FIX: is there some way to avoid the "Command aborted" message?
-            (abort ()
-              :report (lambda (stream)
-                        (format stream "Cancel changing the tempo, leaving it at ~s (~s bpm)." (tempo *clock*) (* (tempo *clock*) 60)))
-              (invoke-restart 'abort))))
-        (setf (tempo *clock*) (if (eql unit :bps)
-                                  value
-                                  (/ value 60)))))))
-
 (define-command (com-toggle-metronome :name t :menu t
                                       :command-table thundersnow-file-command-table
                                       :keystroke (#\m :meta))

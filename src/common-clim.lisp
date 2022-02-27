@@ -138,6 +138,41 @@ See also: `*theme*'"
 
 (define-command-table thundersnow-common-file-command-table)
 
+(define-command (com-set-tempo :name t :menu t
+                               :command-table thundersnow-common-file-command-table)
+    ((tempo 'string :default (tempo *clock*) :prompt "Tempo (default unit: bps)"))
+  (destructuring-bind (value &optional (unit "bps")) (string-split tempo)
+    (let ((value (read-from-string value)))
+      (assert (numberp value) (value) "The provided tempo must be a number; got ~s instead. If you want to specify a unit it must come after the number." value)
+      (let ((unit (upcase-intern unit :keyword)))
+        (assert (member unit (list :bps :bpm)) (unit) "UNIT must be either bps or bpm; got ~s instead." unit)
+        (when (and (eql unit :bps)
+                   (>= value 10))
+          (restart-case
+              (error "The provided beats per second value was abnormally high (~s beats per second = ~s beats per minute)!~%Are you sure you want to proceed?" value (* value 60))
+            (continue ()
+              :report "Use this value for the beats per second anyway."
+              nil)
+            (use-as-bpm ()
+              :report "Use this value as beats per minute instead."
+              (setf unit :bpm))
+            (specify-another-tempo ()
+              :report "Specify another value for the beats per second instead."
+              (execute-frame-command *application-frame*
+                                     (command-line-read-remaining-arguments-for-partial-command
+                                      (find-command-table 'thundersnow)
+                                      (frame-standard-output *application-frame*)
+                                      (list 'com-set-tempo *unsupplied-argument-marker*)
+                                      0))
+              (invoke-restart 'abort)) ;; FIX: is there some way to avoid the "Command aborted" message?
+            (abort ()
+              :report (lambda (stream)
+                        (format stream "Cancel changing the tempo, leaving it at ~s (~s bpm)." (tempo *clock*) (* (tempo *clock*) 60)))
+              (invoke-restart 'abort))))
+        (setf (tempo *clock*) (if (eql unit :bps)
+                                  value
+                                  (/ value 60)))))))
+
 (define-command (com-quit :name t :menu t
                           :command-table thundersnow-common-file-command-table
                           :keystroke (#\q :control))
@@ -225,28 +260,26 @@ See also: `*theme*'"
   ())
 
 (defmethod handle-event ((pane tempo-pane) (event timer-event))
-  (let* ((rect (bounding-rectangle (sheet-region pane)))
-         (width (rectangle-width rect))
-         (height (rectangle-height rect))
-         (clock cl-patterns:*clock*))
-    (draw-rectangle* pane 0 0 width height
+  (let ((region (sheet-region pane))
+        (clock cl-patterns:*clock*))
+    (draw-rectangle* pane 0 0 (rectangle-width region) (rectangle-height region)
                      :filled t
                      :ink (if clock
                               (let ((c (expt (- 1 (mod (- (beat *clock*) (time-dur (clock-latency clock))) 1.0)) 3)))
                                 (make-rgb-color (* c 0.5) (+ 0.5 (* 0.5 c)) (* c 0.5)))
                               (make-gray-color 0.5)))
-    (draw-text* pane
-                (if clock
-                    (format nil "BPM: ~f" (* 60 (cl-patterns:tempo clock)))
-                    (format nil "null *clock*~%(click to create)"))
-                (/ width 2) (/ height 2)
-                :align-x :center
-                :align-y :center))
+    (draw-text pane
+               (if clock
+                   (let ((tempo (cl-patterns:tempo clock)))
+                     (format nil "BPM: ~f~%~$ Hz" (* 60 tempo) tempo))
+                   (format nil "null *clock*~%(click to create)"))
+               (bounding-rectangle-center region)
+               :align-x :center :align-y :center))
   (clime:schedule-event pane (make-instance 'timer-event :sheet pane) 0.01))
 
 (defmethod handle-event ((pane tempo-pane) (event climi::pointer-button-press-event))
   (if *clock*
-      (com-set-tempo)
+      (execute-frame-command *application-frame* (list 'com-set-tempo))
       (start-clock-loop :tempo 110/60)))
 
 (defmethod handle-event ((pane tempo-pane) (event climi::pointer-scroll-event))
