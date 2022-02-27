@@ -20,7 +20,7 @@
 ;;; utility/debug functions
 
 (defun sprint (object)
-  "Swank print; sugar to print to the swank output, avoiding any CLIM interactors."
+  "Swank/Slynk print; sugar to print to the Swank/Slynk output (`*debug-io*'), avoiding any CLIM interactors."
   (print object *debug-io*))
 
 ;;; basic synths and patterns
