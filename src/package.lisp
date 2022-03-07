@@ -52,6 +52,8 @@
            #:graphical-view
            #:+graphical-view+
 
+           #:scroll-position-preserving-mixin
+
            #:mix-colors
            #:*theme*
            #:theme-color

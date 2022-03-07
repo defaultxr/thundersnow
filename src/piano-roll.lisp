@@ -141,9 +141,7 @@ See also: `event-vertically-visible-p', `event-horizontally-visible-p'"
   "Scroll PANE such that PIXEL is at the top of the view.
 
 See also: `scroll-center-to', `scroll-bottom-to', `scroll-focus-pitch'"
-  (scroll-extent pane 0 pixel)
-  (with-slots (%saved-extent) pane
-    (setf %saved-extent (pane-viewport-region pane))))
+  (scroll-extent pane 0 pixel))
 
 (defun scroll-center-to (pane pixel)
   "Scroll PANE such that PIXEL is in the vertical center of the view.
@@ -163,19 +161,32 @@ See also: `scroll-top-to', `scroll-center-to', `scroll-focus-pitch'"
 See also: `scroll-top-to', `scroll-center-to', `scroll-bottom-to'"
   (scroll-center-to pane (pitch-to-y-pixel pitch pane)))
 
-(defclass graphical-view (view)
-  ())
-
-(defconstant +graphical-view+ (make-instance 'graphical-view))
-
 (defclass %background ()
   ())
 
-(define-presentation-type event ())
+(define-presentation-type note ())
 
-(defclass piano-roll-pane (application-pane)
-  ((%saved-extent :initform nil :documentation "The scroll position to return to when redisplaying.") ;; see https://github.com/McCLIM/McCLIM/issues/906 ; "No built-in way of preserving scrollbar positions from redisplay"
-   (%last-click-timestamp :initform -1000 :documentation "The timestamp of the last click the pane received."))
+(define-presentation-method accept
+    ((type note) stream view &key))
+
+;; (define-presentation-type weekday ())
+
+;; (define-presentation-method accept
+;;     ((type weekday) stream (view textual-view) &key)
+;;   (values (completing-from-suggestions (stream)
+;;             (dotimes (i 7)
+;;               (suggest (aref *days* i) i)))))
+
+;; (define-presentation-method present
+;;     (daynumber (type weekday) stream (view textual-view) &key)
+;;   (write-string (aref *days* daynumber) stream))
+
+(define-presentation-type event (&optional selectedp)
+  ;; :inherit-from
+  )
+
+(defclass piano-roll-pane (scroll-position-preserving-mixin application-pane)
+  ((%last-click-timestamp :initform -1000 :documentation "The timestamp of the last click the pane received."))
   (:default-initargs
    :name 'piano-roll
    :display-function 'draw-piano-roll
@@ -189,13 +200,13 @@ See also: `scroll-top-to', `scroll-center-to', `scroll-bottom-to'"
   (make-space-requirement :width (piano-roll-width pane)
                           :height (piano-roll-height pane)))
 
-(defmethod handle-repaint :before ((pane piano-roll-pane) region)
-  ;; save the scroll position
-  (with-slots (%saved-extent) pane
-    ;; default to focusing on the center of the pitch range
-    (unless %saved-extent
-      (scroll-focus-pitch (find-pane-named *application-frame* 'piano-roll-pane) 69))
-    (setf %saved-extent (pane-viewport-region pane))))
+;; (defmethod handle-event ((pane piano-roll-pane) (event pointer-motion-event))
+;;   ;; (print 'heyo *debug-io*)
+;;   ;; (when-let ((doc-pane (find-pane-named *application-frame* 'pointer-documentation-pane)))
+;;   ;;   ;; (redisplay-frame-pane *application-frame* doc-pane :force-p t)
+;;   ;;   (setf (pane-needs-redisplay doc-pane) t)
+;;   ;;   )
+;;   )
 
 (defmethod handle-event ((pane piano-roll-pane) (event pointer-button-press-event))
   ;; CLIM ports are not required to generate double click events: http://bauhh.dyndns.org:8000/clim-spec/8-2.html#_357
@@ -363,13 +374,7 @@ See also: `scroll-top-to', `scroll-center-to', `scroll-bottom-to'"
     ;; draw the notes (events)
     (dolist (event events)
       (updating-output (stream :unique-id event :cache-value event :cache-test #'event-presentation-equal)
-        (present event 'event :stream stream))))
-  ;; make sure we don't lose our current scroll location after we redraw
-  (with-slots (%saved-extent) stream
-    (apply #'scroll-extent stream
-           (if %saved-extent
-               (list (rectangle-min-x %saved-extent) (rectangle-min-y %saved-extent))
-               (list 0 0)))))
+        (present event 'event :stream stream)))))
 
 (define-gesture-name :play :keyboard (#\space))
 

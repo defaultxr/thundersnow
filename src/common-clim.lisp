@@ -97,6 +97,26 @@ See also: `gadget-label'"
 
 (defconstant +graphical-view+ (make-instance 'graphical-view))
 
+;;; scroll-position-preserving-mixin
+;; grabbed from Clouseau: https://github.com/McCLIM/McCLIM/blob/master/Apps/Clouseau/src/pane.lisp
+
+(defclass scroll-position-preserving-mixin ()
+  ())
+
+(defmethod redisplay-frame-pane :around ((frame application-frame) (pane scroll-position-preserving-mixin) &key force-p)
+  (declare (ignore force-p))
+  (multiple-value-bind (x-displacement y-displacement)
+      (transform-position (sheet-transformation pane) 0 0)
+    (call-next-method)
+    (when-let ((viewport (pane-viewport pane)))
+      (scroll-extent pane
+                     (min (- x-displacement)
+                          (- (bounding-rectangle-width pane)
+                             (bounding-rectangle-width viewport)))
+                     (min (- y-displacement)
+                          (- (bounding-rectangle-height pane)
+                             (bounding-rectangle-height viewport)))))))
+
 ;;; color functions
 
 (defun mix-colors (color-1 color-2 &optional (mix 0.5))
