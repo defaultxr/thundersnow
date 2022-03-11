@@ -23,6 +23,8 @@
   :components ((:file "package")
                (:file "utility")
                (:file "common-clim")
+               (:module gadgets
+                :components ((:file "knob")))
                (:file "export")
                (:file "thundersnow")
                (:file "keyboard-gui")
