@@ -142,16 +142,21 @@ See also: `knob-value-point', `knob-angle-point*', `knob-angle-point', `knob-val
 
 (defmethod handle-event ((knob knob) (event pointer-button-press-event))
   (with-slots ((armed climi::armed) last-pointer-coordinates) knob
-    (case (pointer-event-button event)
-      (1 ;; left click
+    (switch ((pointer-event-button event))
+      (+pointer-left-button+
        (when (and armed
                   (region-contains-position-p (knob-ellipse knob) (pointer-event-x event) (pointer-event-y event)))
          (setf armed :active
-               last-pointer-coordinates (list (climi::pointer-event-native-graft-x event) (climi::pointer-event-native-graft-y event)))))
-      (4 ;; right click
+               last-pointer-coordinates (list (climi::pointer-event-native-graft-x event)
+                                              (climi::pointer-event-native-graft-y event)))))
+      (+pointer-right-button+
        (let ((label (or (gadget-maybe-label knob) "Knob")))
-         (case (menu-choose '(("Set value" . set-value)
-                              ("Reset value" . reset-value))
+         (case (menu-choose `(("Set value" :value set-value
+                                           :documentation "Specify a value to set the knob to")
+                              ("Reset value" :value reset-value
+                                             :documentation ,(lambda (item &key stream &allow-other-keys)
+                                                               (declare (ignore item))
+                                                               (format stream "Reset knob value to ~S" (default-value knob)))))
                             :label label)
            (set-value
             (when-let ((new-value (accepting-values (t :label label)
