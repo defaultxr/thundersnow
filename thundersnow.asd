@@ -25,7 +25,8 @@
                (:file "common-clim")
                (:module gadgets
                 :components ((:file "knob")
-                             (:file "scope")))
+                             (:file "scope")
+                             (:file "tempo-pane")))
                (:file "export")
                (:file "thundersnow")
                (:file "keyboard-gui")
