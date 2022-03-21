@@ -12,10 +12,10 @@
 (defun all-frames (&key port frame-manager)
   "Get a list of all application frames currently open."
   (let (res)
-    (apply 'map-over-frames
+    (apply #'map-over-frames
            (fn (push _ res))
-           `(,@(when port (list :port port))
-             ,@(when frame-manager (list :frame-manager frame-manager))))
+           (append (when port (list :port port))
+                   (when frame-manager (list :frame-manager frame-manager))))
     res))
 
 (defun make-or-find-application-frame (frame-name &rest args)
