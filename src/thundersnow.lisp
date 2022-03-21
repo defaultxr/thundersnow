@@ -267,13 +267,6 @@
 (defmethod frame-standard-output ((frame thundersnow))
   (find-pane-named frame 'interactor))
 
-;; (defmethod run-frame-top-level ((frame thundersnow) &key)
-;;   (when-let ((tempo-pane (find-pane-named frame 'tempo-box)))
-;;     (bt:make-thread (lambda ()
-;;                       (update-tempo frame tempo-pane))
-;;                     :name "tempo-box update thread"))
-;;   (call-next-method))
-
 #+nil
 (accepting-values (*query-io* :own-window t)
   (accept '(member 1 2 3 4) :view +radio-box-view+ :stream *query-io*))
