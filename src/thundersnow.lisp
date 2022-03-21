@@ -123,7 +123,7 @@
          ;; :display-function
          )
    (tempo (make-pane 'tempo-pane :name 'tempo-pane))
-   (scope (make-pane 'scope-pane :name 'scope-pane))
+   (scope (make-pane 'scope :name 'scope))
    (patterns-pane (make-pane 'patterns-pane :name 'patterns-pane))
    (pattern-pane (make-pane 'pattern-pane :name 'pattern-pane))
    ;; (input :text-editor)
@@ -156,10 +156,8 @@
   )
 
 (defmethod enable-frame :after ((frame thundersnow))
-  (let ((tempo-pane (find-pane-named frame 'tempo))
-        (scope-pane (find-pane-named frame 'scope)))
-    (clime:schedule-event tempo-pane (make-instance 'timer-event :sheet tempo-pane) 0.1)
-    (clime:schedule-event scope-pane (make-instance 'timer-event :sheet scope-pane) 0.1))
+  (let ((tempo-pane (find-pane-named frame 'tempo)))
+    (clime:schedule-event tempo-pane (make-instance 'timer-event :sheet tempo-pane) 0.1))
   (if-let ((pane (pattern-pane frame)))
     (setf (pane-pattern pane) (slot-value frame 'inspect))
     (sprint 'pane-is-nil)))

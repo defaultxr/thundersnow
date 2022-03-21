@@ -94,7 +94,8 @@
            #:knob-value-point
 
            #:tempo-pane
-           #:scope-pane)
+
+           #:scope)
   (:local-nicknames (:a :alexandria)
                     (:clp :cl-patterns)))
 

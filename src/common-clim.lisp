@@ -312,19 +312,3 @@ See also: `*theme*'"
   (when *clock*
     (incf (tempo *clock*) (* 1/600 (slot-value event 'climi::delta-y)))))
 
-;;; scope pane
-
-(defparameter *scope-wave* (make-array 200 :element-type 'double-float :initial-element 0d0))
-
-(defclass scope-pane (basic-gadget)
-  ())
-
-(defmethod handle-event ((pane scope-pane) (event timer-event))
-  (let* ((rect (bounding-rectangle (sheet-region pane)))
-         (width (rectangle-width rect))
-         (height (rectangle-height rect))
-         (hd2 (/ height 2)))
-    (draw-rectangle* pane 0 0 width height :filled t :ink (make-gray-color 0.2))
-    (draw-line* pane 0 hd2 width hd2 :ink +white+))
-  (clime:schedule-event pane (make-instance 'timer-event :sheet pane) 0.01))
-

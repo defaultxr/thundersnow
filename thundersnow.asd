@@ -24,7 +24,8 @@
                (:file "utility")
                (:file "common-clim")
                (:module gadgets
-                :components ((:file "knob")))
+                :components ((:file "knob")
+                             (:file "scope")))
                (:file "export")
                (:file "thundersnow")
                (:file "keyboard-gui")
