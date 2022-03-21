@@ -275,7 +275,5 @@ See also: `*theme*'"
 (define-command (com-about :name t :menu t
                            :command-table thundersnow-common-help-command-table)
     ()
-  (let* ((system (asdf:find-system "thundersnow"))
-         (version (asdf:component-version system)))
-    (format t "~&thundersnow ~a~%digital audio workstation and live coding laboratory~%a struct.ws project by modula t. worm and contributors~%https://w.struct.ws/thundersnow~%" version)))
+  (format t "~&thundersnow ~a~%digital audio workstation and live coding laboratory~%a struct.ws project by modula t. worm and contributors~%https://w.struct.ws/thundersnow~%" (asdf:component-version (asdf:find-system "thundersnow"))))
 
