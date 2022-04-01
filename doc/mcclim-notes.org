@@ -55,3 +55,5 @@ Just various notes I've collected about (Mc)CLIM, either by asking in #clim or r
 14:42:55 jackdaniel:  but if you write such thing, please share it so we can learn from it
 * drei info
 ** https://common-lisp.net/project/mcclim/static/documents/drei.pdf
+* https://github.com/admich/adm-clim-lib
+CLIM utilities, including a tree view, datetime presentations, history persistence (undo/redo)
