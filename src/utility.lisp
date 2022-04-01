@@ -73,12 +73,12 @@ See also: `note-text', `beat-text'"
 
 ;;; initialization
 
-(defparameter *initialized* nil
+(defvar *initialized* nil
   "True after `thundersnow-initialize' has been run and the configuration has been loaded.")
 
 (defun load-init ()
   "Load the user's custom configurations by checking a few common locations."
-  (dolist (file (list (concat (uiop:xdg-config-home) "thundersnow/init.lisp")
+  (dolist (file (list (uiop:xdg-config-home "thundersnow/init.lisp")
                       (concat (uiop:getenv "HOME") "/.thundersnow.lisp")))
     (when (load file :if-does-not-exist nil)
       (return-from load-init))))

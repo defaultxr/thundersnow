@@ -273,10 +273,12 @@
 
 ;;; main
 
+(defmethod initialize-instance :before ((thundersnow thundersnow) &key &allow-other-keys)
+  (unless *initialized*
+    (thundersnow-initialize)))
+
 (defun thundersnow (&rest args &key pattern)
   "Start thundersnow."
-  (unless *initialized*
-    (thundersnow-initialize))
   (let ((ts (apply #'make-or-find-application-frame 'thundersnow args)))
     (when pattern
       (setf (pane-pattern ts) pattern))
