@@ -107,13 +107,11 @@ See also: `event-vertically-visible-p', `event-horizontally-visible-p'"
 
 (defun x-pixel-to-beat-quantized (x &optional (frame (or *application-frame* (piano-roll))))
   "Convert an x pixel in FRAME to a beat number, quantizing to the grid."
-  (with-slots (grid-size) frame
-    (round-by (x-pixel-to-beat x frame) grid-size)))
+  (round-by (x-pixel-to-beat x frame) (grid-size frame)))
 
 (defun x-pixel-to-beat-floored (x &optional (frame (or *application-frame* (piano-roll))))
   "Convert an x pixel in FRAME to a beat number, quantizing to the grid."
-  (with-slots (grid-size) frame
-    (floor-by (x-pixel-to-beat x frame) grid-size)))
+  (floor-by (x-pixel-to-beat x frame) (grid-size frame)))
 
 (defun beat-to-x-pixel (beat &optional (frame (or *application-frame* (piano-roll))))
   "Convert a beat in FRAME to the relevant x pixel."
@@ -271,7 +269,7 @@ See also: `scroll-top-to', `scroll-center-to', `scroll-bottom-to'"
 (define-application-frame piano-roll ()
   ((eseq :initarg :eseq :initform (eseq) :type eseq :documentation "The `eseq' instance.")
    (beat-size :initarg :beat-size :initform 200 :documentation "The width of one beat, in pixels.")
-   (grid-size :initarg :beat-size :initform 1/4 :documentation "The number of beats between each grid line.")
+   (grid-size :initarg :beat-size :initform nil :documentation "The number of beats between each grid line. If nil, it is calculated from the current beat-size.")
    (y-size :initarg :y-size :initform 40 :documentation "The height of one pitch value (i.e. midinote), in pixels.")
    (scale :initarg :scale :initform :major :documentation "The scale whose notes should be highlighted."))
   (:command-table (piano-roll
@@ -335,6 +333,16 @@ See also: `scroll-top-to', `scroll-center-to', `scroll-bottom-to'"
 (defmethod eseq-events ((piano-roll-pane piano-roll-pane))
   (eseq-events (eseq-of piano-roll-pane)))
 
+(defmethod grid-size ((piano-roll piano-roll))
+  (or (slot-value piano-roll 'grid-size)
+      (let ((div (/ (slot-value piano-roll 'beat-size) 40)))
+        (/ 1 (nth (index-before-greater-than div +powers-of-two+)
+                  +powers-of-two+)))))
+
+(defmethod (setf grid-size) (value (piano-roll piano-roll))
+  (check-type value (or null (real 0)))
+  (setf (slot-value piano-roll 'grid-size) value))
+
 (defmethod (setf scale) (scale (piano-roll piano-roll))
   (setf (slot-value piano-roll 'scale) scale)
   ;; FIX: this resets the scrolling...
@@ -343,7 +351,7 @@ See also: `scroll-top-to', `scroll-center-to', `scroll-bottom-to'"
 (defun draw-piano-roll (frame stream)
   (let* ((stream-width (piano-roll-width stream))
          (stream-height (piano-roll-height stream))
-         (grid-size (slot-value frame 'grid-size))
+         (grid-size (grid-size frame))
          (beat-size (slot-value frame 'beat-size))
          (y-size (slot-value frame 'y-size))
          (eseq (slot-value frame 'eseq))
@@ -496,7 +504,7 @@ See also: `scroll-top-to', `scroll-center-to', `scroll-bottom-to'"
       (tracking-pointer (stream)
         (:pointer-motion (x)
                          (let* ((x-beat (x-pixel-to-beat-quantized x *application-frame*))
-                                (new-sustain (max (slot-value *application-frame* 'grid-size) (- x-beat event-beat)))
+                                (new-sustain (max (grid-size *application-frame*) (- x-beat event-beat)))
                                 (rect (multiple-value-list (bounding-rectangle* record))))
                            (when (/= old-sustain new-sustain)
                              (handle-repaint stream damaged-region)
@@ -569,7 +577,7 @@ See also: `scroll-top-to', `scroll-center-to', `scroll-bottom-to'"
      :gesture :add
      :pointer-documentation
      ((%background x y stream frame)
-      (with-slots (beat-size grid-size) frame
+      (with-slots (beat-size) frame
         (format stream "Add event at beat ~$, midinote ~a" (x-pixel-to-beat-floored x frame) y)))
      ;; :tester ((object event)
      ;;          ;; (setf krovo::tmp (list object event))
