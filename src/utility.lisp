@@ -17,11 +17,20 @@
 (defconstant 2pi (* pi 2)
   "2x pi.")
 
+(defconstant +powers-of-two+ (mapcar (curry #'expt 2) (iota 32 :start 1))
+  "The first 32 powers of two, starting from 2.")
+
 ;;; utility/debug functions
 
 (defun sprint (object)
   "Swank/Slynk print; sugar to print to the Swank/Slynk output (`*debug-io*'), avoiding any CLIM interactors."
   (print object *debug-io*))
+
+;;; math
+
+(defun index-before-greater-than (n list)
+  "Get the index of the element just before the first element of LIST greater than N, or 0 if no element is greater."
+  (max 0 (1- (position-if (lambda (num) (> num n)) list))))
 
 ;;; basic synths and patterns
 

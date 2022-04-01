@@ -14,8 +14,12 @@
                  ;; #:cl-collider
                  )
   (:export #:pi/2 #:0.5pi #:1/2pi #:1.5pi #:2pi
+           #:+powers-of-two+
 
            #:sprint
+
+           #:index-before-greater-than
+
            #:note-text
            #:beat-text
            #:sustain-text
