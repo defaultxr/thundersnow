@@ -59,6 +59,7 @@
            #:theme-color
 
            #:with-border
+           #:wave-polygon-coord-seq
 
            #:event-presentation-equal
 

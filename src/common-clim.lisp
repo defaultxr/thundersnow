@@ -153,6 +153,16 @@ See also: `*theme*'"
          (surrounding-output-with-border (pane :padding ,padding :padding-bottom ,(1- padding) :padding-top ,(1- padding) :background ,background-sym :thickness ,thickness-sym ,@additional-args)
            ,@body)))))
 
+(defun wave-polygon-coord-seq (wave sheet &key (zoom 1))
+  "Convert WAVE, an array of waveform data, into a list in coord-seq format usable by `draw-polygon*'."
+  (let ((width (bounding-rectangle-width sheet))
+        (hd2 (/ (bounding-rectangle-height sheet) 2))
+        (length (length wave)))
+    (loop :for idx :from 0
+          :for e :across wave
+          :collect (* width (/ idx length) zoom)
+          :collect (+ hd2 (* hd2 e)))))
+
 ;;; presentation utilities
 
 (defun event-presentation-equal (event1 event2) ;; used in `updating-output' for `draw-piano-roll'
