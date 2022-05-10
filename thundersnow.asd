@@ -13,6 +13,7 @@
   :depends-on (#:alexandria
                #:mutility
                #:mutility/loopy
+               #:metabang-bind
                #:closer-mop
                #:cl-patterns
                #:bdef
