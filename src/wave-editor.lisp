@@ -292,8 +292,10 @@ See also: `sound-frame-pixel'"
                                  ;; :keystroke (#\- :control)
                                  )
     ()
-  ()
-  (setf (second-px *application-frame*) (* 0.5 (second-px *application-frame*))))
+  (let ((pane (wave-editor-pane)))
+    (setf (second-px *application-frame*) (/ (- (rectangle-width (pane-viewport-region pane))
+                                                (* 2 (slot-value pane 'horizontal-margin)))
+                                             (bdef-duration (sound pane))))))
 
 (define-command-table wave-editor-tools-command-table
   :inherit-from (thundersnow-common-tools-command-table)
