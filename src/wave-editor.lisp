@@ -235,7 +235,7 @@ See also: `sound-frame-pixel'"
 (defmethod (setf sound) ((bdef bdef) (this wave-editor))
   (setf (sound (find-pane-named this 'wave-editor-pane)) bdef)
   (let* ((bdef (sound this))
-         (key (bdef-key bdef))
+         (key (bdef-name bdef))
          (name (etypecase key
                  (symbol key)
                  (string (concat (pathname-name key) "." (pathname-type key))))))
