@@ -118,7 +118,7 @@ See also: `sound-frame-pixel'"
                        point-end-x (- height vertical-margin)
                        :ink +yellow-green+)
       ;; line drawn at the end for the right margin
-      (let ((end-line-x (+ (* 2 horizontal-margin) (sound-frame-pixel stream num-frames))))
+      (let ((end-line-x (+ horizontal-margin (sound-frame-pixel stream num-frames))))
         (draw-line* stream end-line-x 0 end-line-x height))
       (let ((sfm (/ second-px (bdef-sample-rate sound))))
         ;; zero line
@@ -136,8 +136,7 @@ See also: `sound-frame-pixel'"
                   (min-x (rectangle-min-x visible-region))
                   (max-x (rectangle-max-x visible-region)))
               (loop :for x :from min-x :below max-x :do
-                (let ((sf (pixel-sound-frame stream x))
-                      (x-px (+ horizontal-margin x)))
+                (let ((sf (pixel-sound-frame stream x)))
                   (unless (or (minusp sf) (>= sf num-frames))
                     (let (min max)
                       (dotimes (j (truncate sfmr))
@@ -148,8 +147,8 @@ See also: `sound-frame-pixel'"
                             (setf max (if max (max max val) val)
                                   min (if min (min min val) val)))))
                       (draw-line* stream
-                                  x-px (- center-y (* waveform-height max))
-                                  x-px (- center-y (* waveform-height min))
+                                  x (- center-y (* waveform-height max))
+                                  x (- center-y (* waveform-height min))
                                   :ink line-color))))))))
       ;; border rectangle
       (draw-rectangle* stream
