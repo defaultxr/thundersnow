@@ -34,12 +34,8 @@
 
 ;;; basic synths and patterns
 
-#+#.(cl:if (cl:find-package "CL-COLLIDER") '(:and) '(:or))
-(unless (synthdef-metadata :default)
-  (defsynth default ((gate 1) (freq 440) (amp 0.5) (pan 0) (out 0))
-    (let* ((env (env-gen.kr (asr 0.01 1 0.1) :gate gate :act :free))
-           (sig (sin-osc.ar freq 0 0.2)))
-      (out.ar out (pan2.ar sig pan (* env amp))))))
+(when (find-package "CL-COLLIDER")
+  (load "cl-collider.lisp"))
 
 (pb :-metronome
   :instrument :default
