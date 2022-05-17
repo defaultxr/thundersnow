@@ -2,13 +2,25 @@
 
 Just various notes I've collected about (Mc)CLIM, either by asking in #clim or randomly online.
 
-* useful mcclim macros/functions
+* [[https://github.com/McCLIM/McCLIM/wiki/Resources-and-Links][McCLIM Resources and Links]]
+Various resources and links about McCLIM, UI/UX design, and more.
+* misc mcclim code info/reference
+** useful mcclim macros/functions
 - define-presentation-translator
 - define-presentation-to-command-translator
 - define-presentation-action
 - define-drag-and-drop-translator
 - menu-choose
 - menu-choose-from-drawer
+** define-command argument keywords
+- default
+- default-type
+- display-default
+- mentioned-default
+- prompt
+- documentation
+- when
+- gesture
 * theming
 ** "Sort out the gadget color situation" https://github.com/McCLIM/McCLIM/issues/842
 ** Feb 17, 2018
@@ -53,6 +65,17 @@ Just various notes I've collected about (Mc)CLIM, either by asking in #clim or r
 14:41:25 defaultxr:   thanks! i'm also wondering about selecting multiple objects at once (i.e. the traditional "click and drag on an empty space to draw a rectangle and all objects in it become selected); does (mc)clim have a preferred way of doing that?
 14:42:37 jackdaniel:  I can't think of anything
 14:42:55 jackdaniel:  but if you write such thing, please share it so we can learn from it
+* how to implement a "partial redisplay" function
+** May 11, 2022
+2022-05-11 02:06:35	jackdaniel	defaultxr: that's how this could be approached: https://plaster.tymoon.eu/view/3123#3123
+2022-05-11 02:07:04	jackdaniel	notice, that you need to provide /whole/ dimensions when constructing the record, so scroll bars know how much space your pane occupies
+2022-05-11 02:08:56	jackdaniel	this perhaps could be polished into a demo, but oh well, having only 10 fingers is certainly a limiting factor ,)
+2022-05-11 02:10:33	jackdaniel	n.b the fact that I had to use pane-viewport-region instead of supplied region to replay-output-record is a hint, that the supplied region is too big
+2022-05-11 02:11:13	jackdaniel	as in: optimization opportunity
+2022-05-11 02:12:29	jackdaniel	it is surprising, because we do compute the intersection with parents in repaint-sheet
+2022-05-11 02:14:34	jackdaniel	defaultxr: btw, this is not a noob quesiton;
+2022-05-11 02:26:22	jackdaniel	I've added this snippet to the wiki in "How to Guides"
+
 * drei info
 ** https://common-lisp.net/project/mcclim/static/documents/drei.pdf
 * https://github.com/admich/adm-clim-lib
