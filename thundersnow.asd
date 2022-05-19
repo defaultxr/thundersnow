@@ -71,7 +71,8 @@
   :description "FiveAM-based test suite for thundersnow."
   :license "Specify license here"
   :depends-on (#:thundersnow
-               #:fiveam)
+               #:fiveam
+               #:mutility/test-helpers)
   :pathname "t/"
   :serial t
   :components ((:file "package")
