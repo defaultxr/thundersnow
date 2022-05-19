@@ -17,7 +17,7 @@
 (defconstant 2pi (* pi 2)
   "2x pi.")
 
-(defconstant +powers-of-two+ (mapcar (curry #'expt 2) (iota 32 :start 1))
+(serapeum:defconst +powers-of-two+ (mapcar (curry #'expt 2) (iota 32 :start 1))
   "The first 32 powers of two, starting from 2.")
 
 ;;; utility/debug functions

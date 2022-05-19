@@ -11,6 +11,7 @@
   :mailto "defaultxr at gmail dot com"
   :source-control (:git "git@github.com:defaultxr/thundersnow.git")
   :depends-on (#:alexandria
+               #:serapeum
                #:mutility
                #:mutility/loopy
                #:metabang-bind
