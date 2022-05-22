@@ -179,6 +179,8 @@ See also: `knob-value-point', `knob-angle-point*', `knob-angle-point', `knob-val
              (modifier (event-modifier-state event))
              (drag-mul (/ (gadget-range knob) (cond ((logtest modifier +control-key+)
                                                      100000)
+                                                    ((logtest modifier +shift-key+)
+                                                     10000)
                                                     ((logtest modifier +meta-key+)
                                                      100)
                                                     (t 1000)))))
