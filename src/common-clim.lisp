@@ -240,11 +240,25 @@ See also: `*theme*'"
                                   value
                                   (/ value 60)))))))
 
+(define-command (com-close :name t :menu t
+                           :command-table thundersnow-common-file-command-table
+                           :keystroke (#\w :control))
+    ()
+  "Close the current frame."
+  (when-let ((close-p (ask-close)))
+    (when (eql :save close-p)
+      (com-save))
+    (frame-exit *application-frame*)))
+
 (define-command (com-quit :name t :menu t
                           :command-table thundersnow-common-file-command-table
                           :keystroke (#\q :control))
     ()
-  (frame-exit *application-frame*))
+  "Completely quit Thundersnow and end the Lisp process."
+  (when-let ((quit-p (ask-quit)))
+    (when (eql :save quit-p)
+      (com-save))
+    (uiop:quit)))
 
 ;;; edit commands
 

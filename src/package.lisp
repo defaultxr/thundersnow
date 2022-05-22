@@ -74,6 +74,8 @@
 
            #:thundersnow-common-file-command-table
            #:com-set-tempo
+
+           #:com-close
            #:com-quit
 
            #:thundersnow-common-edit-command-table
