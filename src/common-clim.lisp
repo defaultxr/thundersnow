@@ -129,12 +129,15 @@ See also: `gadget-label'"
 ;;; theming/color functionality (FIX: generalize and move to mutility?)
 ;; see also: https://github.com/McCLIM/McCLIM/issues/842 ; "Sort out the gadget color situation"
 
-(defvar *theme* (list
-                 :background (make-rgb-color 0.3 0.3 0.4)
-                 :foreground +black+
-                 :grid (make-gray-color 0.8)
-                 :note-fill +red+
-                 :selected-note-fill +blue+))
+(defvar *theme* (list :background (make-gray-color 0.2)
+                      :foreground +white+
+                      :grid (make-gray-color 0.8)
+                      :stopped +red+
+                      :playing +green+
+                      :ending +red4+
+                      :starting +greenyellow+
+                      :note-fill +red+
+                      :selected-note-fill +blue+))
 
 (defun theme-color (element) ;; FIX: define setf as well
   "Get the theme's color for a type of GUI element, i.e. :foreground, :background, :accent, etc.
