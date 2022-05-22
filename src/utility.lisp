@@ -35,7 +35,7 @@
 ;;; basic synths and patterns
 
 (when (find-package "CL-COLLIDER")
-  (load "cl-collider.lisp"))
+  (load (asdf:system-relative-pathname 'thundersnow "src/cl-collider.lisp")))
 
 (pb :-metronome
   :instrument :default
