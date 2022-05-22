@@ -52,6 +52,9 @@
            #:all-command-tables
            #:bounding-rectangle-center*
            #:bounding-rectangle-center
+           #:ask-confirmation
+           #:ask-quit
+           #:ask-close
 
            #:textual-view
            #:+textual-view+

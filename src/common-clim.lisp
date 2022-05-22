@@ -78,6 +78,30 @@ See also: `gadget-label'"
 (defmethod unsaved-data-p ((frame application-frame))
   nil)
 
+(defun ask-confirmation (query &key (true-text "Yes") (false-text "No") (option-size :very-large))
+  "Open a menu to prompt the user for the answer to a boolean question.
+
+See also: `ask-quit'"
+  (menu-choose `((,true-text :value t)
+                 (,false-text :value nil))
+               :text-style (make-text-style nil nil option-size)
+               :label query))
+
+(defun ask-quit (&key (unsaved-data-p (unsaved-data-p *application-frame*)) (unsaved-query "Save data before quitting Thundersnow and ending the Lisp process?") (saved-query "Really quit Thundersnow and end the Lisp process?") (save-text "Save and quit") (quit-text "Quit") (cancel-text "Cancel") (option-size :very-large))
+  "Open a menu to prompt the user whether they really want to quit. If UNSAVED-DATA-P is true, use UNSAVED-QUERY to warn of the unsaved data and include SAVE-TEXT as an option to save the data before quitting.
+
+See also: `ask-confirmation'"
+  (menu-choose `(,@(when unsaved-data-p `((,save-text :value :save)))
+                 (,quit-text :value :quit)
+                 (,cancel-text :value nil))
+               :text-style (make-text-style nil nil option-size)
+               :label (if unsaved-data-p
+                          unsaved-query
+                          saved-query)))
+
+(defun ask-close (&key (unsaved-data-p (unsaved-data-p *application-frame*)) (unsaved-query "Save data before closing this window?") (saved-query "Really close this window?") (save-text "Save and close") (quit-text "Close") (cancel-text "Cancel") (option-size :very-large))
+  (ask-quit :unsaved-data-p unsaved-data-p :unsaved-query unsaved-query :saved-query saved-query :save-text save-text :quit-text quit-text :cancel-text cancel-text :option-size option-size))
+
 ;;; mcclim "monkey patching"
 
 ;; McCLIM (or its X backend at least) does not provide this class yet so we define it here.
