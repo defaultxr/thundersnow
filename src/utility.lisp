@@ -67,6 +67,11 @@ See also: `note-text', `sustain-text'"
 See also: `note-text', `beat-text'"
   (concat "s: " (friendly-ratio-string (sustain event))))
 
+;;; standard user interface functions
+
+(defgeneric unsaved-data-p (object)
+  (:documentation "True if OBJECT (typically an `application-frame' or `pane') has unsaved data."))
+
 ;;; initialization
 
 (defvar *initialized* nil

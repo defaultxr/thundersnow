@@ -24,6 +24,8 @@
            #:beat-text
            #:sustain-text
 
+           #:unsaved-data-p
+
            #:*initialized*
            #:load-init
            #:thundersnow-initialize)

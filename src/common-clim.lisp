@@ -75,6 +75,9 @@ See also: `gadget-label'"
   (unless (emptyp (gadget-label gadget))
     (gadget-label gadget)))
 
+(defmethod unsaved-data-p ((frame application-frame))
+  nil)
+
 ;;; mcclim "monkey patching"
 
 ;; McCLIM (or its X backend at least) does not provide this class yet so we define it here.
