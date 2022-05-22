@@ -29,8 +29,12 @@
 ;;; math
 
 (defun index-before-greater-than (n list)
-  "Get the index of the element just before the first element of LIST greater than N, or 0 if no element is greater."
-  (max 0 (1- (position-if (lambda (num) (> num n)) list))))
+  "Get the index of the element just before the first element of LIST greater than N, -1 if the first element is greater, or the index of the last element if no element is greater."
+  (let ((idx 0))
+    (dolist (i list (1- idx))
+      (incf idx)
+      (when (> i n)
+        (return-from index-before-greater-than (- idx 2))))))
 
 ;;; basic synths and patterns
 
