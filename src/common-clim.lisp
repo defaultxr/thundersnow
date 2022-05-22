@@ -240,6 +240,8 @@ See also: `*theme*'"
                                   value
                                   (/ value 60)))))))
 
+(add-menu-item-to-command-table 'thundersnow-common-file-command-table nil :divider nil)
+
 (define-command (com-close :name t :menu t
                            :command-table thundersnow-common-file-command-table
                            :keystroke (#\w :control))
