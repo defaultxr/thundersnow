@@ -9,7 +9,7 @@
 
 (in-package #:thundersnow/common-clim)
 
-(defclass knob (labelled-gadget-mixin value-gadget range-gadget-mixin)
+(defclass knob (labelled-gadget-mixin climi::value-changed-repaint-mixin value-gadget range-gadget-mixin)
   ((default-value :initarg :default-value :writer (setf default-value) :documentation "The default value that the knob should return to when \"reset\". If unbound, defaults to the center of the `gadget-range'.")
    (dead-angle :initarg :dead-angle :initform 0.5 :documentation "The \"dead zone\"; the angle in radians at the bottom of the knob that the indicator cannot point to.")
    (knob-margin :initarg :knob-margin :initform 2 :accessor knob-margin :documentation "Amount of empty space to put around the knob.")
@@ -25,9 +25,6 @@
       (setf (slot-value knob 'dead-area-background) (make-ihs-color (/ i 2) h s))))
   (unless (gadget-value knob)
     (setf (gadget-value knob) (default-value knob))))
-
-(defmethod (setf gadget-value) :after (value (knob knob) &key &allow-other-keys)
-  (handle-repaint knob (sheet-region knob)))
 
 (defmethod default-value ((knob knob))
   (if (slot-boundp knob 'default-value)
