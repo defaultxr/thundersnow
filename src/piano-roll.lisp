@@ -283,6 +283,19 @@ See also: `scroll-top-to', `scroll-center-to', `scroll-bottom-to'"
                           ("Help" :menu piano-roll-help-command-table))))
   (:panes
    (piano-roll-pane (make-pane 'piano-roll-pane))
+   (beat-size-slider (make-pane :slider
+                                :name 'beat-size-slider
+                                :orientation :horizontal
+                                :min-value 1 :max-value 40
+                                :value 20
+                                :drag-callback
+                                (lambda (slider value)
+                                  (declare (ignore slider))
+                                  (with-slots (beat-size) *application-frame*
+                                    (let ((new-size (* 10 value)))
+                                      (unless (= beat-size new-size)
+                                        (setf beat-size new-size)
+                                        (redisplay-frame-pane *application-frame* (piano-roll-pane) :force-p t)))))))
    (interactor-pane (make-pane 'piano-roll-interactor-pane
                                :name 'interactor-pane))
    (pointer-documentation-pane :pointer-documentation
@@ -291,6 +304,12 @@ See also: `scroll-top-to', `scroll-center-to', `scroll-bottom-to'"
                                :scroll-bars nil))
   (:layouts
    (default
+    (vertically ()
+      (5/6 (scrolling () piano-roll-pane))
+      beat-size-slider
+      (1/6 (scrolling (:scroll-bar :vertical) interactor-pane))
+      pointer-documentation-pane))
+   (no-zoom-bar
     (vertically ()
       (5/6 (scrolling () piano-roll-pane))
       (1/6 (scrolling (:scroll-bar :vertical) interactor-pane))
