@@ -349,7 +349,7 @@ See also: `scroll-top-to', `scroll-center-to', `scroll-bottom-to'"
 (defmethod grid-size ((piano-roll piano-roll))
   (or (slot-value piano-roll 'grid-size)
       (let ((div (/ (slot-value piano-roll 'beat-size) 40)))
-        (/ 1 (nth (index-before-greater-than div +powers-of-two+)
+        (/ 1 (nth (max 0 (index-before-greater-than div +powers-of-two+))
                   +powers-of-two+)))))
 
 (defmethod (setf grid-size) (value (piano-roll piano-roll))
