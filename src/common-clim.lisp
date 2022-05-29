@@ -275,7 +275,8 @@ See also: `*theme*'"
 (define-command-table thundersnow-common-view-command-table)
 
 (define-command (com-refresh :name t :menu t
-                             :command-table thundersnow-common-view-command-table)
+                             :command-table thundersnow-common-view-command-table
+                             :keystroke (:f5))
     ()
   ;; make clim redraw stuff? this is just for testing; remove this command later
   nil)
