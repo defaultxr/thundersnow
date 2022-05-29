@@ -33,13 +33,6 @@
    ;; :default-view +textual-view+
    ))
 
-(define-presentation-method present (pattern (type pattern) (stream patterns-pane) (view textual-view) &key)
-  (with-room-for-graphics (stream)
-    (draw-rectangle* stream 0 0 16 16 :ink (if (playing-p pattern)
-                                               +green+
-                                               +red+))
-    (draw-text* stream (format nil "~S" pattern) 16 0 )))
-
 (defun display-patterns (frame stream)
   "Display all defined patterns in STREAM."
   (declare (ignorable frame))
@@ -48,9 +41,19 @@
     ;; (format-textual-list (all-pdefs) (lambda (p str)
     ;;                                    (present p 'pattern :stream stream)))
     (dolist (pdef (all-pdefs))
-      (with-output-as-presentation (stream pdef 'pattern)
-        (updating-output (stream :unique-id pdef)
-          (present pdef 'pattern :stream stream))))))
+      (present pdef 'pattern :stream stream))))
+
+(define-presentation-method present (pattern (type pattern) (stream patterns-pane) (view textual-view) &key)
+  (let ((status (clp::pattern-status pattern)))
+    (with-output-as-presentation (stream pattern 'pattern)
+      (updating-output (stream :uniqume-id pdef :cache-value status)
+        (with-room-for-graphics (stream)
+          (draw-rectangle* stream 0 0 15 15 :ink (case status
+                                                   (:starting +green-yellow+)
+                                                   (:playing +green+)
+                                                   (:ending +orange+)
+                                                   (:stopped +red+)))
+          (draw-text* stream (format nil "~S" pattern) 16 0 ))))))
 
 ;;; pattern pane
 
