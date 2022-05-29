@@ -12,6 +12,9 @@ Various resources and links about McCLIM, UI/UX design, and more.
 - define-drag-and-drop-translator
 - menu-choose
 - menu-choose-from-drawer
+** accessing panes/sheets/etc
+- frame-top-level-sheet
+- sheet-children
 ** define-command argument keywords
 - default
 - default-type
@@ -80,3 +83,13 @@ Various resources and links about McCLIM, UI/UX design, and more.
 ** https://common-lisp.net/project/mcclim/static/documents/drei.pdf
 * https://github.com/admich/adm-clim-lib
 CLIM utilities, including a tree view, datetime presentations, history persistence (undo/redo)
+* 07:58:13 alanz:       Is there a way to define a table cell with a maximum width and have text wrap in it?
+08:08:24 alanz:       I guess I can use something based on https://github.com/lokedhs/clim-test/blob/master/word-wrap.lisp
+08:18:24 scymtym:     there are builtin mechanisms. you can use (with-end-of-line-action (STREAM :wrap*) …) for word-based wrapping when the right margin is reached. there are multiple ways to configure the right margin within the table cell. one is (clime:with-temporary-margins (STREAM :right `(:absolute ,DESIRED-RIGHT-MARGIN)) …)
+08:21:14 alanz:       thanks
+08:21:56 alanz:       I figured there would be a way to do it, just not sure how.  I already have end-of-line action as wrap for the pane, it was just the margin that was troubling me
+08:22:40 scymtym:     note that :WRAP is characters-wise, :WRAP* is word-wise
+08:24:25 alanz:       :+1:.  But Setting ":end-of-line-action :wrap" for the pane seems to wrap at word boundaries?
+08:25:19 jackdaniel:  no, :wrap works at character boundaries, :wrap* looks for spaces (that is not very uax-whatever, I know)
+08:55:22 alanz:       It turns out "(clim:filling-output (stream :fill-width 400) ..)" does exactly what I need
+08:55:59 alanz:       As I want to specify a width, not a right margin
