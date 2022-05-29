@@ -3,10 +3,8 @@
 ;;;; piano-roll
 ;;; a piano roll, obviously
 ;; TODO:
-;; - allow notes to be added to the left of the start of the eseq (in which case it becomes the new 0 and the other notes are moved earlier in time)
+;; - allow notes to be added to the left of the start of the eseq (in which case it becomes the new 0 and the other notes are moved later in time)
 ;; FIX: check out: with-temporary-margins, with-translation
-;; NOTES:
-;; - define-application-command arguments can accept defaults: (arg-name arg-type :default default-value)
 
 ;;; util
 
