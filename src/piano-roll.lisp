@@ -470,7 +470,7 @@ See also: `scroll-top-to', `scroll-center-to', `scroll-bottom-to'"
       (fresh-line)
       (accept 'string :default (write-to-string (random 10))))))
 
-(define-piano-roll-command (com-move-event) ((record event) (offset-x real :default 0) (offset-y real :default 0))
+(define-piano-roll-command (com-move-event) ((record 'event) (offset-x 'real :default 0) (offset-y 'real :default 0))
   ;; offset-x and offset-y are where in the presentation that the click occurred.
   (declare (ignore offset-y))
   (drag-output-record (find-pane-named *application-frame* 'piano-roll-pane) record
@@ -507,7 +507,7 @@ See also: `scroll-top-to', `scroll-center-to', `scroll-bottom-to'"
   (multiple-value-bind (old-x old-y) (output-record-position presentation)
     (list presentation (- x old-x) (- y old-y))))
 
-(define-piano-roll-command (com-resize-event) ((record event) (offset-x real :default 0) (offset-y real :default 0))
+(define-piano-roll-command (com-resize-event) ((record 'event) (offset-x 'real :default 0) (offset-y 'real :default 0))
   (declare (ignorable record offset-x offset-y))
   (let* ((stream (find-pane-named *application-frame* 'piano-roll-pane))
          (damaged-region +nowhere+)
@@ -562,16 +562,14 @@ See also: `scroll-top-to', `scroll-center-to', `scroll-bottom-to'"
 (define-command (com-increase-beat-size :name t :menu t
                                         :command-table piano-roll-view-command-table
                                         :keystroke (#\= :control))
-    (&key
-     (increase 'real :default 10))
+    (&key (increase 'real :default 10))
   "Increase the length of one beat by INCREASE pixels."
   (incf (slot-value *application-frame* 'beat-size) increase))
 
 (define-command (com-decrease-beat-size :name t :menu t
                                         :command-table piano-roll-view-command-table
                                         :keystroke (#\- :control))
-    (&key
-     (decrease 'real :default 10))
+    (&key (decrease 'real :default 10))
   "Decrease the length of one beat by DECREASE pixels."
   (decf (slot-value *application-frame* 'beat-size) decrease))
 
