@@ -283,12 +283,8 @@ See also: `scroll-top-to', `scroll-center-to', `scroll-bottom-to'"
                           ("Help" :menu piano-roll-help-command-table))))
   (:panes
    (piano-roll-pane (make-pane 'piano-roll-pane))
-   (interactor-pane (make-clim-stream-pane
-                     :name 'interactor-pane
-                     :type 'piano-roll-interactor-pane)
-                    #+nil (make-pane 'piano-roll-interactor-pane
-                                     :name 'interactor
-                                     :scroll-bar :vertical))
+   (interactor-pane (make-pane 'piano-roll-interactor-pane
+                               :name 'interactor-pane))
    (pointer-documentation-pane :pointer-documentation
                                :name 'doc
                                :display-time :command-loop
@@ -297,12 +293,12 @@ See also: `scroll-top-to', `scroll-center-to', `scroll-bottom-to'"
    (default
     (vertically ()
       (5/6 (scrolling () piano-roll-pane))
-      (1/6 interactor-pane)
+      (1/6 (scrolling (:scroll-bar :vertical) interactor-pane))
       pointer-documentation-pane)))
   (:menu-bar t))
 
 (defmethod frame-standard-output ((frame piano-roll))
-  (find-pane-named frame 'interactor))
+  (find-pane-named frame 'interactor-pane))
 
 (defmethod eseq-of ((piano-roll piano-roll))
   (slot-value piano-roll 'eseq))
