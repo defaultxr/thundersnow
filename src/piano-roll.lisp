@@ -271,7 +271,7 @@ See also: `scroll-top-to', `scroll-center-to', `scroll-bottom-to'"
    (beat-size :initarg :beat-size :initform 200 :documentation "The width of one beat, in pixels.")
    (grid-size :initarg :beat-size :initform nil :documentation "The number of beats between each grid line. If nil, it is calculated from the current beat-size.")
    (y-size :initarg :y-size :initform 40 :documentation "The height of one pitch value (i.e. midinote), in pixels.")
-   (scale :initarg :scale :initform :major :documentation "The scale whose notes should be highlighted."))
+   (scale :initarg :scale :initform :major :reader scale :documentation "The scale whose notes should be highlighted."))
   (:command-table (piano-roll
                    :inherit-from (piano-roll-file-command-table
                                   piano-roll-edit-command-table
