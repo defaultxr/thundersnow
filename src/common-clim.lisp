@@ -201,6 +201,10 @@ See also: `*theme*'"
        (eql (beat event1) (beat event2))
        (eql (event-value event1 :midinote) (event-value event2 :midinote))))
 
+;;; common command table
+
+(define-command-table thundersnow-common-command-table)
+
 ;;; file commands
 
 (define-command-table thundersnow-common-file-command-table)
@@ -331,5 +335,23 @@ See also: `*theme*'"
 (define-command (com-about :name t :menu t
                            :command-table thundersnow-common-help-command-table)
     ()
-  (format t "~&thundersnow ~a~%digital audio workstation and live coding laboratory~%a struct.ws project by modula t. worm and contributors~%https://w.struct.ws/thundersnow~%" (asdf:component-version (asdf:find-system "thundersnow"))))
+  (format t "~&thundersnow ~a~%digital audio workstation and live coding laboratory~%a struct.ws project by modula t. worm and contributors~%" (asdf:component-version (asdf:find-system "thundersnow")))
+  (present "https://w.struct.ws/thundersnow" 'url))
+
+(define-presentation-type url ())
+
+(define-presentation-action open (url nil thundersnow-common-command-table
+                                  :gesture :select
+                                  :pointer-documentation "Open URL in the system's default browser")
+                            (url)
+  (format t "~&Opening URL ~S in the system's default browser...~%" url)
+  (open-url url)
+  nil)
+
+(define-presentation-action copy-url (url nil thundersnow-common-command-table
+                                      :pointer-documentation "Copy URL address to the system clipboard")
+                            (url)
+  (publish-selection *standard-output* :clipboard url 'string)
+  (format t "~&Copied URL ~S to the system clipboard.~%" url)
+  nil)
 
