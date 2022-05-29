@@ -422,7 +422,9 @@ See also: `scroll-top-to', `scroll-center-to', `scroll-bottom-to'"
     ()
   (play (slot-value *application-frame* 'eseq)))
 
-(define-command-table piano-roll-edit-command-table)
+(define-command-table piano-roll-edit-command-table
+  :inherit-from (thundersnow-common-edit-command-table)
+  :inherit-menu t)
 
 ;; FIX: default to mouse's current position
 (define-command (com-add :name t :menu t
@@ -547,7 +549,9 @@ See also: `scroll-top-to', `scroll-center-to', `scroll-bottom-to'"
     (object presentation window x y)
   (list presentation x y))
 
-(define-command-table piano-roll-view-command-table)
+(define-command-table piano-roll-view-command-table
+  :inherit-from (thundersnow-common-view-command-table)
+  :inherit-menu t)
 
 (define-command (com-beat-size :name t :menu t
                                :command-table piano-roll-view-command-table)
