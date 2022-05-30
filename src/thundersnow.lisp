@@ -190,49 +190,30 @@
                                 "Started"
                                 "Stopped")))
 
-(define-command-table thundersnow-edit-command-table)
+(define-command-table thundersnow-edit-command-table
+  :inherit-from (thundersnow-common-edit-command-table)
+  :inherit-menu t)
 
-(define-command-table thundersnow-view-command-table)
+(define-command-table thundersnow-view-command-table
+  :inherit-from (thundersnow-common-view-command-table)
+  :inherit-menu t)
 
 (define-command-table thundersnow-tools-command-table
   :inherit-from (thundersnow-common-tools-command-table)
   :inherit-menu t)
 
-;; (add-menu-item-to-command-table 'thundersnow-tools-command-table "GUIs" :divider nil)
-
 (define-command (com-test :name t :menu t
                           :command-table thundersnow-tools-command-table)
     ()
-  (format t "Hello!~%"))
-
-;; (define-command (com-piano-roll :name t :menu t
-;;                                 :command-table thundersnow-tools-command-table)
-;;     ()
-;;   (piano-roll))
-
-;; (define-command (com-tracker :name t :menu t
-;;                              :command-table thundersnow-tools-command-table)
-;;     ()
-;;   (tracker))
+  (format t "Hello!~%")
+  (format t "~&you picked ~s~%" (accepting-values ()
+                                  (accept '(member 1 2 3 4) :prompt "Number" :view +radio-box-view+))))
 
 (define-command-table thundersnow-help-command-table
   :inherit-from (thundersnow-common-help-command-table)
   :inherit-menu t)
 
-;; (define-command (com-about :name t :menu t
-;;                            :command-table thundersnow-help-command-table)
-;;     ()
-;;   (thundersnow-about))
 
-;; (define-command (com-readme :name "README" :menu t
-;;                             :command-table thundersnow-help-command-table)
-;;     ()
-;;   (thundersnow-readme))
-
-;; (define-command (com-repo :name t :menu t
-;;                           :command-table thundersnow-help-command-table)
-;;     ()
-;;   (thundersnow-repo))
 
 (define-presentation-action change (pattern nil thundersnow :gesture :select :pointer-documentation "Change pattern")
                             (pattern presentation)
@@ -269,10 +250,6 @@
 
 (defmethod frame-standard-output ((frame thundersnow))
   (find-pane-named frame 'interactor))
-
-#+nil
-(accepting-values (*query-io* :own-window t)
-  (accept '(member 1 2 3 4) :view +radio-box-view+ :stream *query-io*))
 
 ;;; main
 
