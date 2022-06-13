@@ -191,13 +191,6 @@
   :inherit-from (thundersnow-common-tools-command-table)
   :inherit-menu t)
 
-(define-command (com-test :name t :menu t
-                          :command-table thundersnow-tools-command-table)
-    ()
-  (format t "Hello!~%")
-  (format t "~&you picked ~s~%" (accepting-values ()
-                                  (accept '(member 1 2 3 4) :prompt "Number" :view +radio-box-view+))))
-
 (define-command-table thundersnow-help-command-table
   :inherit-from (thundersnow-common-help-command-table)
   :inherit-menu t)
