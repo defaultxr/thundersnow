@@ -104,7 +104,7 @@
 ;;; thundersnow frame
 
 (define-application-frame thundersnow ()
-  ((inspect :initarg :inspect :initform nil :documentation "The item to inspect in the inspector pane."))
+  ()
   (:command-table (thundersnow :inherit-from (thundersnow-common-command-table
                                               thundersnow-file-command-table
                                               thundersnow-edit-command-table
@@ -116,54 +116,41 @@
                                       ("View" :menu thundersnow-view-command-table)
                                       ("Tools" :menu thundersnow-tools-command-table)
                                       ("Help" :menu thundersnow-help-command-table))))
-  (:default-initargs
-   :pretty-name "thundersnow")
+  (:default-initargs :pretty-name "thundersnow")
   (:panes
-   ;; (raised (raising (:border-width 3 :background +Gray83+)
-   ;;           (make-pane 'check-box :choices '("First" "Second" "Third"))))
-   (logo :application
-         :scroll-bars nil
-         ;; :display-function
-         )
+   (logo :application :scroll-bars nil)
    (tempo (make-pane 'tempo-pane :name 'tempo-pane))
    (scope (make-pane 'scope :name 'scope))
    (patterns-pane (make-pane 'patterns-pane :name 'patterns-pane))
    (pattern-pane (make-pane 'pattern-pane :name 'pattern-pane))
-   ;; (input :text-editor)
-   ;; (pattern-view :application
-   ;;               :scroll-bars t
-   ;;               :display-function 'display-pattern)
-   (interactor :interactor))
+   (interactor :interactor)
+   (pointer-documentation-pane (make-pane 'pointer-documentation-pane)))
   (:layouts
    (default
-    (raising (:border-width 0 :background +black+)
-      (vertically ()
-        (1/10 (horizontally () ;; toolbar
-                (8/10 logo)
-                ;; FIX: add server status pane with cpu load, number of active ugens, active synths, active groups, and number of synthdefs
-                (1/10 tempo)
-                (1/10 scope)))
-        (7/10 (horizontally ()
-                (1/2 patterns-pane)
-                (1/2 pattern-pane))
-              ;; (labelling (:label "Options")
-              ;;   input)
-              )
-        (make-pane 'clime:box-adjuster-gadget)
-        (2/10 interactor))))
+    (vertically ()
+      (1/10 (horizontally () ;; toolbar
+              (8/10 logo)
+              ;; FIX: add server status pane with cpu load, number of active ugens, active synths, active groups, and number of synthdefs
+              (1/10 tempo)
+              (1/10 scope)))
+      (make-pane 'clime:box-adjuster-gadget)
+      (7/10 (horizontally ()
+              (1/2 patterns-pane)
+              (make-pane 'clime:box-adjuster-gadget)
+              (1/2 pattern-pane)))
+      (make-pane 'clime:box-adjuster-gadget)
+      (2/10 interactor)
+      (1/200 (horizontally ()
+               pointer-documentation-pane))))
    (test-interactor
     (vertically ()
       interactor)))
-  (:pointer-documentation t)
   ;; (:top-level (thundersnow-frame-top-level . nil))
   )
 
 (defmethod enable-frame :after ((frame thundersnow))
   (let ((tempo-pane (find-pane-named frame 'tempo)))
-    (clime:schedule-event tempo-pane (make-instance 'timer-event :sheet tempo-pane) 0.1))
-  (if-let ((pane (pattern-pane frame)))
-    (setf (pane-pattern pane) (slot-value frame 'inspect))
-    (sprint 'pane-is-nil)))
+    (clime:schedule-event tempo-pane (make-instance 'timer-event :sheet tempo-pane) 0.1)))
 
 (defmethod pattern-pane ((frame standard-application-frame))
   (find-pane-named frame 'pattern-pane))
@@ -173,8 +160,7 @@
 
 (defmethod (setf pane-pattern) (pattern (frame standard-application-frame))
   (when-let ((pane (pattern-pane frame)))
-    (setf (pane-pattern pane) pattern))
-  (setf (slot-value frame 'inspect) pattern))
+    (setf (pane-pattern pane) pattern)))
 
 ;;; commands
 
