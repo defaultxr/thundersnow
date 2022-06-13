@@ -3,7 +3,7 @@
 (in-package #:thundersnow/common-clim)
 
 (defclass tempo-pane (basic-gadget)
-  ())
+  ((displayed-tempo :initform (tempo *clock*) :accessor tempo-pane-displayed-tempo)))
 
 (defmethod activate-gadget :after ((tempo-pane tempo-pane))
   (clime:schedule-event tempo-pane (make-instance 'timer-event :sheet tempo-pane) 0.1))
@@ -20,8 +20,8 @@
                               (make-gray-color 0.5)))
     (draw-text tempo-pane
                (if clock
-                   (let ((tempo (cl-patterns:tempo clock)))
-                     (format nil "~f BPM~%~$ Hz" (* 60 tempo) tempo))
+                   (let ((tempo (tempo-pane-displayed-tempo tempo-pane)))
+                     (format nil "~f BPM~%~d (~$) Hz" (* 60 tempo) tempo tempo))
                    (format nil "null *clock*~%(click to create)"))
                (bounding-rectangle-center region)
                :align-x :center :align-y :center)))
@@ -31,11 +31,20 @@
   (when (gadget-active-p tempo-pane)
     (clime:schedule-event tempo-pane (make-instance 'timer-event :sheet tempo-pane) 0.01)))
 
-(defmethod handle-event ((tempo-pane tempo-pane) (event climi::pointer-button-press-event))
-  (if *clock*
-      (execute-frame-command *application-frame* (list 'com-set-tempo))
-      (start-clock-loop :tempo 110/60)))
+(defmethod handle-event ((tempo-pane tempo-pane) (event pointer-button-press-event))
+  (switch ((pointer-event-button event))
+    (+pointer-left-button+
+     (if *clock*
+         (execute-frame-command *application-frame* (list 'com-set-tempo))
+         (start-clock-loop :tempo 110/60)))
+    (+pointer-right-button+
+     (case (menu-choose `(("Set Tempo" :value set-tempo
+                                       :documentation "Set the clock to a specific tempo"))
+                        :label (format nil "~S tempo" *clock*))
+       (set-tempo
+        (execute-frame-command *application-frame* (list 'com-set-tempo)))))))
 
 (defmethod handle-event ((tempo-pane tempo-pane) (event climi::pointer-scroll-event))
   (when *clock*
-    (incf (tempo *clock*) (* -1/600 (slot-value event 'climi::delta-y)))))
+    (incf (tempo-pane-displayed-tempo tempo-pane) (* -1/600 (slot-value event 'climi::delta-y)))
+    (setf (tempo *clock*) (tempo-pane-displayed-tempo tempo-pane))))
