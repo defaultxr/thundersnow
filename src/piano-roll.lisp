@@ -229,11 +229,6 @@ See also: `scroll-top-to', `scroll-center-to', `scroll-bottom-to'"
          (pitch (y-pixel-to-pitch-quantized (slot-value event 'climi::sheet-y) frame)))
     (com-add (event :beat beat :midinote pitch))))
 
-(define-presentation-method present (background (type %background) stream (view graphical-view) &key)
-  (draw-rectangle* stream
-                   0 0 (piano-roll-width stream) (piano-roll-height stream)
-                   :filled nil))
-
 (define-presentation-method present (event (type event) stream (view graphical-view) &key)
   (let* ((frame (pane-frame stream))
          (beat (beat event))
@@ -379,7 +374,6 @@ See also: `scroll-top-to', `scroll-center-to', `scroll-bottom-to'"
          (grid-accent-color (make-rgb-color 1 1 1))
          (scale (slot-value frame 'scale))
          (scale-midinotes (when scale (scale-midinotes scale :octave :all))))
-    (present (make-instance '%background) '%background :stream stream)
     ;; draw the vertical grid lines and beat numbers at the bottom
     (loop :for beat :from 0 :by grid-size :upto (max (+ (dur frame) 32) (/ stream-width (* beat-size grid-size)))
           :for xpos := (beat-to-x-pixel beat frame)
@@ -589,18 +583,15 @@ See also: `scroll-top-to', `scroll-center-to', `scroll-bottom-to'"
 ;; - destination-object context-type frame presentation destination-presentation event window x y
 
 (define-presentation-action add
-    (%background nil piano-roll
+    (t nil piano-roll
      :gesture :add
      :pointer-documentation
-     ((%background x y stream frame)
+     ((object x y stream frame)
       (with-slots (beat-size) frame
         (format stream "Add event at beat ~$, midinote ~a" (x-pixel-to-beat-floored x frame) y)))
-     ;; :tester ((object event)
-     ;;          ;; (setf krovo::tmp (list object event))
-     ;;          t
-     ;;          )
-     )
-    (%background x y frame)
+     :tester ((object window)
+              (typep window 'piano-roll-pane)))
+    (object x y frame)
   (let ((beat (x-pixel-to-beat-floored x frame))
         (y-val (y-pixel-to-pitch-quantized y frame)))
     (com-add (event :beat beat :midinote y-val))
