@@ -292,27 +292,27 @@ See also: `*theme*'"
 (define-command (com-thundersnow :name t :menu t
                                  :command-table thundersnow-common-tools-command-table)
     ()
-  (thundersnow/thundersnow:thundersnow))
+  (raise-frame (thundersnow/thundersnow:thundersnow)))
 
 (define-command (com-tracker :name t :menu t
                              :command-table thundersnow-common-tools-command-table)
     ()
-  (thundersnow/tracker:tracker))
+  (raise-frame (thundersnow/tracker:tracker)))
 
 (define-command (com-piano-roll :name t :menu t
                                 :command-table thundersnow-common-tools-command-table)
     ()
-  (thundersnow/piano-roll:piano-roll))
+  (raise-frame (thundersnow/piano-roll:piano-roll)))
 
 (define-command (com-stepseq :name t :menu t
                              :command-table thundersnow-common-tools-command-table)
     ()
-  (thundersnow/stepseq:stepseq))
+  (raise-frame (thundersnow/stepseq:stepseq)))
 
 (define-command (com-wave-editor :name t :menu t
                                  :command-table thundersnow-common-tools-command-table)
     ()
-  (thundersnow/wave-editor:wave-editor))
+  (raise-frame (thundersnow/wave-editor:wave-editor)))
 
 ;;; help commands
 
