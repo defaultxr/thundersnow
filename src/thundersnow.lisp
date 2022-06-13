@@ -23,84 +23,6 @@
 (defvar *tmp* nil
   "Temporary variable for convenience during development.")
 
-;;; patterns pane
-
-(defclass patterns-pane (application-pane)
-  ((dictionary :initarg :dictionary :initform cl-patterns::*pdef-dictionary* :accessor pane-dictionary))
-  (:default-initargs
-   :name 'pattern
-   :display-function 'display-patterns
-   ;; :default-view +textual-view+
-   ))
-
-(defun display-patterns (frame stream)
-  "Display all defined patterns in STREAM."
-  (declare (ignorable frame))
-  (bind (((:accessors dictionary) stream)
-         (*package* (find-package 'thundersnow/thundersnow))) ;; FIX: there is probably a better way to change the *package* of a frame or stream
-    ;; (format-textual-list (all-pdefs) (lambda (p str)
-    ;;                                    (present p 'pattern :stream stream)))
-    (dolist (pdef (all-pdefs))
-      (present pdef 'pattern :stream stream))))
-
-(define-presentation-method present (pattern (type pattern) (stream patterns-pane) (view textual-view) &key)
-  (let ((status (clp::pattern-status pattern)))
-    (with-output-as-presentation (stream pattern 'pattern)
-      (updating-output (stream :uniqume-id pdef :cache-value status)
-        (with-room-for-graphics (stream)
-          (draw-rectangle* stream 0 0 15 15 :ink (case status
-                                                   (:starting +green-yellow+)
-                                                   (:playing +green+)
-                                                   (:ending +orange+)
-                                                   (:stopped +red+)))
-          (draw-text* stream (format nil "~S" pattern) 16 0 ))))))
-
-;;; pattern pane
-
-(defclass pattern-pane (application-pane)
-  ((pattern :initarg :pattern :initform nil :accessor pane-pattern))
-  (:default-initargs
-   :name 'pattern
-   :display-function 'display-pattern
-   :default-view +textual-view+))
-
-(define-presentation-type pattern ())
-
-(define-presentation-method present (pattern (type pattern) stream (view textual-view) &key)
-  (print pattern stream))
-
-(define-gesture-name :select :pointer-button (:left))
-
-(define-gesture-name :erase :pointer-button (:middle))
-
-;; (define-presentation-method present ((pattern pattern) (type pattern) stream (view textual-view) &key)
-;;   (print 'gen-pat-present *debug-io*)
-;;   ;; (closer-mop:class-direct-slots (find-class 'pbind))
-;;   (format stream "~s" pattern))
-
-;; (define-presentation-method present ((pbind pbind) (type pattern) stream (view textual-view) &key)
-;;   ;; (closer-mop:class-direct-slots (find-class 'pbind))
-;;   (format stream "(~s " 'cl-patterns::pbind)
-;;   (doplist (key value (slot-value pbind 'cl-patterns::pairs))
-;;       (present key 'pattern)
-;;     (present value 'pattern)
-;;     (format stream "~%"))
-;;   (format stream ")"))
-
-;; (define-presentation-method present ((pseq pseq) (type pattern) stream (view textual-view) &key)
-;;   ;; (closer-mop:class-direct-slots (find-class 'pbind))
-;;   (with-output-as-presentation (stream pseq 'pattern)
-;;     (with-slots ((list cl-patterns::list) (repeats cl-patterns::repeats)) pseq
-;;       (format stream "(~s ~s ~s)" 'cl-patterns::pseq list repeats))))
-
-(defun display-pattern (frame stream &optional pattern)
-  "Display a pattern in STREAM."
-  (declare (ignorable frame))
-  (let ((pattern (or pattern (pane-pattern stream))))
-    (with-output-as-presentation (stream pattern 'pattern)
-      (updating-output (stream :unique-id pattern)
-        (present pattern 'pattern :stream stream)))))
-
 ;;; thundersnow frame
 
 (define-application-frame thundersnow ()
@@ -159,7 +81,7 @@
   (find-pane-named frame 'pattern-pane))
 
 (defmethod pane-pattern ((frame standard-application-frame))
-  (pane-pattern (find-pane-named frame 'pattern-pane)))
+  (pane-pattern (pattern-pane frame)))
 
 (defmethod (setf pane-pattern) (pattern (frame standard-application-frame))
   (when-let ((pane (pattern-pane frame)))
@@ -195,46 +117,178 @@
   :inherit-from (thundersnow-common-help-command-table)
   :inherit-menu t)
 
-
-
-(define-presentation-action change (pattern nil thundersnow :gesture :select :pointer-documentation "Change pattern")
-                            (pattern presentation)
-  (sprint 'hi)
-  (sprint pattern)
-  (sprint presentation)
-  (redisplay-frame-pane *application-frame* (find-pane 'patterns-pane) :force-p t)
+(define-presentation-action select (pattern nil thundersnow
+                                    :gesture :select
+                                    :pointer-documentation "Select pattern")
+                            (pattern)
+  (with-room-for-graphics ()
+    (format t "~&Select pattern: ~s~%" pattern))
+  (let ((pattern-pane (pattern-pane *application-frame*)))
+    (setf (pane-pattern pattern-pane) pattern)
+    (redisplay-frame-pane *application-frame* pattern-pane :force-p t))
   nil)
 
-(define-presentation-action play-or-end (pattern nil thundersnow :gesture :select :pointer-documentation "Play or end")
-                            (pattern presentation)
-  (play-or-end pattern)
-  (redisplay-frame-pane *application-frame* (find-pane 'patterns-pane) :force-p t)
+(define-presentation-action play (pattern nil thundersnow
+                                  :gesture nil
+                                  :tester ((object)
+                                           (and (pattern-p object)
+                                                (eql (clp::pattern-status object) :stopped)))
+                                  :pointer-documentation "Play pattern")
+                            (pattern)
+  (play pattern)
+  (redisplay-frame-pane *application-frame* (patterns-pane *application-frame*) :force-p t)
   nil)
 
-(define-presentation-to-command-translator change-pattern
-    (pattern com-change-pattern thundersnow
-     :gesture :select
-     :pointer-documentation "Change pattern"
-     :menu nil
-     :echo t)
-    (object presentation)
-  (list presentation *unsupplied-argument-marker*))
+(define-presentation-action end (pattern nil thundersnow
+                                 :gesture nil
+                                 :tester ((object)
+                                          (and (pattern-p object)
+                                               (eql (clp::pattern-status object) :playing)))
+                                 :pointer-documentation "End pattern")
+                            (pattern)
+  (end pattern)
+  (redisplay-frame-pane *application-frame* (patterns-pane *application-frame*) :force-p t)
+  nil)
 
-(define-command (com-change-pattern)
-    ((pattern 'presentation :prompt "Old pattern")
-     (new-pattern '(or pattern symbol string) :prompt "New pattern"))
-  (sprint 'new-com-change-pattern)
-  (sprint pattern)
-  (setf *tmp* (typecase new-pattern
-                (pattern new-pattern)
-                (symbol (find-pdef new-pattern t))
-                (string (eval new-pattern)))))
+(define-presentation-action stop (pattern nil thundersnow
+                                  :gesture nil
+                                  :tester ((object)
+                                           (and (pattern-p object)
+                                                (eql (clp::pattern-status object) :playing)))
+                                  :pointer-documentation "Stop pattern")
+                            (pattern)
+  (stop pattern)
+  (redisplay-frame-pane *application-frame* (patterns-pane *application-frame*) :force-p t)
+  nil)
 
 (defmethod frame-standard-output ((frame thundersnow))
   (find-pane-named frame 'interactor))
 
-;;; main
+;;; patterns pane
 
+(defclass patterns-pane (application-pane)
+  ((dictionary :initarg :dictionary :initform cl-patterns::*pdef-dictionary* :accessor pane-dictionary))
+  (:default-initargs :name 'pattern
+                     :display-function 'display-patterns))
+
+(defun patterns-pane (&optional frame)
+  "Get the patterns-pane of FRAME.
+
+See also: `pattern-pane', `thundersnow'"
+  (find-pane-named (or frame (thundersnow)) 'patterns-pane))
+
+(defun display-patterns (frame stream)
+  "Display all defined patterns in STREAM."
+  (declare (ignorable frame))
+  (let ((*package* (find-package 'thundersnow/thundersnow))) ;; FIX: there is probably a better way to change the default *package* of a frame/stream
+    (updating-output (stream)
+      (dolist (pdef (all-pdefs))
+        (present pdef 'pattern :stream stream)))))
+
+(define-presentation-method present (pattern (type pattern) (stream patterns-pane) (view textual-view) &key)
+  (let ((status (clp::pattern-status pattern)))
+    (updating-output (stream :uniqume-id pdef :cache-value status)
+      (with-output-as-presentation (stream pattern 'pattern)
+        (with-room-for-graphics (stream)
+          (draw-rectangle* stream 0 0 16 16 :ink (case status
+                                                   (:starting +green-yellow+)
+                                                   (:playing +green+)
+                                                   (:ending +orange+)
+                                                   (:stopped +red+)))
+          (draw-text* stream (format nil "~S" pattern) 16 0 :align-y :bottom))))))
+
+;;; pattern pane
+
+(defclass pattern-pane (application-pane)
+  ((pattern :initarg :pattern :initform nil :accessor pane-pattern))
+  (:default-initargs :name 'pattern
+                     :display-function 'display-pattern
+                     :default-view +graphical-view+))
+
+(defun pattern-pane (&optional frame)
+  "Get the pattern-pane of FRAME.
+
+See also: `patterns-pane', `thundersnow'"
+  (find-pane-named (or frame (thundersnow)) 'pattern-pane))
+
+(define-presentation-type pattern ()
+  :inherit-from t)
+
+(define-presentation-type slot (object accessor)
+  :inherit-from 'pattern)
+
+(define-presentation-method present (object (type number) stream (view graphical-view) &key)
+  (prin1 object stream))
+
+(define-presentation-method present (object (type symbol) stream (view graphical-view) &key)
+  (prin1 object stream))
+
+(define-presentation-method present (object (type pattern) stream (view graphical-view) &key)
+  (prin1 object stream))
+
+(define-presentation-method present ((object pattern) (type pattern) stream (view graphical-view) &key)
+  (let ((class (class-of object)))
+    (format stream "(~S" (class-name class))
+    (closer-mop:ensure-finalized class)
+    (multiple-value-bind (req opt) (parse-ordinary-lambda-list (function-arglist (class-name class)))
+      (dolist (slot (append req (mapcar #'car opt)))
+        (format stream " ")
+        (present (slot-value object slot) `(slot ,object ,slot) :stream stream)))
+    (format stream ")")))
+
+(define-presentation-action change-value (slot nil thundersnow
+                                          :gesture :select
+                                          :pointer-documentation
+                                          ((object stream presentation)
+                                           (let ((type (presentation-type presentation)))
+                                             (format stream "Change ~S ~S value" (class-name (class-of (second type))) (third type)))))
+                            (object presentation)
+  (setf *tmp* presentation)
+  (format t "~&Change-value: slot: ~S ~S~%" object presentation)
+  (destructuring-bind (type pattern slot) (presentation-type presentation)
+    (declare (ignore type))
+    (setf (pattern-value pattern slot)
+          (accepting-values ()
+            (accept t :prompt (format nil "Change ~S ~S value" (class-name (class-of pattern)) slot)
+                      :default object)))))
+
+(define-presentation-method present ((pbind pbind) (type pattern) stream (view graphical-view) &key)
+  (with-room-for-graphics (stream)
+    (format stream "(~S " 'pbind)
+    (with-room-for-graphics (stream)
+      (formatting-table (stream)
+        (doplist (key val (slot-value pbind 'cl-patterns::pairs))
+          (formatting-row (stream)
+            (formatting-cell (stream)
+              (present key 'symbol :stream stream))
+            (formatting-cell (stream)
+              (present val `(slot ,pbind ,key) :stream stream))))))
+    (format stream ")")))
+
+(define-presentation-method present ((pdef pdef) (type pattern) stream (view graphical-view) &key)
+  (with-room-for-graphics (stream)
+    (format stream "(~S " 'pdef)
+    (let ((name (pdef-name pdef)))
+      (present name (presentation-type-of name) :stream stream))
+    (format stream "~%")
+    (indenting-output (stream "    ")
+      (with-room-for-graphics (stream)
+        (let ((val (pdef-pattern pdef)))
+          (present val (presentation-type-of val) :stream stream))
+        (format stream ")")))))
+
+(define-gesture-name :select :pointer-button (:left))
+
+(defun display-pattern (frame stream &optional pattern)
+  "Display a pattern in STREAM."
+  (declare (ignorable frame))
+  (let ((*package* (find-package 'thundersnow))
+        (pattern (or pattern (pane-pattern stream))))
+    (with-output-as-presentation (stream pattern 'pattern)
+      (updating-output (stream :unique-id pattern)
+        (present pattern 'pattern :stream stream)))))
+
+;;; main
 
 (defun thundersnow (&rest args &key pattern)
   "Start thundersnow."
