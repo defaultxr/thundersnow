@@ -78,15 +78,35 @@ See also: `note-text', `beat-text'"
 
 ;;; initialization
 
+(defvar *configuration-directory* (uiop:xdg-config-home "thundersnow")
+  "The directory Thundersnow's configuration is stored.")
+
+(defun configuration-directory (&optional subdirectory)
+  "Get the full path of Thundersnow's configuration directory. With SUBDIRECTORY, get the specified subdirectory of it.
+
+Examples:
+
+;; (configuration-directory) ;=> \"/home/user/.config/thundersnow/\"
+;; (configuration-directory \"themes\") ;=> \"/home/user/.config/thundersnow/themes/\""
+  (uiop:native-namestring
+   (if subdirectory
+       (join-pathnames *configuration-directory* subdirectory)
+       *configuration-directory*)))
+
+(defun (setf configuration-directory) (directory &optional subdirectory)
+  (when subdirectory
+    (error "Cannot set subdirectories of ~S." 'configuration-directory))
+  (setf *configuration-directory* (uiop:native-namestring directory)))
+
 (defvar *initialized* nil
   "True after `thundersnow-initialize' has been run and the configuration has been loaded.")
 
-(defun load-init ()
+(defun load-init-file ()
   "Load the user's custom configurations by checking a few common locations."
-  (dolist (file (list (uiop:xdg-config-home "thundersnow/init.lisp")
+  (dolist (file (list (merge-pathnames "init.lisp" (configuration-directory))
                       (concat (uiop:getenv "HOME") "/.thundersnow.lisp")))
     (when (load file :if-does-not-exist nil)
-      (return-from load-init))))
+      (return-from load-init-file))))
 
 (defun thundersnow-ensure-initialized ()
   "Run thundersnow's initialization routine if it hasn't already been run."
@@ -95,6 +115,6 @@ See also: `note-text', `beat-text'"
 
 (defun thundersnow-initialize ()
   "Run thundersnow's initialization routine; read config files, etc."
-  (load-init)
+  (load-init-file)
   (setf *initialized* t))
 
