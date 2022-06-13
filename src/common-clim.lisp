@@ -328,8 +328,8 @@ See also: `*theme*'"
     ()
   (open-url (asdf:system-homepage (asdf:find-system :thundersnow t))))
 
-(define-command (com-bugs :name t :menu t
-                          :command-table thundersnow-common-help-command-table)
+(define-command (com-issues :name t :menu t
+                            :command-table thundersnow-common-help-command-table)
     ()
   (open-url (asdf:system-bug-tracker (asdf:find-system :thundersnow t))))
 
