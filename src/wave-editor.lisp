@@ -172,7 +172,8 @@ See also: `sound-frame-pixel'"
 (define-application-frame wave-editor ()
   ((second-px :initarg :second-px :initform 1000))
   (:command-table (wave-editor
-                   :inherit-from (wave-editor-file-command-table
+                   :inherit-from (thundersnow-common-command-table
+                                  wave-editor-file-command-table
                                   wave-editor-edit-command-table
                                   wave-editor-view-command-table
                                   wave-editor-tools-command-table

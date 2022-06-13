@@ -271,7 +271,8 @@ See also: `scroll-top-to', `scroll-center-to', `scroll-bottom-to'"
    (y-size :initarg :y-size :initform 40 :documentation "The height of one pitch value (i.e. midinote), in pixels.")
    (scale :initarg :scale :initform :major :reader scale :documentation "The scale whose notes should be highlighted."))
   (:command-table (piano-roll
-                   :inherit-from (piano-roll-file-command-table
+                   :inherit-from (thundersnow-common-command-table
+                                  piano-roll-file-command-table
                                   piano-roll-edit-command-table
                                   piano-roll-view-command-table
                                   piano-roll-tools-command-table

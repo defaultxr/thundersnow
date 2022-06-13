@@ -38,7 +38,8 @@
 (define-application-frame stepseq ()
   ()
   (:command-table (stepseq
-                   :inherit-from (stepseq-file-command-table
+                   :inherit-from (thundersnow-common-command-table
+                                  stepseq-file-command-table
                                   stepseq-edit-command-table
                                   stepseq-view-command-table
                                   stepseq-tools-command-table

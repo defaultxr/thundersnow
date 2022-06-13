@@ -185,7 +185,8 @@
                                                                          :dur 1/4)
                                                                    (make-list 16))))
   (:command-table (tracker
-                   :inherit-from (tracker-file-command-table
+                   :inherit-from (thundersnow-common-command-table
+                                  tracker-file-command-table
                                   tracker-edit-command-table
                                   tracker-view-command-table
                                   tracker-tools-command-table

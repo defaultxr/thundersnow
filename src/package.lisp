@@ -72,6 +72,8 @@
 
            #:event-presentation-equal
 
+           #:thundersnow-common-command-table
+
            #:thundersnow-common-file-command-table
            #:com-set-tempo
 
