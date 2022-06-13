@@ -1,15 +1,3 @@
-(uiop:define-package #:thundersnow/tests
-  (:nicknames #:ts/t #:ts/tests)
-  (:use)
-  (:mix #:fiveam
-        #:clim
-        #:clim-lisp
-        #:clim-extensions
-        #:thundersnow/common
-        #:thundersnow/common-clim
-        #:alexandria
-        #:mutility))
-
 (in-package #:thundersnow/tests)
 
 ;;;; t/test.lisp - basic tests and test utilities/fixtures/etc for the thundersnow test suite.
