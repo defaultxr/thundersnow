@@ -148,6 +148,9 @@
   ;; (:top-level (thundersnow-frame-top-level . nil))
   )
 
+(defmethod initialize-instance :before ((thundersnow thundersnow) &key &allow-other-keys)
+  (thundersnow-ensure-initialized))
+
 (defmethod enable-frame :after ((frame thundersnow))
   (let ((tempo-pane (find-pane-named frame 'tempo)))
     (clime:schedule-event tempo-pane (make-instance 'timer-event :sheet tempo-pane) 0.1)))
@@ -239,9 +242,6 @@
 
 ;;; main
 
-(defmethod initialize-instance :before ((thundersnow thundersnow) &key &allow-other-keys)
-  (unless *initialized*
-    (thundersnow-initialize)))
 
 (defun thundersnow (&rest args &key pattern)
   "Start thundersnow."

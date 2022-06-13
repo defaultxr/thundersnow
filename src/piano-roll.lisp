@@ -312,6 +312,9 @@ See also: `scroll-top-to', `scroll-center-to', `scroll-bottom-to'"
       pointer-documentation-pane)))
   (:menu-bar t))
 
+(defmethod initialize-instance :before ((piano-roll piano-roll) &key &allow-other-keys)
+  (thundersnow-ensure-initialized))
+
 (defmethod enable-frame :after ((frame piano-roll))
   (scroll-focus-pitch (piano-roll-pane frame) 64))
 

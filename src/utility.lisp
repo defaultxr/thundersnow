@@ -88,6 +88,11 @@ See also: `note-text', `beat-text'"
     (when (load file :if-does-not-exist nil)
       (return-from load-init))))
 
+(defun thundersnow-ensure-initialized ()
+  "Run thundersnow's initialization routine if it hasn't already been run."
+  (unless *initialized*
+    (thundersnow-initialize)))
+
 (defun thundersnow-initialize ()
   "Run thundersnow's initialization routine; read config files, etc."
   (load-init)

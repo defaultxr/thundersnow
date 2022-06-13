@@ -28,6 +28,7 @@
 
            #:*initialized*
            #:load-init
+           #:thundersnow-ensure-initialized
            #:thundersnow-initialize)
   (:local-nicknames (:a :alexandria)
                     (:clp :cl-patterns)))

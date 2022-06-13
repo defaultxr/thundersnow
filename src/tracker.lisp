@@ -205,6 +205,9 @@
   (:menu-bar t)
   (:pointer-documentation t))
 
+(defmethod initialize-instance :before ((tracker tracker) &key &allow-other-keys)
+  (thundersnow-ensure-initialized))
+
 (defgeneric frame-ptrack (frame)
   (:documentation "The `ptrack' associated with FRAME."))
 

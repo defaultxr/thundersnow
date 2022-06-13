@@ -65,6 +65,9 @@
       interactor)))
   (:pointer-documentation t))
 
+(defmethod initialize-instance :before ((stepseq stepseq) &key &allow-other-keys)
+  (thundersnow-ensure-initialized))
+
 (defun stepseq ()
   "Open a stepseq or get one of the instances already open.
 

@@ -181,6 +181,9 @@ See also: `sound-frame-pixel'"
       pointer-documentation-pane)))
   (:menu-bar t))
 
+(defmethod initialize-instance :before ((wave-editor wave-editor) &key &allow-other-keys)
+  (thundersnow-ensure-initialized))
+
 (define-presentation-action select (sound-frame nil wave-editor
                                     :gesture :select
                                     :pointer-documentation
