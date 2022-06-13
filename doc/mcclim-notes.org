@@ -78,7 +78,11 @@ Various resources and links about McCLIM, UI/UX design, and more.
 2022-05-11 02:12:29	jackdaniel	it is surprising, because we do compute the intersection with parents in repaint-sheet
 2022-05-11 02:14:34	jackdaniel	defaultxr: btw, this is not a noob quesiton;
 2022-05-11 02:26:22	jackdaniel	I've added this snippet to the wiki in "How to Guides"
-
+* when to use updating-output
+2022-06-11 12:06:19	contrapunctus	jackdaniel: you told me to remove calls to `updating-output` before, so I was wondering in what situations it is required, and in what situations it's enough to just have `:incremental-redisplay t` for the pane. (Perhaps I could add this information to the manual.)
+2022-06-11 12:08:23	jackdaniel	sole :incremental-redisplay t will compare output records before and after the redisplay (the display function will run fully), if you add updating-output caching points, then their bodies will be executed conditionally based on the cache test, so there is less to a) display, b) compare for a difference
+2022-06-11 12:08:51	jackdaniel	there is also the function redisplay-output-record that may be used to recompute only part of the already displayed history
+2022-06-11 12:09:03	jackdaniel	in other words updating-output gives you additional caching points
 * drei info
 ** https://common-lisp.net/project/mcclim/static/documents/drei.pdf
 * https://github.com/admich/adm-clim-lib
