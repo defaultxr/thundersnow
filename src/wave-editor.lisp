@@ -11,30 +11,18 @@
 
 ;;; gui stuff
 
-(defclass wave-editor-pane (application-pane)
+(defclass wave-editor-pane (scroll-position-preserving-mixin application-pane)
   ((sound :initarg :sound :initform nil :type (or null bdef) :documentation "The sound instance as a `bdef'.")
    (point :initarg :point :initform 0 :type (or integer list) :documentation "The frame that the point is to the left of, or a list consisting of the start and end points of the region if active.")
    (second-px :initarg :second-px :initform 1000 :type number :documentation "The number of horizontal pixels per second (i.e. the \"zoom\" level of the pane).")
    (horizontal-margin :initarg :horizontal-margin :initform 10 :type (real 0) :documentation "The margin between the left/right edges of the pane and the start/end of the waveform.")
    (vertical-margin :initarg :y-margin :initform 40 :type (real 0) :documentation "The margin between the top/bottom of the pane and 1 and -1 of the waveform.")
-   (%cached-frames :initform nil :documentation "Cached frames from the sound. Frames are cached since getting a buffer's contents from the server may take a long time.")
-   (%saved-extent :initform nil :documentation "The scroll position to return to when redisplaying."))
-  (:default-initargs
-   :name 'wave-editor
-   :display-function 'draw-wave-editor
-   :display-time :command-loop
-   ;; :default-view +graphical-view+
-   :foreground (theme-color :foreground)
-   :background (theme-color :background)))
-
-(defmethod handle-event :after ((stream wave-editor-pane) (event climi::pointer-scroll-event))
-  (with-slots (%saved-extent) stream
-    (let* ((new-region (pane-viewport-region stream))
-           (should-redraw (or (/= (rectangle-min-x new-region) (rectangle-min-x %saved-extent))
-                              (/= (rectangle-max-x new-region) (rectangle-max-x %saved-extent)))))
-      (setf %saved-extent new-region)
-      (when should-redraw
-        (redisplay-frame-pane (pane-frame stream) stream :force-p t)))))
+   (%cached-frames :initform nil :documentation "Cached frames from the sound. Frames are cached since getting a buffer's contents from the server may take a long time."))
+  (:default-initargs :name 'wave-editor-pane
+                     :display-function 'draw-wave-editor
+                     :display-time :command-loop ;; :default-view +graphical-view+
+                     :foreground (theme-color :foreground)
+                     :background (theme-color :background)))
 
 (define-presentation-type bdef ())
 
@@ -42,10 +30,6 @@
 
 (define-presentation-type sound-frame ())
 
-(defmethod handle-repaint :before ((stream wave-editor-pane) region)
-  ;; save the scroll position
-  (with-slots (%saved-extent) stream
-    (setf %saved-extent (pane-viewport-region stream))))
 
 (defmethod sound ((this wave-editor-pane))
   (slot-value this 'sound))
@@ -94,7 +78,7 @@ See also: `sound-frame-pixel'"
 
 (defun draw-wave-editor (frame stream) ;; visible frames only (fastest)
   (declare (ignore frame))
-  (with-slots (sound point second-px horizontal-margin vertical-margin %saved-extent) stream
+  (with-slots (sound point second-px horizontal-margin vertical-margin) stream
     (unless sound
       (return-from draw-wave-editor nil))
     (let* ((region (sheet-region stream))
@@ -104,7 +88,7 @@ See also: `sound-frame-pixel'"
            (line-color (theme-color :foreground))
            (frames (cached-frames-for stream))
            (num-frames (bdef-length sound))
-           (visible-region %saved-extent)
+           (visible-region (pane-viewport-region stream))
            (left-frame (max 0 (truncate (pixel-sound-frame stream (rectangle-min-x visible-region)))))
            (right-frame (max 0 (truncate (pixel-sound-frame stream (rectangle-max-x visible-region)))))
            (point (ensure-list point))
@@ -163,11 +147,7 @@ See also: `sound-frame-pixel'"
                        point-start-x vertical-margin
                        point-end-x (- height vertical-margin)
                        :filled nil
-                       :ink +yellow+))
-    (apply #'scroll-extent stream
-           (if %saved-extent
-               (list (rectangle-min-x %saved-extent) (rectangle-min-y %saved-extent))
-               (list 0 0)))))
+                       :ink +yellow+))))
 
 (define-application-frame wave-editor ()
   ((second-px :initarg :second-px :initform 1000))
