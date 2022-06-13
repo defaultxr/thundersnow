@@ -213,9 +213,9 @@ See also: `sound-frame-pixel'"
 (defmethod sound ((this wave-editor))
   (sound (find-pane-named this 'wave-editor-pane)))
 
-(defmethod (setf sound) ((bdef bdef) (this wave-editor))
-  (setf (sound (find-pane-named this 'wave-editor-pane)) bdef)
-  (let* ((bdef (sound this))
+(defmethod (setf sound) ((bdef bdef) (frame wave-editor))
+  (setf (sound (wave-editor-pane frame)) bdef)
+  (let* ((bdef (sound frame))
          (key (bdef-name bdef))
          (name (etypecase key
                  (symbol key)
@@ -301,8 +301,8 @@ See also: `sound-frame-pixel'"
 
 ;;; misc / testing
 
-(defun wave-editor-pane (&optional frame)
-  (find-pane-named (or frame (wave-editor)) 'wave-editor-pane))
+(defun wave-editor-pane (&optional (frame (wave-editor)))
+  (find-pane-named frame 'wave-editor-pane))
 
 (defun test-wave-editor (&optional wave)
   (let ((frame (find-application-frame 'wave-editor)))
