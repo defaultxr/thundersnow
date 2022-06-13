@@ -318,6 +318,12 @@ See also: `*theme*'"
 
 (define-command-table thundersnow-common-help-command-table)
 
+(define-command (com-about :name t :menu t
+                           :command-table thundersnow-common-help-command-table)
+    ()
+  (format t "~&thundersnow ~a~%digital audio workstation and live coding laboratory~%a struct.ws project by modula t. worm and contributors~%" (asdf:component-version (asdf:find-system "thundersnow")))
+  (present "https://w.struct.ws/thundersnow" 'url))
+
 (define-command (com-readme :name "README" :menu t
                             :command-table thundersnow-common-help-command-table)
     ()
@@ -332,12 +338,6 @@ See also: `*theme*'"
                             :command-table thundersnow-common-help-command-table)
     ()
   (open-url (asdf:system-bug-tracker (asdf:find-system :thundersnow t))))
-
-(define-command (com-about :name t :menu t
-                           :command-table thundersnow-common-help-command-table)
-    ()
-  (format t "~&thundersnow ~a~%digital audio workstation and live coding laboratory~%a struct.ws project by modula t. worm and contributors~%" (asdf:component-version (asdf:find-system "thundersnow")))
-  (present "https://w.struct.ws/thundersnow" 'url))
 
 (define-presentation-type url ())
 
