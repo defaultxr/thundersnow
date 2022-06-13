@@ -576,6 +576,14 @@ See also: `scroll-top-to', `scroll-center-to', `scroll-bottom-to'"
   "Decrease the length of one beat by DECREASE pixels."
   (decf (slot-value *application-frame* 'beat-size) decrease))
 
+(define-command (com-change-layout :name t :menu t
+                                   :command-table piano-roll-view-command-table)
+    ()
+  "Switch the current layout of the `piano-roll'."
+  (setf (frame-current-layout *application-frame*) (if (eql 'default (frame-current-layout *application-frame*))
+                                                       'no-zoom-bar
+                                                       'default)))
+
 (define-command-table piano-roll-tools-command-table
   :inherit-from (thundersnow-common-tools-command-table)
   :inherit-menu t)
