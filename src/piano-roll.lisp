@@ -312,6 +312,9 @@ See also: `scroll-top-to', `scroll-center-to', `scroll-bottom-to'"
       pointer-documentation-pane)))
   (:menu-bar t))
 
+(defmethod enable-frame :after ((frame piano-roll))
+  (scroll-focus-pitch (piano-roll-pane frame) 64))
+
 (defmethod frame-standard-output ((frame piano-roll))
   (find-pane-named frame 'interactor-pane))
 
