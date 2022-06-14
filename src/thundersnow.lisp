@@ -77,9 +77,6 @@
   (let ((tempo-pane (find-pane-named frame 'tempo)))
     (clime:schedule-event tempo-pane (make-instance 'timer-event :sheet tempo-pane) 0.1)))
 
-(defmethod pattern-pane ((frame standard-application-frame))
-  (find-pane-named frame 'pattern-pane))
-
 (defmethod pane-pattern ((frame standard-application-frame))
   (pane-pattern (pattern-pane frame)))
 
