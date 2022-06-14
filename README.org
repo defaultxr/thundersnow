@@ -20,43 +20,55 @@ More documentation and functionality will exist in the future.
 
 * Overview
 
-The main GUIs included with thundersnow are the following. Note none of these have much implemented yet.
+The main GUIs included with thundersnow are the following. Note all of them are in very early stages of development and may have bugs and lack various functionality.
 
-** Thundersnow
-The main interface; gives a general overview of all synths, patterns, routines, etc, that are playing, buffers that are loaded, etc, and makes it easier to control or modify them.
-** Tracker
+** Main GUIs
+*** Thundersnow
+The main interface; gives a general overview of all synths, patterns, bdefs/buffers, and their status, and allows for high-level control and modification of them.
+*** Tracker
 A tracker-inspired interface over cl-patterns' ~ptrack~ pattern.
-** Piano roll
+*** Piano roll
 A piano roll interface for editing sequences of notes via cl-patterns' ~eseq~. Will eventually become a more general pattern/data plotting interface.
-** Stepseq
+*** Stepseq
 A simple drum machine-style interface for editing and sequencing drum patterns.
-** Wave editor
-Show the waveform of a sound buffer and optionally ~splits~ data. The waveform view gadget will also be used for a general scope in the future if it can be made to run fast enough for that.
-** Keyboard GUI [working name]
+*** Wave editor
+Show the waveform of a sound buffer and optionally ~splits~ data.
+*** Keyboard GUI [working name]
 Simple interface to trigger and control synths from your keyboard or via the GUI.
 
-** Pattern GUIs
-Not implemented at all yet. GUIs for showing the structure of nested patterns and for changing their parameters, etc.
-** Synth GUIs
+*** Pattern GUIs
+GUIs for showing the structure of defined patterns and for changing their parameters, etc.
+*** Synth GUIs
 Not implemented at all yet. Interfaces to controlling synths as well as generating synthdefs. Will likely use template macros to generate the synthdefs.
-** File/object browser
+*** File/object browser
 Not implemented at all yet. Fast/efficient interface to find a file (local or potentially remote) or object (i.e. a ~bdef~).
+
+** Gadgets
+*** Knob
+Basic gadget to view and set a numeric parameter via a radial interface.
+*** Ruler bar [working name]
+Not implemented at all yet. Scrollbar replacement gadget that can be used to adjust zoom and scroll position simultaneously.
+*** Scope
+Oscilloscope-like display for realtime sound visualization.
+*** Status pane
+Basic gadget to show status information such as the number of synths playing, CPU usage, etc.
+*** Tempo pane
+Gadget displaying the tempo (in BPM and Hz), pulsing to the beat, and allowing tempo alteration.
 
 * Features
 
-Basically nothing yet! Wow!
-
 - Configuration file loaded when thundersnow is started (located at ~$XDG_CONFIG_HOME/thundersnow/init.lisp~). This is basically just whatever Lisp code you want to run before the window opens. Examples/suggestions forthcoming.
+- Basic "theming" support.
+- (Theoretical) support for multiple audio backends, thanks to the use of [[https://github.com/defaultxr/cl-patterns][cl-patterns]] and [[https://github.com/defaultxr/bdef][bdef]].
 
 * Future
 
 Roughly in descending order of priority. Not an exhaustive list, of course.
 
 - Specify a license
-- Scope/waveform view
-- Knob gadget
 - Example config files
 - Theming support (this also depends on more theming functionality being implemented in McCLIM)
+- Documentation
 - File search pane (for loading samples, projects, etc)
   - Use thumbnails if possible
 - Command line interface
@@ -72,8 +84,14 @@ Roughly in descending order of priority. Not an exhaustive list, of course.
 ~sox input.wav -n channels 1 spectrogram -r -o output.png~
 - Look into this page on [[http://www.personal.psu.edu/cab38/ColorSch/Schemes.html][color schemes]]
 - Consider using [[https://github.com/szos/defconfig][defconfig]] for customization/options/etc.
+- Standalone mode (for when Thundersnow is started from the command line, not loaded from an already-running Lisp image)
+- File indexer (for fast searching through sample/music directories)
+- Playlist view
+- MIDI mapping
+- MIDI device interfacing (generalized functionality to send/receive MIDI to/from controllers to use them as an interface and display relevant info)
 - EVERYTHING ELSE!
 
 * Known Issues
 
 - Interfaces are sometimes drawn with the wrong size at first, until a command is run or a manual redraw triggered. This appears to be due to [[https://github.com/McCLIM/McCLIM/issues/970][this bug]] in McCLIM.
+- Theming is not yet supported for all aspects of the GUI. [[https://github.com/McCLIM/McCLIM/issues/842][Related issue in McCLIM]].
