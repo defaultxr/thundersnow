@@ -11,11 +11,5 @@
                                              (invoke-restart 'sb-impl::take-new))))
         (export (list sym) common-package)))))
 
-#+nil
+#+(or)
 (ensure-common-symbols-exported :thundersnow/common)
-
-;; (in-package #:thundersnow/common-clim)
-;; (thundersnow/common::ensure-common-symbols-exported :thundersnow/common-clim)
-
-;; (in-package #:thundersnow/common-nod)
-;; (thundersnow/common::ensure-common-symbols-exported :thundersnow/common-nod)
