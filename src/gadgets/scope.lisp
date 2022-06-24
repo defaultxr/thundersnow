@@ -35,4 +35,4 @@
 
 (defmethod handle-event ((scope scope) (event pointer-button-press-event))
   (setf (scope-wave scope) (make-array 200 :element-type 'real
-                                           :initial-contents (a (random-range -1.0 1.0)!200))))
+                                           :initial-contents (loop :repeat 200 :collect (random-range -1.0 1.0)))))
