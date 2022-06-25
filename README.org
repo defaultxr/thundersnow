@@ -46,6 +46,8 @@ Not implemented at all yet. Fast/efficient interface to find a file (local or po
 ** Gadgets
 *** Knob
 Basic gadget to view and set a numeric parameter via a radial interface.
+*** X/Y pad
+Not implemented at all yet. Two-dimensional "pad" for controlling up to three parameters at once.
 *** Ruler bar [working name]
 Not implemented at all yet. Scrollbar replacement gadget that can be used to adjust zoom and scroll position simultaneously.
 *** Scope
