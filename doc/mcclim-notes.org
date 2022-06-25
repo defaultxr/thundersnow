@@ -78,6 +78,35 @@ Various resources and links about McCLIM, UI/UX design, and more.
 2022-05-11 02:12:29	jackdaniel	it is surprising, because we do compute the intersection with parents in repaint-sheet
 2022-05-11 02:14:34	jackdaniel	defaultxr: btw, this is not a noob quesiton;
 2022-05-11 02:26:22	jackdaniel	I've added this snippet to the wiki in "How to Guides"
+*** linked code
+#+begin_src lisp
+(in-package #:clim-user)
+
+(defclass my-fancy-record (climi::standard-displayed-output-record)
+  ())
+
+(defmethod replay-output-record ((record my-fancy-record) stream &optional region x y)
+  (declare (ignore x y))
+  (let ((ink (alexandria:random-elt (list +blue+ +red+ +yellow+ +green+ +cyan+ +grey+))))
+    (with-bounding-rectangle* (x1 y1 x2 y2) (pane-viewport-region stream)
+      (draw-rectangle* stream x1 y1 x2 y2 :ink +white+)
+      (draw-rectangle* stream (+ x1 10) (+ y1 10 ) (- x2 10) (- y2 10) :ink ink))))
+
+(defun fancy-display (frame stream)
+  (declare (ignore frame))
+  (stream-add-output-record stream
+                            (make-instance 'my-fancy-record
+                                           :x1 0 :y1 0 :x2 800 :y2 600
+                                           :ink +black+
+                                           :clipping-region (make-rectangle* 0 0 800 600))))
+
+
+(define-application-frame defaultxr ()
+  ()
+  (:pane :application :display-function 'fancy-display :display-time t))
+
+(find-application-frame 'defaultxr)
+#+end_src
 * when to use updating-output
 2022-06-11 12:06:19	contrapunctus	jackdaniel: you told me to remove calls to `updating-output` before, so I was wondering in what situations it is required, and in what situations it's enough to just have `:incremental-redisplay t` for the pane. (Perhaps I could add this information to the manual.)
 2022-06-11 12:08:23	jackdaniel	sole :incremental-redisplay t will compare output records before and after the redisplay (the display function will run fully), if you add updating-output caching points, then their bodies will be executed conditionally based on the cache test, so there is less to a) display, b) compare for a difference
