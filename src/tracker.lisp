@@ -106,7 +106,8 @@
 
 ;; (defmethod replay-output-record)
 
-(defclass cell-unparsed-text (textual-dialog-view) ())
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (defclass cell-unparsed-text (textual-dialog-view) ()))
 
 (defconstant +cell-unparsed-text-view+ (make-instance 'cell-unparsed-text))
 
