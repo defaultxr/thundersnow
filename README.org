@@ -61,36 +61,6 @@ Gadget displaying the tempo (in BPM and Hz), pulsing to the beat, and allowing t
 - Basic "theming" support.
 - (Theoretical) support for multiple audio backends, thanks to the use of [[https://github.com/defaultxr/cl-patterns][cl-patterns]] and [[https://github.com/defaultxr/bdef][bdef]].
 
-* Future
-
-Roughly in descending order of priority. Not an exhaustive list, of course.
-
-- Specify a license
-- Example config files
-- Theming support (this also depends on more theming functionality being implemented in McCLIM)
-- Documentation
-- File search pane (for loading samples, projects, etc)
-  - Use thumbnails if possible
-- Command line interface
-- MIDI controller support
-- Routing GUI/"Session" support
-- Make it actually look good (related to theming support, above)
-- Create the universe
-  - Bake an apple pie from scratch
-- Create a site
-  - Register a domain
-- Integration with [[https://freesound.org/][Freesound]] -- maybe via [[https://github.com/ntrocado/freesound][ntrocado/freesound]]
-- Integration with [[http://sox.sourceforge.net/][SoX]] to generate soundfile thumbnails (spectrograms):
-~sox input.wav -n channels 1 spectrogram -r -o output.png~
-- Look into this page on [[http://www.personal.psu.edu/cab38/ColorSch/Schemes.html][color schemes]]
-- Consider using [[https://github.com/szos/defconfig][defconfig]] for customization/options/etc.
-- Standalone mode (for when Thundersnow is started from the command line, not loaded from an already-running Lisp image)
-- File indexer (for fast searching through sample/music directories)
-- Playlist view
-- MIDI mapping
-- MIDI device interfacing (generalized functionality to send/receive MIDI to/from controllers to use them as an interface and display relevant info)
-- EVERYTHING ELSE!
-
 * Known Issues
 
 - Interfaces are sometimes drawn with the wrong size at first, until a command is run or a manual redraw triggered. This appears to be due to [[https://github.com/McCLIM/McCLIM/issues/970][this bug]] in McCLIM.
