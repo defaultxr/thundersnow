@@ -57,7 +57,9 @@
 
 See also: `beat-text', `sustain-text'"
   (let ((rounded (round midinote)))
-    (concat (unless (= midinote rounded) "~") (chromatic-index-note rounded) (midinote-octave midinote) " (" midinote ")")))
+    (concat (unless (= midinote rounded) "~")
+            (midinote-note rounded)
+            " (" midinote ")")))
 
 (defun beat-text (event)
   "Get the beat text string for EVENT.
