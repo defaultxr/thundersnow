@@ -12,106 +12,116 @@
                  #:bdef
                  ;; #+#.(cl:if (cl:find-package "CL-COLLIDER") '(:and) '(:or))
                  ;; #:cl-collider
-                 )
-  (:export #:pi/2 #:0.5pi #:1/2pi #:1.5pi #:2pi
-           #:+powers-of-two+
-
-           #:sprint
-
-           #:index-before-greater-than
-
-           #:note-text
-           #:beat-text
-           #:sustain-text
-
-           #:unsaved-data-p
-
-           #:*initialized*
-           #:load-init
-           #:thundersnow-ensure-initialized
-           #:thundersnow-initialize)
-  (:local-nicknames (:a :alexandria)
-                    (:clp :cl-patterns)))
-
-(uiop:define-package #:thundersnow/common-clim
-  (:nicknames #:ts/c-c #:ts/cc #:ts/clim)
-  (:use)
-  (:mix-reexport #:clim-lisp
+                 #:clim-lisp
                  #:clim
-                 #:clim-extensions
-                 #:thundersnow/common)
+                 #:clim-extensions)
   (:shadowing-import-from #:cl-patterns
                           #:pattern
                           #:event
                           #:stop
                           #:play
                           #:quant)
-  (:export #:all-frames
-           #:make-or-find-application-frame
-           #:frame-all-panes
-           #:find-pane
-           #:all-command-tables
-           #:bounding-rectangle-center*
-           #:bounding-rectangle-center
-           #:ask-confirmation
-           #:ask-quit
-           #:ask-close
+  (:export
+   ;; utility.lisp
+   #:pi/2 #:0.5pi #:1/2pi #:1.5pi #:2pi
+   #:+powers-of-two+
 
-           #:textual-view
-           #:+textual-view+
-           #:graphical-view
-           #:+graphical-view+
+   #:sprint
 
-           #:scroll-position-preserving-mixin
+   #:index-before-greater-than
 
-           #:mix-colors
-           #:*theme*
-           #:theme-color
+   #:note-text
+   #:beat-text
+   #:sustain-text
 
-           #:with-border
-           #:wave-polygon-coord-seq
+   #:unsaved-data-p
 
-           #:event-presentation-equal
+   #:*initialized*
+   #:load-init
+   #:thundersnow-ensure-initialized
+   #:thundersnow-initialize
 
-           #:thundersnow-common-command-table
+   ;; common.lisp
 
-           #:thundersnow-common-file-command-table
-           #:com-set-tempo
+   #:all-frames
+   #:make-or-find-application-frame
+   #:frame-all-panes
+   #:find-pane
+   #:all-command-tables
+   #:bounding-rectangle-center*
+   #:bounding-rectangle-center
+   #:ask-confirmation
+   #:ask-quit
+   #:ask-close
 
-           #:com-close
-           #:com-quit
+   #:textual-view
+   #:+textual-view+
+   #:graphical-view
+   #:+graphical-view+
 
-           #:thundersnow-common-edit-command-table
+   #:scroll-position-preserving-mixin
 
-           #:thundersnow-common-view-command-table
-           #:com-refresh
+   #:mix-colors
+   #:*theme*
+   #:theme-color
 
-           #:thundersnow-common-tools-command-table
-           #:com-thundersnow
-           #:com-tracker
-           #:com-piano-roll
-           #:com-stepseq
-           #:com-wave-editor
+   #:with-border
+   #:wave-polygon-coord-seq
 
-           #:thundersnow-common-help-command-table
-           #:com-readme
-           #:com-repo
-           #:com-bugs
-           #:com-about
+   #:event-presentation-equal
 
-           #:knob
-           #:knob-angle-clim-angle
-           #:clim-angle-knob-angle
-           #:knob-angle-point*
-           #:knob-angle-point
-           #:knob-value-angle
-           #:knob-value-point*
-           #:knob-value-point
+   #:backend-task-added
+   #:backend-task-removed
+   #:backend-task-play-event
+   #:update-tempo-information
 
-           #:scope
+   #:thundersnow-common-command-table
 
+   #:thundersnow-common-file-command-table
+   #:com-set-tempo
 
-           #:tempo-pane)
+   #:com-close
+   #:com-quit
+
+   #:thundersnow-common-edit-command-table
+
+   #:thundersnow-common-view-command-table
+   #:com-refresh
+
+   #:thundersnow-common-tools-command-table
+   #:com-thundersnow
+   #:com-tracker
+   #:com-piano-roll
+   #:com-stepseq
+   #:com-wave-editor
+
+   #:thundersnow-common-help-command-table
+   #:com-readme
+   #:com-repo
+   #:com-bugs
+   #:com-about
+
+   #:knob
+   #:knob-angle-clim-angle
+   #:clim-angle-knob-angle
+   #:knob-angle-point*
+   #:knob-angle-point
+   #:knob-value-angle
+   #:knob-value-point*
+   #:knob-value-point
+
+   #:scope
+
+   #:status-pane
+
+   #:tempo-pane
+
+   #:piano-mode
+   #:piano-mode-mixin
+   #:frame-recording-octave
+   #:frame-task
+   #:frame-recording-beat
+   #:com-exit-piano-mode)
   (:local-nicknames (:a :alexandria)
                     (:clp :cl-patterns)))
 
@@ -125,7 +135,7 @@
 (uiop:define-package #:thundersnow/thundersnow
   (:nicknames #:ts/ts)
   (:use)
-  (:mix #:thundersnow/common-clim
+  (:mix #:thundersnow/common
         #:cl)
   (:local-nicknames (:a :alexandria)
                     (:clp :cl-patterns))
@@ -134,7 +144,7 @@
 (uiop:define-package #:thundersnow/keyboard-gui
   (:nicknames #:ts/kg)
   (:use)
-  (:mix #:thundersnow/common-clim
+  (:mix #:thundersnow/common
         #:cl)
   (:local-nicknames (:a :alexandria)
                     (:clp :cl-patterns))
@@ -143,7 +153,7 @@
 (uiop:define-package #:thundersnow/piano-roll
   (:nicknames #:ts/pr)
   (:use)
-  (:mix #:thundersnow/common-clim
+  (:mix #:thundersnow/common
         #:cl)
   (:local-nicknames (:a :alexandria)
                     (:clp :cl-patterns))
@@ -152,7 +162,7 @@
 (uiop:define-package #:thundersnow/stepseq
   (:nicknames #:ts/ss)
   (:use)
-  (:mix #:thundersnow/common-clim
+  (:mix #:thundersnow/common
         #:cl)
   (:local-nicknames (:a :alexandria)
                     (:clp :cl-patterns))
@@ -161,7 +171,7 @@
 (uiop:define-package #:thundersnow/tracker
   (:nicknames #:ts/tr)
   (:use)
-  (:mix #:thundersnow/common-clim
+  (:mix #:thundersnow/common
         #:cl)
   (:local-nicknames (:a :alexandria)
                     (:clp :cl-patterns))
@@ -170,7 +180,7 @@
 (uiop:define-package #:thundersnow/wave-editor
   (:nicknames #:ts/we)
   (:use)
-  (:mix #:thundersnow/common-clim
+  (:mix #:thundersnow/common
         #:cl)
   (:local-nicknames (:a :alexandria)
                     (:clp :cl-patterns))
@@ -178,7 +188,7 @@
 
 (uiop:define-package #:thundersnow
   (:nicknames #:ts)
-  (:use #:thundersnow/common-clim
+  (:use #:thundersnow/common
         #:thundersnow/thundersnow
         #:thundersnow/piano-roll
         #:thundersnow/tracker

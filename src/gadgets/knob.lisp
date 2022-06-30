@@ -7,7 +7,7 @@
 ;; - better modifier key functionality; i.e. shift should also work, and combining multiple modifiers (i.e. ctrl+alt or ctrl+shift) should mix their effects
 ;; - implement changing value by mouse scrolling
 
-(in-package #:thundersnow/common-clim)
+(in-package #:thundersnow/common)
 
 (defclass knob (labelled-gadget-mixin climi::value-changed-repaint-mixin value-gadget range-gadget-mixin)
   ((default-value :initarg :default-value :writer (setf default-value) :documentation "The default value that the knob should return to when \"reset\". If unbound, defaults to the center of the `gadget-range'.")

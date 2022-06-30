@@ -8,6 +8,5 @@
         #:clim-lisp
         #:clim-extensions
         #:thundersnow/common
-        #:thundersnow/common-clim
         #:alexandria
         #:mutility))

@@ -24,7 +24,7 @@
   :serial t
   :components ((:file "package")
                (:file "utility")
-               (:file "common-clim")
+               (:file "common")
                (:module gadgets
                 :components ((:file "knob")
                              (:file "scope")
@@ -55,7 +55,7 @@
   :components ((:file "package")
                (:file "test")
                (:file "utility")
-               (:file "common-clim")
+               (:file "common")
                (:file "thundersnow")
                (:file "keyboard-gui")
                (:file "piano-roll")

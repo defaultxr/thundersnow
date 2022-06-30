@@ -3,7 +3,7 @@
 ;;; NOTES:
 ;; 06:42:53 scymtym:     drawing a line plot with a single DRAW-POLYGON* call can be much more efficient than multiple draw calls, depending on the backend
 
-(in-package #:thundersnow/common-clim)
+(in-package #:thundersnow/common)
 
 (defclass scope (basic-gadget)
   ((wave :initarg :wave :initform (make-array 200 :element-type 'real :initial-element 0d0) :reader scope-wave :type array :documentation "The array containing the scope's waveform data.")

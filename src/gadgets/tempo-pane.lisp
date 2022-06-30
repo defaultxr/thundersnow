@@ -1,6 +1,6 @@
 ;;;; tempo-pane.lisp - tempo display/control gadget.
 
-(in-package #:thundersnow/common-clim)
+(in-package #:thundersnow/common)
 
 (defclass tempo-pane (basic-gadget)
   ((displayed-tempo :initform (tempo *clock*) :accessor tempo-pane-displayed-tempo)))

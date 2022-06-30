@@ -1,6 +1,6 @@
-(in-package #:thundersnow/common-clim)
+(in-package #:thundersnow/common)
 
-;;;; common-clim.lisp - common functionality for the mcclim-based interfaces
+;;;; common.lisp - functionality common to all thundersnow interfaces.
 
 ;;; debug conveniences
 
