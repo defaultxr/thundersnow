@@ -428,37 +428,3 @@ See also: `ptrack-cell', `ptrack'"))
 (defun tracker (&optional ptrack)
   "Open a tracker."
   (apply #'make-or-find-application-frame 'tracker (when ptrack (list :ptrack ptrack))))
-
-;;; testing out the layout switching bug(?)
-
-(defun draw-foopy (frame stream)
-  (present "foo" 'string :stream stream))
-
-(define-application-frame foo ()
-  ()
-  (:panes
-   (foopy :application :display-function 'draw-foopy)
-   (interacty :interactor))
-  (:layouts
-   (default (vertically ()
-              foopy interacty))
-   (no-interactor foopy)))
-
-(defmethod frame-standard-output ((frame foo))
-  (or (find-pane-named frame 'interacty)
-      (find-pane-named frame 'foopy)
-      ))
-
-(defmethod frame-standard-input ((frame foo))
-  (or (find-pane-named frame 'interacty)
-      (find-pane-named frame 'foopy)))
-
-(define-foo-command (com-switch-layout :name t :menu t
-                                       :keystroke (#\n :meta))
-    ()
-  (let ((layouts (frame-all-layouts *application-frame*)))
-    (setf (frame-current-layout *application-frame*) (elt-wrap layouts (1+ (position (frame-current-layout *application-frame*) layouts))))))
-
-(define-foo-command (com-foo-change :name t)
-    ((string 'string :gesture :select))
-  (notify-user *application-frame* "HEYO"))
