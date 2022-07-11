@@ -84,6 +84,46 @@
   (when-let ((pane (pattern-pane frame)))
     (setf (pane-pattern pane) pattern)))
 
+(defmethod backend-task-added ((frame thundersnow) task)
+  (thundersnow-backend-update frame task))
+
+(defmethod backend-task-removed ((frame thundersnow) task)
+  (thundersnow-backend-update frame task))
+
+(defmethod backend-task-play-event ((frame thundersnow) task event)
+  (thundersnow-backend-update frame task event))
+
+(defun thundersnow-backend-update (frame object &optional extra-object)
+  (etypecase object
+    (cl-patterns::task
+     (unless extra-object
+       (redisplay-frame-pane frame (patterns-pane frame) :force-p t)
+       (return-from thundersnow-backend-update))
+     (typecase extra-object
+       (event
+        (case (event-value extra-object :type)
+          (:tempo
+           (update-tempo-information (event-value object :tempo)))
+          (:note
+           (let ((pattern (task-pattern object)))
+             (dolist (pane (list (patterns-pane frame)
+                                 (pattern-pane frame)))
+               (when-let ((record (find-pattern-record pane pattern)))
+                 (redisplay-output-record record pane))
+               ;; (format *debug-io* "~&~S ~S~%"  (type-of (find-pattern-record pane pattern)))
+               ))
+           (redisplay-frame-pane frame (patterns-pane frame) :force-p t)
+           ;; i'm not sure why redisplay-output-record isn't working here..
+           ;; (let ((pattern (task-pattern object)))
+           ;;   (dolist (pane (list (patterns-pane frame)
+           ;;                       ;; (pattern-pane frame)
+           ;;                       ))
+           ;;     (when-let ((record (find-pattern-record pane pattern)))
+           ;;       (redisplay-output-record record pane))
+           ;;     ;; (format *debug-io* "~&~S ~S~%"  (type-of (find-pattern-record pane pattern)))
+           ;;     ))
+           )))))))
+
 ;;; commands
 
 (define-command-table thundersnow-file-command-table

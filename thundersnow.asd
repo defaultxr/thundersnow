@@ -30,6 +30,7 @@
                              (:file "scope")
                              (:file "tempo-pane")))
                (:file "export")
+               (:file "backend")
                (:file "thundersnow")
                (:file "keyboard-gui")
                (:file "piano-roll")
