@@ -26,6 +26,11 @@
   (unless (gadget-value knob)
     (setf (gadget-value knob) (default-value knob))))
 
+(defmethod compose-space ((knob knob) &key width height)
+  (declare (ignore width height))
+  (let ((size (+ (* 2 (slot-value knob 'knob-margin)) 40)))
+    (make-space-requirement :min-width size :min-height size)))
+
 (defmethod default-value ((knob knob))
   (if (slot-boundp knob 'default-value)
       (slot-value knob 'default-value)
