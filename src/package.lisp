@@ -50,6 +50,8 @@
    #:make-or-find-application-frame
    #:frame-all-panes
    #:find-pane
+   #:find-record
+   #:find-presentation
 
    #:ask-confirmation
    #:ask-quit

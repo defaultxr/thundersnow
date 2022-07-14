@@ -68,6 +68,21 @@ See also: `clim:frame-panes'"
        (fn (when-let ((pane (find-pane name _)))
              (return-from find-pane pane))))))
 
+(defun find-record (pane thing &key (test #'eq))
+  "Get the output record for THING in PANE. Returns the presentation as a second value"
+  (labels ((walk (record)
+             (let ((parent (output-record-parent record)))
+               (multiple-value-bind (object err) (ignore-errors (presentation-object parent))
+                 (when (and (not err)
+                            (funcall test object thing))
+                   (return-from find-record (values record parent)))))
+             (map-over-output-records #'walk record)))
+    (walk (stream-output-history pane))))
+
+(defun find-presentation (pane thing &key (test #'eq))
+  "Get the presentation for THING in PANE. Returns the output record as a second value."
+  (let ((record (find-record pane thing :test test)))
+    (values (output-record-parent record) record)))
 
 (defun gadget-maybe-label (gadget)
   "Get GADGET's label, or nil if it is the empty string.
