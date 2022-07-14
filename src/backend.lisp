@@ -17,6 +17,9 @@
   (map-over-frames (lambda (frame)
                      (backend-task-removed frame task))))
 
+(defmethod backend-task-play-event (frame task event)
+  nil)
+
 (defmethod cl-patterns::backend-play-event ((backend thundersnow-backend) event task)
   (map-over-frames (lambda (frame)
                      (backend-task-play-event frame task event))))
