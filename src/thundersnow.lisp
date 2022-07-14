@@ -67,8 +67,7 @@
    (test-interactor
     (vertically ()
       interactor)))
-  ;; (:top-level (thundersnow-frame-top-level . nil))
-  )
+  (:top-level (default-frame-top-level :prompt "thundersnow: ")))
 
 (defmethod initialize-instance :before ((thundersnow thundersnow) &key &allow-other-keys)
   (thundersnow-ensure-initialized))
