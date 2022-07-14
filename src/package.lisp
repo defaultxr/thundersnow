@@ -43,13 +43,14 @@
 
    ;; common.lisp
 
+   #:bounding-rectangle-center*
+   #:bounding-rectangle-center
+   #:all-command-tables
    #:all-frames
    #:make-or-find-application-frame
    #:frame-all-panes
    #:find-pane
-   #:all-command-tables
-   #:bounding-rectangle-center*
-   #:bounding-rectangle-center
+
    #:ask-confirmation
    #:ask-quit
    #:ask-close
