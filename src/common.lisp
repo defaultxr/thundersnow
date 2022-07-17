@@ -49,7 +49,7 @@ See also: `bounding-rectangle-center*'"
 (defun frame-all-panes (frame)
   "Get all panes of FRAME.
 
-See also: `clim:frame-panes'"
+See also: `clim:frame-panes', `find-pane'"
   (flatten
    (etypecase frame
      (application-frame
@@ -60,10 +60,15 @@ See also: `clim:frame-panes'"
         (cons children (mapcan 'frame-all-panes children)))))))
 
 (defun find-pane (name &optional (frame *application-frame*))
-  "Find any pane named NAME."
+  "Find any pane named NAME, optionally limiting the search to FRAME.
+
+See also: `frame-all-panes', `all-frames', `clim:find-pane-named'"
   (if frame
-      (or (find-pane-named frame name)
-          (find-pane-named frame (ensure-symbol (concat name '-pane) (package-name (symbol-package name)))))
+      (let ((frame (if (symbolp frame)
+                       (find-application-frame frame :create nil :activate nil)
+                       frame)))
+        (or (find-pane-named frame name)
+            (find-pane-named frame (ensure-symbol (concat name '-pane) (package-name (symbol-package name))))))
       (map-over-frames
        (fn (when-let ((pane (find-pane name _)))
              (return-from find-pane pane))))))
