@@ -41,10 +41,10 @@
   (:default-initargs :pretty-name "thundersnow")
   (:panes
    (logo :application :scroll-bars nil)
-   (tempo (make-pane 'tempo-pane :name 'tempo-pane))
+   (tempo (make-pane 'tempo-pane))
    (scope (make-pane 'scope :name 'scope))
-   (patterns-pane (make-pane 'patterns-pane :name 'patterns-pane))
-   (pattern-pane (make-pane 'pattern-pane :name 'pattern-pane))
+   (patterns-pane (make-pane 'patterns-pane))
+   (pattern-pane (make-pane 'pattern-pane))
    (interactor :interactor)
    (pointer-documentation-pane (make-pane 'pointer-documentation-pane)))
   (:layouts
