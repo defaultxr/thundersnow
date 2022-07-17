@@ -145,7 +145,8 @@ See also: `ask-confirmation'"
   (defclass graphical-view (view)
     ()))
 
-(defconstant +graphical-view+ (make-instance 'graphical-view))
+(unless (boundp '+graphical-view+)
+  (defconstant +graphical-view+ (make-instance 'graphical-view)))
 
 ;;; scroll-position-preserving-mixin
 ;; grabbed from Clouseau: https://github.com/McCLIM/McCLIM/blob/master/Apps/Clouseau/src/pane.lisp
