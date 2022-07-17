@@ -10,12 +10,12 @@
 (in-package #:thundersnow/common)
 
 (defclass knob (labelled-gadget-mixin climi::value-changed-repaint-mixin value-gadget range-gadget-mixin)
-  ((default-value :initarg :default-value :writer (setf default-value) :documentation "The default value that the knob should return to when \"reset\". If unbound, defaults to the center of the `gadget-range'.")
-   (dead-angle :initarg :dead-angle :initform 0.5 :documentation "The \"dead zone\"; the angle in radians at the bottom of the knob that the indicator cannot point to.")
-   (knob-margin :initarg :knob-margin :initform 2 :accessor knob-margin :documentation "Amount of empty space to put around the knob.")
-   (indicator :initarg :indicator :initform +red+ :documentation "The color of the knob's value indicator.")
-   (knob-background :initarg :knob-background :initform +gray40+ :documentation "The background color of the knob.")
-   (dead-area-background :initarg :dead-area-background :documentation "The background color of the knob's \"dead zone\".")
+  ((default-value :initarg :default-value :writer (setf default-value) :type number :documentation "The default value that the knob should return to when \"reset\". If unbound, defaults to the center of the `gadget-range'.")
+   (dead-angle :initarg :dead-angle :initform 0.5 :type (real 0) :documentation "The \"dead zone\"; the angle in radians at the bottom of the knob that the indicator cannot point to.")
+   (knob-margin :initarg :knob-margin :initform 2 :accessor knob-margin :type (real 0) :documentation "Amount of empty space to put around the knob.")
+   (indicator :initarg :indicator :initform +red+ :type color :documentation "The color of the knob's value indicator.")
+   (knob-background :initarg :knob-background :initform +gray40+ :type color :documentation "The background color of the knob.")
+   (dead-area-background :initarg :dead-area-background :type color :documentation "The background color of the knob's \"dead zone\".")
    (last-pointer-coordinates :type list :documentation "The last seen pointer coordinates; used in drag calculations."))
   (:documentation "One-dimensional control surface controlled by dragging the mouse. Similar to a `slider' but with a radial output style."))
 
