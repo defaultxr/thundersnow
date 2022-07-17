@@ -202,8 +202,10 @@
 
 (defclass patterns-pane (application-pane)
   ((dictionary :initarg :dictionary :initform cl-patterns::*pdef-dictionary* :accessor pane-dictionary))
-  (:default-initargs :name 'pattern
-                     :display-function 'display-patterns))
+  (:default-initargs :name 'patterns-pane
+                     :display-function 'display-patterns
+                     :foreground (theme-color :foreground)
+                     :background (theme-color :background)))
 
 (defun patterns-pane (&optional frame)
   "Get the patterns-pane of FRAME.
@@ -235,9 +237,11 @@ See also: `pattern-pane', `thundersnow'"
 
 (defclass pattern-pane (application-pane)
   ((pattern :initarg :pattern :initform nil :accessor pane-pattern))
-  (:default-initargs :name 'pattern
+  (:default-initargs :name 'pattern-pane
                      :display-function 'display-pattern
-                     :default-view +graphical-view+))
+                     :default-view +graphical-view+
+                     :foreground (theme-color :foreground)
+                     :background (theme-color :background)))
 
 (defun pattern-pane (&optional frame)
   "Get the pattern-pane of FRAME.
