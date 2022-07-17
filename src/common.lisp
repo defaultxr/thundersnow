@@ -268,7 +268,7 @@ See also: `*theme*'"
                                   value
                                   (/ value 60)))))))
 
-(add-menu-item-to-command-table 'thundersnow-common-file-command-table nil :divider nil)
+(add-menu-item-to-command-table 'thundersnow-common-file-command-table nil :divider nil :errorp nil)
 
 (define-command (com-close :name t :menu t
                            :command-table thundersnow-common-file-command-table
@@ -309,7 +309,7 @@ See also: `*theme*'"
 
 (define-command-table thundersnow-common-tools-command-table)
 
-(add-menu-item-to-command-table 'thundersnow-common-tools-command-table "GUIs" :divider nil)
+(add-menu-item-to-command-table 'thundersnow-common-tools-command-table "GUIs" :divider nil :errorp nil)
 
 ;; FIX: these functions should bring their respective windows to the front
 
