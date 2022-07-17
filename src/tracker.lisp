@@ -26,30 +26,31 @@
 
 ;;; gui
 
-(defclass cell ()
-  ((frame :initarg :frame :accessor frame)
-   (row :initarg :row :initform nil :accessor row)
-   (column :initarg :column :initform nil :accessor column)
-   (key :initarg :key :initform nil :accessor key)
-   (content :initarg :content)
-   (table :initarg :table :initform nil)))
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (defclass tracker-cell ()
+    ((frame :initarg :frame :accessor frame)
+     (row :initarg :row :initform nil :accessor row)
+     (column :initarg :column :initform nil :accessor column)
+     (key :initarg :key :initform nil :accessor key)
+     (content :initarg :content)
+     (table :initarg :table :initform nil))))
 
-(defmethod print-object ((cell cell) stream)
+(defmethod print-object ((cell tracker-cell) stream)
   (with-slots (row key) cell
     (print-unreadable-object (cell stream :type t)
       (format stream ":row ~s :key ~s" row key))))
 
-(defun make-cell (&rest args)
-  (apply #'make-instance 'cell args))
+(defun make-tracker-cell (&rest args)
+  (apply #'make-instance 'tracker-cell args))
 
-(defmethod content ((cell cell))
+(defmethod content ((cell tracker-cell))
   (with-slots (frame row key) cell
     (if (and row key)
         (ptrack-cell frame row key)
         (when (slot-boundp cell 'content)
           (slot-value cell 'content)))))
 
-(defmethod (setf content) (value (cell cell))
+(defmethod (setf content) (value (cell tracker-cell))
   (with-slots (frame row key) cell
     (let ((string (typecase value
                     (string value)
@@ -61,9 +62,9 @@
               (warn "Attempted to set ~s's content to ~s but no key set." cell value))
           (setf (ptrack-source-cell frame :header key) string)))))
 
-(define-presentation-type cell ())
+(define-presentation-type tracker-cell ())
 
-(define-presentation-method present (cell (type cell) stream (view textual-view) &key)
+(define-presentation-method present (cell (type tracker-cell) stream (view textual-view) &key)
   (with-accessors ((row row) (column column) (content content)) cell
     (format stream "~a" (or content "     "))
     (when-let* ((table (slot-value cell 'table))
@@ -75,50 +76,54 @@
                               (elt (slot-value table 'climi::heights) (1+ row)))))
       (draw-line* stream 0 0 col-width row-height :ink +transparent-ink+))))
 
-(define-presentation-method present (cell (type cell) (stream string-stream) (view textual-view) &key)
+(define-presentation-method present (cell (type tracker-cell) (stream string-stream) (view textual-view) &key)
   (with-accessors ((content content)) cell
     (format stream "~a" (or content ""))))
 
-(defclass cell-row-number (cell) ;; FIX: use this instead of just `cell' ?
-  ()
-  (:documentation "The cell showing the row number."))
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (defclass tracker-cell-row-number (tracker-cell) ;; FIX: use this instead of just `cell' ?
+    ()
+    (:documentation "The cell showing the row number.")))
 
-(define-presentation-type cell-row-number ()
-  :inherit-from 'cell)
+(define-presentation-type tracker-cell-row-number ()
+  :inherit-from 'tracker-cell)
 
-(defclass cell-column-header (cell) ;; FIX: use this instead of just `cell' ?
-  ()
-  (:documentation "The cell showing the column header."))
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (defclass tracker-cell-column-header (tracker-cell) ;; FIX: use this instead of just `cell' ?
+    ()
+    (:documentation "The cell showing the column header.")))
 
-(define-presentation-type cell-column-header ()
-  :inherit-from 'cell)
+(define-presentation-type tracker-cell-column-header ()
+  :inherit-from 'tracker-cell)
 
-(defclass cell-pattern-id (cell-row-number cell-column-header)
-  ()
-  (:documentation "The cell showing the pattern number."))
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (defclass tracker-cell-pattern-id (tracker-cell-row-number tracker-cell-column-header)
+    ()
+    (:documentation "The cell showing the pattern number.")))
 
-(define-presentation-type cell-pattern-id ()
-  :inherit-from '(and cell-column-header cell-row-number))
+(define-presentation-type tracker-cell-pattern-id ()
+  :inherit-from '(and tracker-cell-column-header tracker-cell-row-number))
 
-(define-presentation-method present (cell (type cell-pattern-id) stream (view textual-view) &key)
+(define-presentation-method present (cell (type tracker-cell-pattern-id) stream (view textual-view) &key)
   (with-drawing-options (stream :ink +white+)
     (format stream "~a" (content cell))))
 
 ;; (defmethod replay-output-record)
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
-  (defclass cell-unparsed-text (textual-dialog-view) ()))
+  (defclass tracker-cell-unparsed-text (textual-dialog-view) ()))
 
-(defconstant +cell-unparsed-text-view+ (make-instance 'cell-unparsed-text))
+(unless (boundp '+tracker-cell-unparsed-text-view+)
+  (defconstant +tracker-cell-unparsed-text-view+ (make-instance 'tracker-cell-unparsed-text)))
 
-(define-presentation-method present (cell (type cell) stream (view cell-unparsed-text) &key)
+(define-presentation-method present (cell (type tracker-cell) stream (view tracker-cell-unparsed-text) &key)
   (format stream "~a" (content cell)))
 
-(define-presentation-method present (cell (type cell) stream (view cell-unparsed-text) &key)
+(define-presentation-method present (cell (type tracker-cell) stream (view tracker-cell-unparsed-text) &key)
   (format stream "~a" (content cell)))
 
-(define-presentation-method accept ((type cell) stream (view cell-unparsed-text) &key)
-  (let ((cell (make-cell))) ;; FIX?
+(define-presentation-method accept ((type tracker-cell) stream (view tracker-cell-unparsed-text) &key)
+  (let ((cell (make-tracker-cell))) ;; FIX?
     (setf (content cell) (read stream))))
 
 ;;; pattern drawing
@@ -150,14 +155,14 @@
             (formatting-row (pane)
               (with-border (+black+ 1)
                 (formatting-cell (pane)
-                  (present (make-instance 'cell-pattern-id :frame frame :content "p 0") 'cell-pattern-id :stream pane)))
+                  (present (make-instance 'tracker-cell-pattern-id :frame frame :content "p 0") 'tracker-cell-pattern-id :stream pane)))
               ;; column headers
               (let ((col 1))
                 (doplist (key value header)
                   (prog1
                       (with-border ((cell-color t col))
                         (let ((tcell (formatting-cell (pane)
-                                       (present (make-instance 'cell-column-header :frame frame :content (format nil "~s ~s" key value) :key key) 'cell-column-header :stream pane))))
+                                       (present (make-instance 'tracker-cell-column-header :frame frame :content (format nil "~s ~s" key value) :key key) 'tracker-cell-column-header :stream pane))))
                           (push tcell tcols)
                           tcell))
                     (incf col)))
@@ -165,7 +170,7 @@
                 ;; new column button
                 (with-border ((cell-color t col))
                   (formatting-cell (pane)
-                    (present (make-instance 'cell-column-header :frame frame :content "+" :row :insert-column) 'cell-column-header :stream pane)))))
+                    (present (make-instance 'tracker-cell-column-header :frame frame :content "+" :row :insert-column) 'tracker-cell-column-header :stream pane)))))
             ;; FIX: alternate color for every N rows, where N is determined by the beats per bar
             (dolist* (row-num row rows)
               (declare (ignore row))
@@ -173,12 +178,12 @@
                 ;; row numbers
                 (with-border ((cell-color nil 0))
                   (formatting-cell (pane)
-                    (present (make-instance 'cell-row-number :frame frame :content row-num :row row-num :column 0 :table table) 'cell-row-number :stream pane)))
+                    (present (make-instance 'tracker-cell-row-number :frame frame :content row-num :row row-num :column 0 :table table) 'tracker-cell-row-number :stream pane)))
                 ;; ptrack cells
                 (dolist* (col-num key keys)
                   (with-border ((cell-color nil (1+ col-num)))
                     (formatting-cell (pane)
-                      (present (make-cell :frame frame :row row-num :column (1+ col-num) :key key :table table) 'cell :stream pane)))))))))
+                      (present (make-tracker-cell :frame frame :row row-num :column (1+ col-num) :key key :table table) 'tracker-cell :stream pane)))))))))
       (fresh-line))))
 
 (define-application-frame tracker ()
@@ -278,7 +283,7 @@ See also: `ptrack-cell', `ptrack'"))
         (setf (nth (/ (position key header) 2) (nth (1+ row) (pattern-metadata ptrack :source-code))) value))))
 
 (define-presentation-to-command-translator change-pattern
-    (cell-pattern-id com-pattern-id tracker
+    (tracker-cell-pattern-id com-pattern-id tracker
      :pointer-documentation
      ((cell stream)
       (format stream "Change current pattern")))
@@ -286,35 +291,35 @@ See also: `ptrack-cell', `ptrack'"))
   (list presentation))
 
 (define-tracker-command (com-pattern-id)
-    ((presentation 'cell-pattern-id))
+    ((presentation 'tracker-cell-pattern-id))
   (format t "Changing patterns is not yet implemented.~%"))
 
 ;; (define-presentation-action insert-column )
 
 (define-presentation-to-command-translator edit-cell
-    (cell com-edit-cell tracker
-          :tester
-          ((cell)
-           (with-slots (key row) cell
-             (and (not (eql row :insert-column))
-                  (not (null key)))))
-          :pointer-documentation
-          ((cell stream)
-           (with-slots (key row) cell
-             (if (null row)
-                 (format stream "Edit ~s header" key)
-                 (format stream "Edit ~a cell ~s" key row)))))
+    (tracker-cell com-edit-cell tracker
+     :tester
+     ((cell)
+      (with-slots (key row) cell
+        (and (not (eql row :insert-column))
+             (not (null key)))))
+     :pointer-documentation
+     ((cell stream)
+      (with-slots (key row) cell
+        (if row
+            (format stream "Edit ~a cell ~s" key row)
+            (format stream "Edit ~s header" key)))))
     (object)
   (list object))
 
 (define-tracker-command (com-insert-column :name t :command-table tracker)
-    ((index '(or integer cell-column-header) ;; :display-default (lambda () (concat (random 2)))
+    ((index '(or integer tracker-cell-column-header) ;; :display-default (lambda () (concat (random 2)))
             ))
   (sprint 'com-insert-column)
   (sprint index))
 
 (define-presentation-to-command-translator insert-column
-    (cell-column-header com-insert-column tracker
+    (tracker-cell-column-header com-insert-column tracker
      :tester
      ((cell)
       (eql (slot-value cell 'row) :insert-column))
@@ -331,19 +336,19 @@ See also: `ptrack-cell', `ptrack'"))
               (t (1+ row)))))))
 
 (define-tracker-command (com-insert-row :name t :command-table tracker)
-    ((index '(or integer cell-row-number) ;; :display-default (lambda () (concat (random 2)))
+    ((index '(or integer tracker-cell-row-number) ;; :display-default (lambda () (concat (random 2)))
             ))
   (sprint 'com-insert-row)
   (sprint index))
 
 (define-presentation-to-command-translator insert-row
-    (cell-row-number com-insert-row tracker
-                     ;; :tester
-                     ;; ((cell)
-                     ;;  (eql (slot-value cell 'row) :insert-column))
-                     :pointer-documentation
-                     ((cell stream)
-                      (format stream "Insert new row")))
+    (tracker-cell-row-number com-insert-row tracker
+     ;; :tester
+     ;; ((cell)
+     ;;  (eql (slot-value cell 'row) :insert-column))
+     :pointer-documentation
+     ((cell stream)
+      (format stream "Insert new row")))
     (object)
   (list (slot-value object 'row)))
 
@@ -366,7 +371,7 @@ See also: `ptrack-cell', `ptrack'"))
 (define-command (com-set-pattern :name t :menu "Load Tracker Pattern"
                                  :command-table tracker-file-command-table
                                  :keystroke (#\o :control))
-    ((pattern t));; (cell 'cell :gesture :select)
+    ((pattern t));; (cell 'tracker-cell :gesture :select)
   (setf (frame-ptrack *application-frame*) (etypecase pattern
                                              (pattern pattern)
                                              (symbol (if (pdef-pattern pattern)
@@ -379,14 +384,14 @@ See also: `ptrack-cell', `ptrack'"))
 
 (define-command (com-edit-cell :name t :menu t
                                :command-table tracker-edit-command-table)
-    ((cell 'cell))
+    ((cell 'tracker-cell))
   (setf *tmp* cell)
   (with-slots (key row) cell
     (let ((prompt (format nil "~a ~a" key row))
           string)
       (accepting-values ()
         (setf string (apply #'accept 'string
-                            :view +cell-unparsed-text-view+
+                            :view +tracker-cell-unparsed-text-view+
                             :prompt prompt ;; for some reason this doesn't work if i put the format here directly?
                             (when-let ((default (ptrack-source-cell *application-frame* (row cell) (key cell))))
                               (list :default default)))))
