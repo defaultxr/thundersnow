@@ -3,7 +3,9 @@
 (in-package #:thundersnow/common)
 
 (defclass tempo-pane (basic-gadget)
-  ((displayed-tempo :initform (tempo *clock*) :accessor tempo-pane-displayed-tempo)))
+  ((displayed-tempo :initform (tempo *clock*) :accessor tempo-pane-displayed-tempo :type (real 0))
+   (margin :initarg :margin :initform 2 :accessor margin :type (real 0) :documentation "Amount of empty space to put around the gadget."))
+  (:default-initargs :name 'tempo-pane))
 
 (defmethod activate-gadget :after ((tempo-pane tempo-pane))
   (clime:schedule-event tempo-pane (make-instance 'timer-event :sheet tempo-pane) 0.1))
