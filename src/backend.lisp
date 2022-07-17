@@ -17,9 +17,6 @@
   (map-over-frames (lambda (frame)
                      (backend-task-removed frame task))))
 
-(defmethod backend-task-play-event (frame task event)
-  nil)
-
 (defmethod cl-patterns::backend-play-event ((backend thundersnow-backend) event task)
   (map-over-frames (lambda (frame)
                      (backend-task-play-event frame task event))))
@@ -29,5 +26,14 @@
          (ebeat (+ beat (dur event))))
     (list (clp::absolute-beats-to-timestamp beat (clp::task-clock task))
           (clp::absolute-beats-to-timestamp ebeat (clp::task-clock task)))))
+
+(defmethod backend-task-added ((frame application-frame) task)
+  nil)
+
+(defmethod backend-task-removed ((frame application-frame) task)
+  nil)
+
+(defmethod backend-task-play-event ((frame application-frame) task event)
+  nil)
 
 (backend-start 'thundersnow-backend)
