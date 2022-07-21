@@ -72,7 +72,8 @@
 (defmethod initialize-instance :before ((thundersnow thundersnow) &key &allow-other-keys)
   (thundersnow-ensure-initialized))
 
-(defmethod enable-frame :after ((frame thundersnow))
+(defmethod note-frame-enabled :after (frame-manager (frame thundersnow))
+  (declare (ignore frame-manager))
   (let ((tempo-pane (find-pane-named frame 'tempo)))
     (clime:schedule-event tempo-pane (make-instance 'timer-event :sheet tempo-pane) 0.1)))
 

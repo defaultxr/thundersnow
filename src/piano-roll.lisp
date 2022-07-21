@@ -315,7 +315,8 @@ See also: `scroll-top-to', `scroll-center-to', `scroll-bottom-to'"
 (defmethod initialize-instance :before ((piano-roll piano-roll) &key &allow-other-keys)
   (thundersnow-ensure-initialized))
 
-(defmethod enable-frame :after ((frame piano-roll))
+(defmethod note-frame-enabled :after (frame-manager (frame piano-roll))
+  (declare (ignore frame-manager))
   (scroll-focus-pitch (piano-roll-pane frame) 64))
 
 (defmethod frame-standard-output ((frame piano-roll))
