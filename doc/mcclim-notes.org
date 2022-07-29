@@ -4,6 +4,8 @@ Just various notes I've collected about (Mc)CLIM, either by asking in #clim or r
 
 * [[https://github.com/McCLIM/McCLIM/wiki/Resources-and-Links][McCLIM Resources and Links]]
 Various resources and links about McCLIM, UI/UX design, and more.
+* [[http://turtleware.eu/posts/A-tale-of-two-abstractions.html][McCLIM Library Structural Overview]]
+A very handy "map" of how (Mc)CLIM is conceptually structured.
 * misc mcclim code info/reference
 ** useful mcclim macros/functions
 - define-presentation-translator
