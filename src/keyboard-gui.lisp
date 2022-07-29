@@ -86,7 +86,7 @@
 
 (define-command-table keyboard-gui-edit-command-table)
 
-(define-keyboard-gui-command (com-resize-event) ((record event) (offset-x real :default 0) (offset-y real :default 0))
+(define-keyboard-gui-command (com-resize-event) ((record 'event) (offset-x 'real :default 0) (offset-y 'real :default 0))
   ;; (declare (ignorable record offset-x offset-y))
   (let* ((stream (find-pane-named *application-frame* 'keyboard-gui-pane))
          (damaged-region +nowhere+)
