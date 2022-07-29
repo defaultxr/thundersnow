@@ -32,7 +32,9 @@ A piano roll interface for editing sequences of notes via cl-patterns' ~eseq~. W
 *** Stepseq
 A simple drum machine-style interface for editing and sequencing drum patterns.
 *** Wave editor
-Show the waveform of a sound buffer and optionally ~splits~ data.
+An Audacity-like UI to show the waveform of a sound buffer and optionally ~splits~ data.
+*** Env editor
+An editor allowing the creation and editing of envelopes and their properties.
 *** Keyboard GUI [working name]
 Simple interface to trigger and control synths from your keyboard or via the GUI.
 
