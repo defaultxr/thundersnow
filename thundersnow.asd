@@ -14,6 +14,7 @@
                #:serapeum
                #:mutility
                #:mutility/loopy
+               #:mutility/files
                #:metabang-bind
                #:closer-mop
                #:cl-patterns
@@ -25,6 +26,7 @@
   :components ((:file "package")
                (:file "utility")
                (:file "common")
+               (:file "thumbnails")
                (:module gadgets
                 :components ((:file "knob")
                              (:file "scope")
