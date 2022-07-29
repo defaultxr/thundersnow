@@ -125,62 +125,62 @@
    #:frame-task
    #:frame-recording-beat
    #:com-exit-piano-mode)
-  (:local-nicknames (:a :alexandria)
-                    (:clp :cl-patterns)))
+  (:local-nicknames (#:a #:alexandria)
+                    (#:clp #:cl-patterns)))
 
 (uiop:define-package #:thundersnow/indexer
   (:nicknames #:ts/i)
   (:use)
   (:mix #:thundersnow/common)
-  (:local-nicknames (:a :alexandria)
-                    (:clp :cl-patterns)))
+  (:local-nicknames (#:a #:alexandria)
+                    (#:clp #:cl-patterns)))
 
 (uiop:define-package #:thundersnow/thundersnow
   (:nicknames #:ts/ts)
   (:use)
   (:mix #:thundersnow/common)
-  (:local-nicknames (:a :alexandria)
-                    (:clp :cl-patterns))
+  (:local-nicknames (#:a #:alexandria)
+                    (#:clp #:cl-patterns))
   (:export :thundersnow))
 
 (uiop:define-package #:thundersnow/keyboard-gui
   (:nicknames #:ts/kg)
   (:use)
   (:mix #:thundersnow/common)
-  (:local-nicknames (:a :alexandria)
-                    (:clp :cl-patterns))
+  (:local-nicknames (#:a #:alexandria)
+                    (#:clp #:cl-patterns))
   (:export :keyboard-gui))
 
 (uiop:define-package #:thundersnow/piano-roll
   (:nicknames #:ts/pr)
   (:use)
   (:mix #:thundersnow/common)
-  (:local-nicknames (:a :alexandria)
-                    (:clp :cl-patterns))
+  (:local-nicknames (#:a #:alexandria)
+                    (#:clp #:cl-patterns))
   (:export :piano-roll))
 
 (uiop:define-package #:thundersnow/stepseq
   (:nicknames #:ts/ss)
   (:use)
   (:mix #:thundersnow/common)
-  (:local-nicknames (:a :alexandria)
-                    (:clp :cl-patterns))
+  (:local-nicknames (#:a #:alexandria)
+                    (#:clp #:cl-patterns))
   (:export :stepseq))
 
 (uiop:define-package #:thundersnow/tracker
   (:nicknames #:ts/tr)
   (:use)
   (:mix #:thundersnow/common)
-  (:local-nicknames (:a :alexandria)
-                    (:clp :cl-patterns))
+  (:local-nicknames (#:a #:alexandria)
+                    (#:clp #:cl-patterns))
   (:export :tracker))
 
 (uiop:define-package #:thundersnow/wave-editor
   (:nicknames #:ts/we)
   (:use)
   (:mix #:thundersnow/common)
-  (:local-nicknames (:a :alexandria)
-                    (:clp :cl-patterns))
+  (:local-nicknames (#:a #:alexandria)
+                    (#:clp #:cl-patterns))
   (:export :wave-editor))
 
 (uiop:define-package #:thundersnow
@@ -192,8 +192,8 @@
         #:thundersnow/stepseq
         #:thundersnow/wave-editor
         #:thundersnow/keyboard-gui)
-  (:local-nicknames (:a :alexandria)
-                    (:clp :cl-patterns))
+  (:local-nicknames (#:a #:alexandria)
+                    (#:clp #:cl-patterns))
   (:export #:thundersnow
            #:piano-roll
            #:tracker
