@@ -172,13 +172,17 @@ See also: `ask-confirmation'"
 
 (defun mix-colors (color-1 color-2 &optional (mix 0.5))
   "Linearly mix between COLOR-1 and COLOR-2. MIX ranges from 0, meaning 100% color-1, to 1, meaning 100% color-2."
-  (apply 'make-rgb-color (apply 'mapcar
-                                (lambda (c1 c2)
-                                  (+ c1 (* mix (- c2 c1))))
-                                (mapcar (lambda (c) (multiple-value-list (color-rgb c))) (list color-1 color-2)))))
+  (apply #'make-rgb-color (apply #'mapcar
+                                 (lambda (c1 c2)
+                                   (+ c1 (* mix (- c2 c1))))
+                                 (mapcar (lambda (c) (multiple-value-list (color-rgb c))) (list color-1 color-2)))))
 
 ;;; theming/color functionality (FIX: generalize and move to mutility?)
 ;; see also: https://github.com/McCLIM/McCLIM/issues/842 ; "Sort out the gadget color situation"
+;; allow "symbolic names", i.e. "background", "primary", "secondary", "accent", etc.
+;; themes should also specify whether they are "dark" or not, so programmatic colors can change their behavior accordingly.
+;; perhaps have a "fallback" item, specifying a theme to fall back to if a color is not defined in this one.
+;; maybe use mcclim indirect inks instead of colors directly?
 
 (defvar *theme* (list :background (make-gray-color 0.2)
                       :foreground +white+
