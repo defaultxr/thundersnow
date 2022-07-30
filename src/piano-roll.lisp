@@ -259,7 +259,7 @@ See also: `scroll-top-to', `scroll-center-to', `scroll-bottom-to'"
                 x-start y-bottom
                 :align-y :bottom)))
 
-(define-application-frame piano-roll ()
+(define-application-frame piano-roll (thundersnow-application-frame)
   ((eseq :initarg :eseq :initform (eseq) :type eseq :documentation "The `eseq' instance.")
    (beat-size :initarg :beat-size :initform 200 :documentation "The width of one beat, in pixels.")
    (grid-size :initarg :beat-size :initform nil :documentation "The number of beats between each grid line. If nil, it is calculated from the current beat-size.")

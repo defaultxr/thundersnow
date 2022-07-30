@@ -384,3 +384,11 @@ See also: `*theme*'"
   (format t "~&Copied URL ~S to the system clipboard.~%" url)
   nil)
 
+;;; abstract class for thundersnow application frames
+;; provides the functionality common among the various thundersnow GUIs
+
+(defclass thundersnow-application-frame (standard-application-frame)
+  ())
+
+(defmethod default-frame-top-level ((frame thundersnow-application-frame) &rest args &key prompt &allow-other-keys)
+  (apply #'call-next-method frame :prompt (or prompt (concat (frame-pretty-name frame) ": ")) (remove-from-plist args :prompt)))

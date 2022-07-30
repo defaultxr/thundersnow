@@ -25,7 +25,7 @@
 
 ;;; thundersnow frame
 
-(define-application-frame thundersnow ()
+(define-application-frame thundersnow (thundersnow-application-frame)
   ()
   (:command-table (thundersnow :inherit-from (thundersnow-common-command-table
                                               thundersnow-file-command-table
@@ -66,8 +66,7 @@
                pointer-documentation-pane))))
    (test-interactor
     (vertically ()
-      interactor)))
-  (:top-level (default-frame-top-level :prompt "thundersnow: ")))
+      interactor))))
 
 (defmethod initialize-instance :before ((thundersnow thundersnow) &key &allow-other-keys)
   (thundersnow-ensure-initialized))

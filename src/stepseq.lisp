@@ -35,7 +35,7 @@
   :inherit-from (thundersnow-common-help-command-table)
   :inherit-menu t)
 
-(define-application-frame stepseq ()
+(define-application-frame stepseq (thundersnow-application-frame)
   ()
   (:command-table (stepseq
                    :inherit-from (thundersnow-common-command-table

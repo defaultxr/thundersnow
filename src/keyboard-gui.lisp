@@ -50,7 +50,7 @@
                (list (rectangle-min-x %saved-extent) (rectangle-min-y %saved-extent))
                (list 0 0)))))
 
-(define-application-frame keyboard-gui ()
+(define-application-frame keyboard-gui (thundersnow-application-frame)
   ()
   (:command-table (keyboard-gui
                    :inherit-from (keyboard-gui-file-command-table

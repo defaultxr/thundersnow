@@ -149,7 +149,7 @@ See also: `sound-frame-pixel'"
                        :filled nil
                        :ink +yellow+))))
 
-(define-application-frame wave-editor ()
+(define-application-frame wave-editor (thundersnow-application-frame)
   ((second-px :initarg :second-px :initform 1000))
   (:command-table (wave-editor
                    :inherit-from (thundersnow-common-command-table

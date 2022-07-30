@@ -104,6 +104,8 @@
    #:com-bugs
    #:com-about
 
+   #:thundersnow-application-frame
+
    #:knob
    #:knob-angle-clim-angle
    #:clim-angle-knob-angle

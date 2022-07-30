@@ -186,7 +186,7 @@
                       (present (make-tracker-cell :frame frame :row row-num :column (1+ col-num) :key key :table table) 'tracker-cell :stream pane)))))))))
       (fresh-line))))
 
-(define-application-frame tracker ()
+(define-application-frame tracker (thundersnow-application-frame)
   ((ptrack :initarg :ptrack :reader frame-ptrack :initform (ptrack (list :degree (pseries 0 (pwhite 0 4) 16)
                                                                          :dur 1/4)
                                                                    (make-list 16))))
