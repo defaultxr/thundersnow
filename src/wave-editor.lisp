@@ -1,10 +1,11 @@
-(in-package #:thundersnow/wave-editor)
-
-;;; wave-editor
+;;; wave-editor - sound buffer visualizer and editor
 ;; Notes:
-;; Prior art:
+;; * prior art:
 ;; - cl-wav-synth; https://common-lisp.net/project/cl-wav-synth/
-;; https://github.com/McCLIM/McCLIM/issues/927 - "proposal: display function performs no actual output"; possible performance gain for this, as it would avoid drawing items that are not on screen
+;; * McCLIM info
+;; - https://github.com/McCLIM/McCLIM/issues/927 - "proposal: display function performs no actual output"; possible performance gain for this, as it would avoid drawing items that are not on screen
+
+(in-package #:thundersnow/wave-editor)
 
 (defvar *tmp* nil
   "Temporary variable for convenience during development.")
@@ -29,7 +30,6 @@
 (define-presentation-type wave-editor-point ())
 
 (define-presentation-type sound-frame ())
-
 
 (defmethod sound ((this wave-editor-pane))
   (slot-value this 'sound))

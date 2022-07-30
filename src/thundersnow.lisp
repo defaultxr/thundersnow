@@ -131,9 +131,7 @@
                                       :command-table thundersnow-file-command-table
                                       :keystroke (#\m :meta))
     ()
-  (format t "~a metronome." (if (play-or-stop :-metronome)
-                                "Started"
-                                "Stopped")))
+  (format t "~A metronome.~%" (if (play-or-stop :-metronome) "Started" "Stopped")))
 
 (define-command-table thundersnow-edit-command-table
   :inherit-from (thundersnow-common-edit-command-table)

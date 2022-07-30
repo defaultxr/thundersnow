@@ -162,8 +162,7 @@ See also: `scroll-top-to', `scroll-center-to', `scroll-bottom-to'"
 
 (define-presentation-type note ())
 
-(define-presentation-method accept
-    ((type note) stream view &key))
+(define-presentation-method accept ((type note) stream view &key))
 
 ;; (define-presentation-type weekday ())
 
@@ -284,14 +283,13 @@ See also: `scroll-top-to', `scroll-center-to', `scroll-bottom-to'"
                                 :orientation :horizontal
                                 :min-value 1 :max-value 40
                                 :value 20
-                                :drag-callback
-                                (lambda (slider value)
-                                  (declare (ignore slider))
-                                  (with-slots (beat-size) *application-frame*
-                                    (let ((new-size (* 10 value)))
-                                      (unless (= beat-size new-size)
-                                        (setf beat-size new-size)
-                                        (redisplay-frame-pane *application-frame* (piano-roll-pane) :force-p t)))))))
+                                :drag-callback (lambda (slider value)
+                                                 (declare (ignore slider))
+                                                 (with-slots (beat-size) *application-frame*
+                                                   (let ((new-size (* 10 value)))
+                                                     (unless (= beat-size new-size)
+                                                       (setf beat-size new-size)
+                                                       (redisplay-frame-pane *application-frame* (piano-roll-pane) :force-p t)))))))
    (interactor-pane (make-pane 'piano-roll-interactor-pane
                                :name 'interactor-pane))
    (pointer-documentation-pane :pointer-documentation
