@@ -92,7 +92,7 @@ Examples:
 ;; (configuration-directory \"themes\") ;=> \"/home/user/.config/thundersnow/themes/\""
   (uiop:native-namestring
    (if subdirectory
-       (join-pathnames *configuration-directory* subdirectory)
+       (join-path-components *configuration-directory* subdirectory)
        *configuration-directory*)))
 
 (defun (setf configuration-directory) (directory &optional subdirectory)

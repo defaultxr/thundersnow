@@ -14,7 +14,7 @@ Examples:
 ;; (thumbnail-directory \"spectrograms\") ;=> \"/home/user/.cache/thundersnow/thumbnails/spectrograms/\""
   (file-path
    (if subdirectory
-       (join-pathnames *thumbnail-directory* subdirectory)
+       (join-path-components *thumbnail-directory* subdirectory)
        *thumbnail-directory*)))
 
 (defun (setf thumbnail-directory) (directory &optional subdirectory)
