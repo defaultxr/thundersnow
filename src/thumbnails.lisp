@@ -114,12 +114,12 @@ Keyword arguments:
       (uiop:ensure-all-directories-exist (file-directory output-file))
       (values-list (list* output-file
                           (multiple-value-list
-                           (uiop:run-program (dprint (apply (case generator
-                                                              (:ffmpeg 'audio-file-thumbnail-ffmpeg-invocation)
-                                                              (:sox 'audio-file-thumbnail-sox-invocation))
-                                                            :audio-file audio-file
-                                                            :output-file output-file
-                                                            (remove-from-plist args :output-file)))
+                           (uiop:run-program (apply (case generator
+                                                      (:ffmpeg 'audio-file-thumbnail-ffmpeg-invocation)
+                                                      (:sox 'audio-file-thumbnail-sox-invocation))
+                                                    :audio-file audio-file
+                                                    :output-file output-file
+                                                    (remove-from-plist args :output-file))
                                              :output '(:string :stripped t)
                                              :error-output '(:string :stripped t))))))))
 
