@@ -9,7 +9,7 @@
 
 (test undocumented-symbols
   "Check for any undocumented exported symbols"
-  (let ((undocumented (undocumented-symbols :thundersnow)))
+  (let ((undocumented (package-undocumented-symbols :thundersnow)))
     (is-false undocumented
               "some exported symbols do not have docstrings: ~s"
               undocumented)))
