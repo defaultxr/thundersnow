@@ -49,7 +49,7 @@ See also: `thumbnail-cache-clear'"
 
 ;;; thumbnail generation
 
-(defun audio-file-thumbnail-output-filename (audio-file size &optional (type :spectrogram))
+(defun audio-file-thumbnail-output-filename (audio-file &key size (type :spectrogram))
   "Generate a default filename to write a spectrogram image for AUDIO-FILE to."
   (concat (thumbnail-directory (concat (ecase type
                                          (:spectrogram "spectrograms")
@@ -105,7 +105,7 @@ Keyword arguments:
             (generator mode)
             "SoX does not support drawing waveforms")
     (let ((output-file (or output-file
-                           (audio-file-thumbnail-output-filename audio-file :size (list width height)))))
+                           (audio-file-thumbnail-output-filename audio-file :size (list width height) :type mode))))
       (unless (or force
                   (not (file-exists-p output-file))
                   (>= (file-write-date audio-file)
