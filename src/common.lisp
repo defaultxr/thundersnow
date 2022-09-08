@@ -272,6 +272,12 @@ See also: `*theme*'"
                                   value
                                   (/ value 60)))))))
 
+(define-command (com-toggle-metronome :name t :menu t
+                                      :command-table thundersnow-common-file-command-table
+                                      :keystroke (#\m :meta))
+    ()
+  (format t "~A metronome.~%" (if (play-or-stop :-metronome) "Started" "Stopped")))
+
 (add-menu-item-to-command-table 'thundersnow-common-file-command-table nil :divider nil :errorp nil)
 
 (define-command (com-close :name t :menu t

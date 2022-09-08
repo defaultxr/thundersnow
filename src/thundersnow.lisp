@@ -127,12 +127,6 @@
   :inherit-from (thundersnow-common-file-command-table)
   :inherit-menu t)
 
-(define-command (com-toggle-metronome :name t :menu t
-                                      :command-table thundersnow-file-command-table
-                                      :keystroke (#\m :meta))
-    ()
-  (format t "~A metronome.~%" (if (play-or-stop :-metronome) "Started" "Stopped")))
-
 (define-command-table thundersnow-edit-command-table
   :inherit-from (thundersnow-common-edit-command-table)
   :inherit-menu t)
