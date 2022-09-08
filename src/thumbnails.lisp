@@ -111,7 +111,7 @@ Keyword arguments:
                   (>= (file-write-date audio-file)
                       (file-write-date output-file)))
         (return-from audio-file-thumbnail output-file))
-      (uiop:ensure-all-directories-exist (file-directory output-file))
+      (uiop:ensure-all-directories-exist (list (file-directory output-file)))
       (values-list (list* output-file
                           (multiple-value-list
                            (uiop:run-program (apply (case generator
