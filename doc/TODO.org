@@ -5,7 +5,9 @@ A list of various ideas and things to be done for Thundersnow, so they aren't fo
 
 * Specify a license
 * Example config files
-* Theming support (this also depends on more theming functionality being implemented in McCLIM)
+* Theming support
+(this also depends on more theming functionality being implemented in McCLIM)
+** Perhaps use [[https://codeberg.org/contrapunctus/clim-app-base/src/branch/production/doc/anathema.org][Anathema]]?
 * Documentation
 * File search pane (for loading samples, projects, etc)
 ** Use thumbnails if possible
@@ -20,12 +22,16 @@ A list of various ideas and things to be done for Thundersnow, so they aren't fo
 * Integration with [[https://freesound.org/][Freesound]] -- maybe via [[https://github.com/ntrocado/freesound][ntrocado/freesound]]
 * Integration with [[http://sox.sourceforge.net/][SoX]] to generate soundfile thumbnails (spectrograms):
 ~sox input.wav -n channels 1 spectrogram -r -o output.png~
+** ffmpeg also supports generating thumbnails.
 * Look into this page on [[http://www.personal.psu.edu/cab38/ColorSch/Schemes.html][color schemes]]
 * Consider using [[https://github.com/szos/defconfig][defconfig]] for customization/options/etc.
-* Standalone mode (for when Thundersnow is started from the command line, not loaded from an already-running Lisp image)
-* File indexer (for fast searching through sample/music directories)
+* Standalone mode
+for when Thundersnow is started from the command line, not loaded from an already-running Lisp image.
+* File indexer
+for fast searching through sample/music directories.
 * Playlist view
 * MIDI mapping
 * MIDI device interfacing (generalized functionality to send/receive MIDI to/from controllers to use them as an interface and display relevant info)
+* Testing and distribution/packages
+** [[https://nyxt.atlas.engineer/article/continuous-testing-and-packaging.org][Useful information from the Nyxt project]]
 * EVERYTHING ELSE!
-
