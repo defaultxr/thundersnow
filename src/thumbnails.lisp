@@ -68,7 +68,8 @@ See also: `thumbnail-cache-clear'"
                (:spectrogram "showspectrumpic")
                (:waveform "showwavespic"))
              "=size=" width "x" height
-             ":legend=" (if show-axes "enable" "disable"))
+             (unless (eql mode :waveform)
+               (concat ":legend=" (if show-axes "enable" "disable"))))
     ,output-file))
 
 (defun audio-file-thumbnail-sox-invocation (&key audio-file output-file show-axes (width 1024) (height 256) (mode :spectrogram) &allow-other-keys)
