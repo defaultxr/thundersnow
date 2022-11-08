@@ -14,8 +14,8 @@
 (defconstant 1.5pi (* pi 1.5)
   "1.5x pi.")
 
-(defconstant 2pi (* pi 2)
-  "2x pi.")
+(defconstant tau (* pi 2)
+  "Tau; 2x pi. https://tauday.com/tau-manifesto")
 
 (serapeum:defconst +powers-of-two+ (mapcar (curry #'expt 2) (iota 32 :start 1))
   "The first 32 powers of two, starting from 2.")

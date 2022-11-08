@@ -49,16 +49,16 @@
   "Convert a KNOB-ANGLE (where 0 is down, 0.5pi is left, etc) to a CLIM angle (where 0 is right, 0.5pi is up, etc).
 
 See also: `clim-angle-knob-angle'"
-  (mod (- 1.5pi knob-angle) 2pi))
+  (mod (- 1.5pi knob-angle) tau))
 
 (defun clim-angle-knob-angle (clim-angle)
   "Convert a CLIM-ANGLE (where 0 is right, 0.5pi is up, etc) to a knob angle (where 0 is down, 0.5pi is left, etc).
 
 See also: `knob-angle-clim-angle'"
-  (abs (- (mod clim-angle 2pi) 1.5pi)))
+  (abs (- (mod clim-angle tau) 1.5pi)))
 
 (defun knob-angle-point* (knob angle)
-  "Get x and y values for the point on KNOB's ellipse at ANGLE, where 0 and 2pi are down, 0.5pi is left, pi is up, and 1.5pi is right. Does not take into account the dead-zone-size.
+  "Get x and y values for the point on KNOB's ellipse at ANGLE, where 0 and tau are down, 0.5pi is left, pi is up, and 1.5pi is right. Does not take into account the dead-zone-size.
 
 See also: `knob-angle-point', `knob-value-angle', `knob-value-point*', `knob-value-point'"
   (let ((center (bounding-rectangle-center knob))
@@ -79,7 +79,7 @@ See also: `knob-angle-point*', `knob-value-angle', `knob-value-point*', `knob-va
   (multiple-value-call #'make-point (knob-angle-point* knob angle)))
 
 (defun knob-value-angle (knob value)
-  "Get the knob angle for VALUE on KNOB, taking into account the dead-zone-size. If VALUE is the knob's min-value, the result is half the dead-zone-size; if VALUE is the knob's max-value, the result is 2pi minus half the dead-zone-size, and if VALUE is in the middle of the range, the result is pi.
+  "Get the knob angle for VALUE on KNOB, taking into account the dead-zone-size. If VALUE is the knob's min-value, the result is half the dead-zone-size; if VALUE is the knob's max-value, the result is tau minus half the dead-zone-size, and if VALUE is in the middle of the range, the result is pi.
 
 See also: `knob-angle-point*', `knob-angle-point', `knob-value-point*', `knob-value-point'"
   (let* ((min-value (gadget-min-value knob))

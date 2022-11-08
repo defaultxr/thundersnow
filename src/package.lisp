@@ -23,7 +23,7 @@
                           #:quant)
   (:export
    ;; utility.lisp
-   #:pi/2 #:0.5pi #:1/2pi #:1.5pi #:2pi
+   #:pi/2 #:0.5pi #:1/2pi #:1.5pi #:tau
    #:+powers-of-two+
 
    #:sprint
