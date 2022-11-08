@@ -11,7 +11,7 @@
 
 (defclass knob (labelled-gadget-mixin climi::value-changed-repaint-mixin value-gadget range-gadget-mixin)
   ((default-value :initarg :default-value :writer (setf default-value) :type number :documentation "The default value that the knob should return to when \"reset\". If unbound, defaults to the center of the `gadget-range'.")
-   (dead-angle :initarg :dead-angle :initform 0.5 :type (real 0) :documentation "The \"dead zone\"; the angle in radians at the bottom of the knob that the indicator cannot point to.")
+   (dead-zone-size :initarg :dead-zone-size :initform 0.5 :type (real 0) :documentation "The size of the \"dead zone\"; the angle in radians at the bottom of the knob that the indicator cannot point to.")
    (knob-margin :initarg :knob-margin :initform 2 :accessor knob-margin :type (real 0) :documentation "Amount of empty space to put around the knob.")
    (indicator :initarg :indicator :initform +red+ :type color :documentation "The color of the knob's value indicator.")
    (knob-background :initarg :knob-background :initform +gray40+ :type color :documentation "The background color of the knob.")
@@ -58,7 +58,7 @@ See also: `knob-angle-clim-angle'"
   (abs (- (mod clim-angle 2pi) 1.5pi)))
 
 (defun knob-angle-point* (knob angle)
-  "Get x and y values for the point on KNOB's ellipse at ANGLE, where 0 and 2pi are down, 0.5pi is left, pi is up, and 1.5pi is right. Does not take into account the dead-angle.
+  "Get x and y values for the point on KNOB's ellipse at ANGLE, where 0 and 2pi are down, 0.5pi is left, pi is up, and 1.5pi is right. Does not take into account the dead-zone-size.
 
 See also: `knob-angle-point', `knob-value-angle', `knob-value-point*', `knob-value-point'"
   (let ((center (bounding-rectangle-center knob))
@@ -79,14 +79,14 @@ See also: `knob-angle-point*', `knob-value-angle', `knob-value-point*', `knob-va
   (multiple-value-call #'make-point (knob-angle-point* knob angle)))
 
 (defun knob-value-angle (knob value)
-  "Get the knob angle for VALUE on KNOB, taking into account the dead-angle. If VALUE is the knob's min-value, the result is half the dead-angle; if VALUE is the knob's max-value, the result is 2pi minus half the dead-angle, and if VALUE is in the middle of the range, the result is pi.
+  "Get the knob angle for VALUE on KNOB, taking into account the dead-zone-size. If VALUE is the knob's min-value, the result is half the dead-zone-size; if VALUE is the knob's max-value, the result is 2pi minus half the dead-zone-size, and if VALUE is in the middle of the range, the result is pi.
 
 See also: `knob-angle-point*', `knob-angle-point', `knob-value-point*', `knob-value-point'"
   (let* ((min-value (gadget-min-value knob))
-         (dead-angle (slot-value knob 'dead-angle))
+         (dead-zone-size (slot-value knob 'dead-zone-size))
          (value-percent (/ (- value min-value) (gadget-range knob))))
-    (+ (/ dead-angle 2)
-       (* value-percent (- (* 2 pi) dead-angle)))))
+    (+ (/ dead-zone-size 2)
+       (* value-percent (- (* 2 pi) dead-zone-size)))))
 
 (defun knob-value-point* (knob value)
   "Get x and y as values for the point on KNOB's ellipse at VALUE.
