@@ -276,6 +276,7 @@ See also: `scroll-top-to', `scroll-center-to', `scroll-bottom-to'"
                           ("View" :menu piano-roll-view-command-table)
                           ("Tools" :menu piano-roll-tools-command-table)
                           ("Help" :menu piano-roll-help-command-table))))
+  (:default-initargs :pretty-name "piano-roll")
   (:panes
    (piano-roll-pane (make-pane 'piano-roll-pane))
    (beat-size-slider (make-pane :slider
