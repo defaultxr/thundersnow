@@ -143,49 +143,54 @@
   :inherit-from (thundersnow-common-help-command-table)
   :inherit-menu t)
 
-(define-presentation-action select (pattern nil thundersnow
-                                    :gesture :select
-                                    :pointer-documentation "Select pattern")
-                            (pattern)
-  (with-room-for-graphics ()
-    (format t "~&Select pattern: ~s~%" pattern))
+(define-command (com-select :name t :menu t :command-table thundersnow-edit-command-table)
+    ((pattern 'pattern))
+  (format t "~&Select pattern: ~S~%" pattern)
   (let ((pattern-pane (pattern-pane *application-frame*)))
-    (setf (pane-pattern pattern-pane) pattern)
-    (redisplay-frame-pane *application-frame* pattern-pane :force-p t))
-  nil)
+    (setf (pane-pattern pattern-pane) pattern)))
 
-(define-presentation-action play (pattern nil thundersnow
-                                  :gesture nil
-                                  :tester ((object)
-                                           (and (pattern-p object)
-                                                (eql (clp::pattern-status object) :stopped)))
-                                  :pointer-documentation "Play pattern")
-                            (pattern)
-  (play pattern)
-  (redisplay-frame-pane *application-frame* (patterns-pane *application-frame*) :force-p t)
-  nil)
+(define-presentation-to-command-translator select (pattern com-select thundersnow) (pattern)
+  (list pattern))
 
-(define-presentation-action end (pattern nil thundersnow
-                                 :gesture nil
-                                 :tester ((object)
-                                          (and (pattern-p object)
-                                               (eql (clp::pattern-status object) :playing)))
-                                 :pointer-documentation "End pattern")
-                            (pattern)
-  (end pattern)
-  (redisplay-frame-pane *application-frame* (patterns-pane *application-frame*) :force-p t)
-  nil)
+(define-command (com-play :name t :menu t :command-table thundersnow-edit-command-table)
+  ((pattern 'pattern))
+  (play pattern))
 
-(define-presentation-action stop (pattern nil thundersnow
-                                  :gesture nil
-                                  :tester ((object)
-                                           (and (pattern-p object)
-                                                (eql (clp::pattern-status object) :playing)))
-                                  :pointer-documentation "Stop pattern")
-                            (pattern)
-  (stop pattern)
-  (redisplay-frame-pane *application-frame* (patterns-pane *application-frame*) :force-p t)
-  nil)
+(define-presentation-to-command-translator play (pattern com-play thundersnow
+                                                 :gesture nil
+                                                 :tester ((object)
+                                                          (and (pattern-p object)
+                                                               (eql (clp::pattern-status object) :stopped)))
+                                                 :pointer-documentation "Play pattern")
+                                           (pattern)
+  (list pattern))
+
+
+(define-command (com-end :name t :menu t :command-table thundersnow-edit-command-table)
+  ((pattern 'pattern))
+  (end pattern))
+
+(define-presentation-to-command-translator end (pattern com-end thundersnow
+                                                :gesture nil
+                                                :tester ((object)
+                                                         (and (pattern-p object)
+                                                              (eql (clp::pattern-status object) :playing)))
+                                                :pointer-documentation "End pattern")
+                                           (pattern)
+  (list pattern))
+
+(define-command (com-stop :name t :menu t :command-table thundersnow-edit-command-table)
+  ((pattern 'pattern))
+  (stop pattern))
+
+(define-presentation-to-command-translator stop (pattern com-stop thundersnow
+                                                 :gesture nil
+                                                 :tester ((object)
+                                                          (and (pattern-p object)
+                                                               (eql (clp::pattern-status object) :playing)))
+                                                 :pointer-documentation "Stop pattern")
+                                           (pattern)
+  (list pattern))
 
 (defmethod frame-standard-output ((frame thundersnow))
   (find-pane-named frame 'interactor))
