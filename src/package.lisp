@@ -143,7 +143,7 @@
   (:mix #:thundersnow/common)
   (:local-nicknames (#:a #:alexandria)
                     (#:clp #:cl-patterns))
-  (:export :thundersnow))
+  (:export #:thundersnow))
 
 (uiop:define-package #:thundersnow/keyboard-gui
   (:nicknames #:ts/kg)
@@ -151,7 +151,7 @@
   (:mix #:thundersnow/common)
   (:local-nicknames (#:a #:alexandria)
                     (#:clp #:cl-patterns))
-  (:export :keyboard-gui))
+  (:export #:keyboard-gui))
 
 (uiop:define-package #:thundersnow/piano-roll
   (:nicknames #:ts/pr)
@@ -159,7 +159,7 @@
   (:mix #:thundersnow/common)
   (:local-nicknames (#:a #:alexandria)
                     (#:clp #:cl-patterns))
-  (:export :piano-roll))
+  (:export #:piano-roll))
 
 (uiop:define-package #:thundersnow/stepseq
   (:nicknames #:ts/ss)
@@ -167,7 +167,7 @@
   (:mix #:thundersnow/common)
   (:local-nicknames (#:a #:alexandria)
                     (#:clp #:cl-patterns))
-  (:export :stepseq))
+  (:export #:stepseq))
 
 (uiop:define-package #:thundersnow/tracker
   (:nicknames #:ts/tr)
@@ -175,7 +175,7 @@
   (:mix #:thundersnow/common)
   (:local-nicknames (#:a #:alexandria)
                     (#:clp #:cl-patterns))
-  (:export :tracker))
+  (:export #:tracker))
 
 (uiop:define-package #:thundersnow/wave-editor
   (:nicknames #:ts/we)
@@ -183,7 +183,7 @@
   (:mix #:thundersnow/common)
   (:local-nicknames (#:a #:alexandria)
                     (#:clp #:cl-patterns))
-  (:export :wave-editor))
+  (:export #:wave-editor))
 
 (uiop:define-package #:thundersnow
   (:nicknames #:ts)
