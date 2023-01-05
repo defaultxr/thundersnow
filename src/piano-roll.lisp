@@ -363,8 +363,8 @@ See also: `scroll-top-to', `scroll-center-to', `scroll-bottom-to'"
   (redisplay-frame-pane piano-roll (find-pane-named piano-roll 'piano-roll-pane) :force-p t))
 
 (defun draw-piano-roll (frame stream)
-  (let* ((stream-width (piano-roll-width stream))
-         (stream-height (piano-roll-height stream))
+  (let* ((width (piano-roll-width stream))
+         (height (piano-roll-height stream))
          (grid-size (grid-size frame))
          (beat-size (slot-value frame 'beat-size))
          (y-size (slot-value frame 'y-size))
@@ -380,15 +380,15 @@ See also: `scroll-top-to', `scroll-center-to', `scroll-bottom-to'"
          (scale (slot-value frame 'scale))
          (scale-midinotes (when scale (scale-midinotes scale :octave :all))))
     ;; draw the vertical grid lines and beat numbers at the bottom
-    (loop :for beat :from 0 :by grid-size :upto (max (+ (dur frame) 32) (/ stream-width (* beat-size grid-size)))
+    (loop :for beat :from 0 :by grid-size :upto (max (+ (dur frame) 32) (/ width (* beat-size grid-size)))
           :for xpos := (beat-to-x-pixel beat frame)
-          :do (draw-line* stream xpos 0 xpos stream-height :ink (if (= (round beat) beat) grid-color bg-grid-mixed))
-              (draw-text* stream (write-to-string beat) (1+ xpos) (1- stream-height) :ink grid-color))
+          :do (draw-line* stream xpos 0 xpos height :ink (if (= (round beat) beat) grid-color bg-grid-mixed))
+              (draw-text* stream (write-to-string beat) (1+ xpos) (1- height) :ink grid-color))
     ;; draw the horizontal grid lines and note names on the side
     (loop :for y :from 0 :upto 127
-          :for ypos := (- stream-height (* y y-size))
-          :for top-ypos := (- stream-height (* (1+ y) y-size))
-          :do (draw-line* stream 0 ypos stream-width ypos :ink grid-color)
+          :for ypos := (- height (* y y-size))
+          :for top-ypos := (- height (* (1+ y) y-size))
+          :do (draw-line* stream 0 ypos width ypos :ink grid-color)
               (draw-text* stream (note-text y) 1 top-ypos :align-y :top :ink (if (member y scale-midinotes)
                                                                                  grid-accent-color
                                                                                  grid-color)))
