@@ -180,7 +180,7 @@ See also: `scroll-top-to', `scroll-center-to', `scroll-bottom-to'"
   ;; :inherit-from
   )
 
-(defclass piano-roll-pane (scroll-position-preserving-mixin application-pane)
+(defclass piano-roll-pane (application-pane)
   ((%last-click-timestamp :initform -1000 :documentation "The timestamp of the last click the pane received."))
   (:default-initargs
    :name 'piano-roll

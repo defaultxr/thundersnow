@@ -1,9 +1,7 @@
-;;; wave-editor - sound buffer visualizer and editor
-;; Notes:
-;; * prior art:
-;; - cl-wav-synth; https://common-lisp.net/project/cl-wav-synth/
-;; * McCLIM info
-;; - https://github.com/McCLIM/McCLIM/issues/927 - "proposal: display function performs no actual output"; possible performance gain for this, as it would avoid drawing items that are not on screen
+;;;; wave-editor - sound buffer visualizer and editor
+;;; Notes:
+;;; * prior art:
+;;; - cl-wav-synth; https://common-lisp.net/project/cl-wav-synth/
 
 (in-package #:thundersnow/wave-editor)
 
@@ -12,7 +10,7 @@
 
 ;;; gui stuff
 
-(defclass wave-editor-pane (scroll-position-preserving-mixin application-pane)
+(defclass wave-editor-pane (application-pane)
   ((sound :initarg :sound :initform nil :type (or null bdef) :documentation "The sound instance as a `bdef'.")
    (point :initarg :point :initform 0 :type (or integer list) :documentation "The frame that the point is to the left of, or a list consisting of the start and end points of the region if active.")
    (second-px :initarg :second-px :initform 1000 :type number :documentation "The number of horizontal pixels per second (i.e. the \"zoom\" level of the pane).")
