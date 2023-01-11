@@ -135,13 +135,8 @@ See also: `ask-confirmation'"
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defclass textual-view (view)
-    ()))
+    ())
 
-;; FIX: this is now provided/exported by McCLIM. remove it after September 25.
-(unless (boundp '+textual-view+)
-  (defconstant +textual-view+ (make-instance 'textual-view)))
-
-(eval-when (:compile-toplevel :load-toplevel :execute)
   (defclass graphical-view (view)
     ()))
 
