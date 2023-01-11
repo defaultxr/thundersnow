@@ -7,7 +7,8 @@
   (:documentation "cl-patterns thundersnow backend."))
 
 (defmethod cl-patterns::backend-tempo-change-at ((backend thundersnow-backend) clock timestamp)
-  (update-tempo-information (tempo clock)))
+  ;; (update-tempo-information (tempo clock))
+  )
 
 (defmethod cl-patterns::backend-task-added ((backend thundersnow-backend) task)
   (map-over-frames (lambda (frame)
