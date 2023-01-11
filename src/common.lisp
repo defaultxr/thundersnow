@@ -169,11 +169,15 @@ See also: `ask-confirmation'"
                       :note-fill +red+
                       :selected-note-fill +blue+))
 
-(defun theme-color (element) ;; FIX: define setf as well
+(defun theme-color (element)
   "Get the theme's color for a type of GUI element, i.e. :foreground, :background, :accent, etc.
 
 See also: `*theme*'"
   (getf *theme* element))
+
+(defun (setf theme-color) (value element)
+  (check-type value design)
+  (setf (getf *theme* element) value))
 
 ;;; drawing utilities
 
