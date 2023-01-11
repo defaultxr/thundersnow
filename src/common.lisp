@@ -159,15 +159,24 @@ See also: `ask-confirmation'"
 ;; perhaps have a "fallback" item, specifying a theme to fall back to if a color is not defined in this one.
 ;; maybe use mcclim indirect inks instead of colors directly?
 
-(defvar *theme* (list :background (make-gray-color 0.2)
-                      :foreground +white+
-                      :grid (make-gray-color 0.8)
-                      :stopped +red+
-                      :playing +green+
-                      :ending +red4+
-                      :starting +greenyellow+
-                      :note-fill +red+
-                      :selected-note-fill +blue+))
+(defvar *theme* (list
+                 ;; general
+                 :background (make-gray-color 0.2)
+                 :foreground +white+
+                 ;; patterns
+                 :stopped +red+
+                 :playing +green+
+                 :ending +red4+
+                 :starting +greenyellow+
+                 ;; piano-roll
+                 :grid (make-gray-color 0.8)
+                 :note-fill +red+
+                 :selected-note-fill +blue+
+                 ;; keyboard-gui
+                 :white-key +white+
+                 :black-key +black+
+                 :octave-separator +red+)
+  "The active Thundersnow theme. These are the default colors for all included graphical interfaces, though colors can still be changed on a per-instance basis through the slots of the associated objects.")
 
 (defun theme-color (element)
   "Get the theme's color for a type of GUI element, i.e. :foreground, :background, :accent, etc.
