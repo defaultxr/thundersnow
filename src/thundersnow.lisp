@@ -15,8 +15,10 @@
 ;; arguments for define-drag-and-drop-translator can include:
 ;; - destination-object context-type frame presentation destination-presentation event window x y
 ;; zoom should be proportional; zoom series is: 1, 2, 3, 4, 6, 8, 12, 16, 24, 32
+;; zoom factor = pow(2, steps/100)
 ;; to get the clim debugger on errors, wrap your code in (clim-debugger:with-debugger () ...)
 ;; ... or add (:debugger t) to the define-application-frame when supported? (see https://www.youtube.com/watch?v=kfBmRsPRdGg&start=17m0s )
+;; - add a scrolling event view a la the screenshot here: https://twitter.com/defaultxr/status/621486028751290368
 
 (in-package #:thundersnow/thundersnow)
 
@@ -213,7 +215,7 @@ See also: `pattern-pane', `thundersnow'"
 (defun display-patterns (frame stream)
   "Display all defined patterns in STREAM."
   (declare (ignorable frame))
-  (let ((*package* (find-package 'thundersnow/thundersnow))) ;; FIX: there is probably a better way to change the default *package* of a frame/stream
+  (let ((*package* (find-package 'thundersnow/thundersnow))) ; FIX: there is probably a better way to change the default *package* of a frame/stream
     (updating-output (stream)
       (dolist (pdef (all-pdefs))
         (present pdef 'pattern :stream stream)))))

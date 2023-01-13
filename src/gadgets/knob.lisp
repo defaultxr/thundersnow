@@ -149,8 +149,7 @@ See also: `knob-value-point', `knob-angle-point*', `knob-angle-point', `knob-val
        (when (and armed
                   (region-contains-position-p (knob-ellipse knob) (pointer-event-x event) (pointer-event-y event)))
          (setf armed :active
-               last-pointer-coordinates (list (pointer-event-x event)
-                                              (pointer-event-y event)))))
+               last-pointer-coordinates (list (pointer-event-x event) (pointer-event-y event)))))
       (+pointer-right-button+
        (let ((label (or (gadget-maybe-label knob) "Knob")))
          (case (menu-choose `(("Set value" :value set-value

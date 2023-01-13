@@ -130,3 +130,6 @@ CLIM utilities, including a tree view, datetime presentations, history persisten
 08:55:59 alanz:       As I want to specify a width, not a right margin
 * [[https://techfak.de/~jmoringe/mcclim-double-buffering-7.ogv][very cool mcclim demo]]
 shows off double buffering, etc
+* i've been thinking about attempting to implement pointer-click-event and pointer-double-click-event. any hints/suggestions/requirements for implementing such? i'm thinking since they are compound events, they should be triggered after the respective "release" event. it looks like there is already a *DOUBLE-CLICK-DELAY* symbol in climi which it seems should probably be used too. a double click should probably only be triggered if both clicks are from the same button. 
+* look into space-requirement-options-mixin for ourcustom gadgets?
+* drawing a line plot with a single DRAW-POLYGON* call can be much more efficient than multiple draw calls, depending on the backend

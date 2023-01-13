@@ -45,7 +45,7 @@
   :instrument :default
   :dur 1
   :legato 0.1
-  :midinote (pif (pnary #'zerop (pnary #'mod (pbeat*) 4)) ;; FIX: change the length based on the time signature?
+  :midinote (pif (pnary #'zerop (pnary #'mod (pbeat*) 4)) ; FIX: change the length based on the time signature?
                  69
                  60)
   :quant 1)

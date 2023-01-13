@@ -1,5 +1,8 @@
 (in-package #:thundersnow/tracker)
 
+;;; NOTES:
+;; look into `grid-pane' ?
+
 ;;; misc
 
 (defvar *tmp* nil

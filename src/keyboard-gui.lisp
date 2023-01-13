@@ -1,6 +1,7 @@
+;;;; keyboard-gui.lisp - a simple interface to trigger synths from your keyboard or the gui.
+
 (in-package #:thundersnow/keyboard-gui)
 
-;;;; keyboard-gui.lisp - a simple interface to trigger synths from your keyboard or the gui.
 
 (defclass keyboard-gui-pane (application-pane)
   ()

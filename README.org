@@ -4,7 +4,7 @@ Digital audio workstation and [[https://en.wikipedia.org/wiki/Live_coding][live 
 
 Contains various GUIs and functionality for working with audio in Lisp in real time. Primarily developed for use with [[https://github.com/defaultxr/cl-patterns][cl-patterns]] and [[https://github.com/defaultxr/bdef][bdef]], using audio servers like [[https://supercollider.github.io/][SuperCollider]] (via [[https://github.com/byulparan/cl-collider][cl-collider]]) and [[https://incudine.sf.net/][Incudine]].
 
-Please note that this is a major work in progress at the moment, and very little useful functionality is currently implemented. Feel free to submit bug reports or suggestions, though, or even a pull request if you're feeling brave.
+Please note that this is a major work in progress at the moment, and very little useful functionality is currently implemented. Feel free to submit bug reports or suggestions, though, if you are interested.
 
 * Intro
 

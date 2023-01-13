@@ -182,13 +182,12 @@ See also: `scroll-top-to', `scroll-center-to', `scroll-bottom-to'"
 
 (defclass piano-roll-pane (application-pane)
   ((%last-click-timestamp :initform -1000 :documentation "The timestamp of the last click the pane received."))
-  (:default-initargs
-   :name 'piano-roll
-   :display-function 'draw-piano-roll
-   :display-time :command-loop
-   :default-view +graphical-view+
-   :foreground +white+
-   :background (theme-color :background)))
+  (:default-initargs :name 'piano-roll
+                     :display-function 'draw-piano-roll
+                     :display-time :command-loop
+                     :default-view +graphical-view+
+                     :foreground +white+
+                     :background (theme-color :background)))
 
 (defmethod compose-space ((pane piano-roll-pane) &key width height)
   (declare (ignore width height))

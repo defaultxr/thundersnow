@@ -1,7 +1,4 @@
-;;;; scope.lisp - scope gadget.
-
-;;; NOTES:
-;; 06:42:53 scymtym:     drawing a line plot with a single DRAW-POLYGON* call can be much more efficient than multiple draw calls, depending on the backend
+;;;; scope.lisp - oscilloscope gadget.
 
 (in-package #:thundersnow/common)
 
