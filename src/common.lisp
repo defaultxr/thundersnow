@@ -168,6 +168,8 @@ See also: `ask-confirmation'"
                  :playing +green+
                  :ending +red4+
                  :starting +greenyellow+
+                 ;; pattern
+                 :pattern-name +cyan+
                  ;; piano-roll
                  :grid (make-gray-color 0.8)
                  :note-fill +red+
