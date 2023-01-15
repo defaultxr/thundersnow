@@ -78,6 +78,9 @@
   (let ((tempo-pane (find-pane-named frame 'tempo)))
     (clime:schedule-event tempo-pane (make-instance 'timer-event :sheet tempo-pane) 0.1)))
 
+(defmethod frame-standard-output ((frame thundersnow))
+  (find-pane-named frame 'interactor))
+
 (defmethod pane-pattern ((frame standard-application-frame))
   (pane-pattern (pattern-pane frame)))
 
@@ -193,9 +196,6 @@
                                                  :pointer-documentation "Stop pattern")
                                            (pattern)
   (list pattern))
-
-(defmethod frame-standard-output ((frame thundersnow))
-  (find-pane-named frame 'interactor))
 
 ;;; patterns pane
 
