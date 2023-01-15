@@ -40,22 +40,29 @@
                                       ("View" :menu thundersnow-view-command-table)
                                       ("Tools" :menu thundersnow-tools-command-table)
                                       ("Help" :menu thundersnow-help-command-table))))
+  (:menu-bar nil)
   (:default-initargs :pretty-name "thundersnow")
   (:panes
-   (logo :application :scroll-bars nil)
+   (menu-bar (climi::make-menu-bar (frame-command-table *application-frame*) *application-frame* 'climi::hmenu-pane))
+   (logo :application :scroll-bars nil :background (theme-color :background))
+   (toolbar :application :scroll-bars nil :background (theme-color :background))
    (tempo (make-pane 'tempo-pane))
    (scope (make-pane 'scope :name 'scope))
    (patterns-pane (make-pane 'patterns-pane))
    (pattern-pane (make-pane 'pattern-pane))
    (interactor :interactor)
-   (pointer-documentation-pane (make-pane 'pointer-documentation-pane)))
+   (pointer-documentation-pane (make-pane 'pointer-documentation-pane))
+   (status-pane (make-pane 'status-pane :name 'status-pane)))
   (:layouts
    (default
     (vertically ()
-      (1/10 (horizontally () ;; toolbar
-              (8/10 logo)
-              ;; FIX: add server status pane with cpu load, number of active ugens, active synths, active groups, and number of synthdefs
-              (1/10 tempo)
+      (1/25 (horizontally () ; menu bar and standard gadgets
+              (2/10 menu-bar)
+              (7/10 logo)
+              (1/10 tempo)))
+      (1/10 (horizontally () ; toolbar
+              (9/10 toolbar)
+              ;; (make-pane 'clime:box-adjuster-gadget)
               (1/10 scope)))
       (make-pane 'clime:box-adjuster-gadget)
       (7/10 (horizontally ()
@@ -65,10 +72,12 @@
       (make-pane 'clime:box-adjuster-gadget)
       (2/10 interactor)
       (1/200 (horizontally ()
-               pointer-documentation-pane))))
+               (9/10 pointer-documentation-pane)
+               (1/10 status-pane)))))
    (test-interactor
     (vertically ()
-      interactor))))
+      interactor)))
+  (:reinitialize-frames t))
 
 (defmethod initialize-instance :before ((thundersnow thundersnow) &key &allow-other-keys)
   (thundersnow-ensure-initialized))
