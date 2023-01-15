@@ -206,6 +206,18 @@
                                            (pattern)
   (list pattern))
 
+(define-command (com-change-value :name t :menu t :command-table thundersnow-edit-command-table)
+    ((pattern 'pattern :prompt "Pattern")
+     (slot 'slot :prompt "Slot")
+     (value t :prompt "Value"))
+  (setf (pattern-value pattern slot) value))
+
+(define-presentation-to-command-translator change-value (slot com-change-value thundersnow
+                                                         :gesture :select)
+                                           (object presentation)
+  (let ((type (presentation-type presentation)))
+    (list (second type) (third type))))
+
 ;;; patterns pane
 
 (defclass patterns-pane (application-pane)
@@ -281,22 +293,6 @@ See also: `patterns-pane', `thundersnow'"
         (format stream " ")
         (present (slot-value object slot) `(slot ,object ,slot) :stream stream)))
     (format stream ")")))
-
-(define-presentation-action change-value (slot nil thundersnow
-                                          :gesture :select
-                                          :pointer-documentation
-                                          ((object stream presentation)
-                                           (let ((type (presentation-type presentation)))
-                                             (format stream "Change ~S ~S value" (class-name (class-of (second type))) (third type)))))
-                            (object presentation)
-  (setf *tmp* presentation)
-  (format t "~&Change-value: slot: ~S ~S~%" object presentation)
-  (destructuring-bind (type pattern slot) (presentation-type presentation)
-    (declare (ignore type))
-    (setf (pattern-value pattern slot)
-          (accepting-values ()
-            (accept t :prompt (format nil "Change ~S ~S value" (class-name (class-of pattern)) slot)
-                      :default object)))))
 
 (define-presentation-method present ((pbind pbind) (type pattern) stream (view graphical-view) &key)
   (with-room-for-graphics (stream)
