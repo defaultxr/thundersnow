@@ -25,6 +25,14 @@
 (defvar *tmp* nil
   "Temporary variable for convenience during development.")
 
+;;; presentation types
+
+(define-presentation-type pattern ()
+  :inherit-from t)
+
+(define-presentation-type slot (object accessor)
+  :inherit-from 'pattern)
+
 ;;; thundersnow frame
 
 (define-application-frame thundersnow (thundersnow-application-frame)
@@ -268,12 +276,6 @@ See also: `pattern-pane', `thundersnow'"
 
 See also: `patterns-pane', `thundersnow'"
   (find-pane-named (or frame (thundersnow)) 'pattern-pane))
-
-(define-presentation-type pattern ()
-  :inherit-from t)
-
-(define-presentation-type slot (object accessor)
-  :inherit-from 'pattern)
 
 (define-presentation-method present (object (type number) stream (view graphical-view) &key)
   (prin1 object stream))
