@@ -460,7 +460,7 @@ See also: `scroll-top-to', `scroll-center-to', `scroll-bottom-to'"
     ((event 'event))
   (let* ((*standard-input* (frame-standard-input *application-frame*))
          (plist (event-plist event))
-         (pitch-type (find-any (list :midinote :freq :degree) plist)) ;; FIX: this should be standard functionality in cl-patterns
+         (pitch-type (find-member (list :midinote :freq :degree) plist)) ; FIX: this should be standard functionality in cl-patterns
          )
     (accepting-values ()
       (fresh-line)
