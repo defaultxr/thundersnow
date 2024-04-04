@@ -84,7 +84,9 @@
   :inherit-from (thundersnow-common-file-command-table)
   :inherit-menu t)
 
-(define-command-table keyboard-gui-edit-command-table)
+(define-command-table keyboard-gui-edit-command-table
+  :inherit-from (thundersnow-common-edit-command-table)
+  :inherit-menu t)
 
 (define-keyboard-gui-command (com-resize-event) ((record 'event) (offset-x 'real :default 0) (offset-y 'real :default 0))
   ;; (declare (ignorable record offset-x offset-y))
@@ -127,7 +129,9 @@
     (object presentation window x y)
   (list presentation x y))
 
-(define-command-table keyboard-gui-view-command-table)
+(define-command-table keyboard-gui-view-command-table
+  :inherit-from (thundersnow-common-view-command-table)
+  :inherit-menu t)
 
 (define-command-table keyboard-gui-tools-command-table
   :inherit-from (thundersnow-common-tools-command-table)
