@@ -288,8 +288,8 @@ See also: `scroll-top-to', `scroll-center-to', `scroll-bottom-to'"
                                                      (unless (= beat-size new-size)
                                                        (setf beat-size new-size)
                                                        (redisplay-frame-pane *application-frame* (piano-roll-pane) :force-p t)))))))
-   (interactor-pane (make-pane 'piano-roll-interactor-pane
-                               :name 'interactor-pane))
+   (interactor (make-pane 'piano-roll-interactor-pane
+                          :name 'interactor))
    (pointer-documentation-pane :pointer-documentation
                                :name 'doc
                                :display-time :command-loop
@@ -299,12 +299,12 @@ See also: `scroll-top-to', `scroll-center-to', `scroll-bottom-to'"
     (vertically ()
       (5/6 (scrolling () piano-roll-pane))
       beat-size-slider
-      (1/6 (scrolling (:scroll-bar :vertical) interactor-pane))
+      (1/6 (scrolling (:scroll-bar :vertical) interactor))
       pointer-documentation-pane))
    (no-zoom-bar
     (vertically ()
       (5/6 (scrolling () piano-roll-pane))
-      (1/6 (scrolling (:scroll-bar :vertical) interactor-pane))
+      (1/6 (scrolling (:scroll-bar :vertical) interactor))
       pointer-documentation-pane)))
   (:menu-bar t))
 
@@ -316,7 +316,7 @@ See also: `scroll-top-to', `scroll-center-to', `scroll-bottom-to'"
   (scroll-focus-pitch (piano-roll-pane frame) 64))
 
 (defmethod frame-standard-output ((frame piano-roll))
-  (find-pane-named frame 'interactor-pane))
+  (find-pane-named frame 'interactor))
 
 (defmethod eseq-of ((piano-roll piano-roll))
   (slot-value piano-roll 'eseq))
@@ -398,7 +398,8 @@ See also: `scroll-top-to', `scroll-center-to', `scroll-bottom-to'"
 (define-gesture-name :play :keyboard (#\space))
 
 (defclass piano-roll-interactor-pane (interactor-pane)
-  ())
+  ()
+  (:default-initargs :name 'interactor))
 
 (define-command-table piano-roll-file-command-table
   :inherit-from (thundersnow-common-file-command-table)
@@ -674,10 +675,10 @@ See also: `piano-roll'"
   (find-pane-named (or frame (piano-roll)) 'piano-roll-pane))
 
 (defun piano-roll-interactor-pane (&optional frame)
-  "Get the piano-roll-pane of FRAME.
+  "Get the interactor-pane of FRAME.
 
 See also: `piano-roll'"
-  (find-pane-named (or frame (piano-roll)) 'interactor-pane))
+  (find-pane-named (or frame (piano-roll)) 'interactor))
 
 (defun piano-roll ()
   "Open a piano-roll or get one of the instances already open.
