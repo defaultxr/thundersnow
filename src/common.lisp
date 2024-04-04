@@ -201,15 +201,14 @@ See also: `*theme*'"
          (surrounding-output-with-border (pane :padding ,padding :padding-bottom ,(1- padding) :padding-top ,(1- padding) :background ,background-sym :thickness ,thickness-sym ,@additional-args)
            ,@body)))))
 
-(defun wave-polygon-coord-seq (wave sheet &key (zoom 1))
+(defun wave-polygon-coord-seq (wave sheet &key (zoom 1) (width (bounding-rectangle-width sheet)) (height (bounding-rectangle-height sheet)))
   "Convert WAVE, an array of waveform data, into a list in coord-seq format usable by `draw-polygon*'."
-  (let ((width (bounding-rectangle-width sheet))
-        (hd2 (/ (bounding-rectangle-height sheet) 2))
-        (length (length wave)))
-    (loop :for idx :from 0
-          :for e :across wave
-          :collect (* width (/ idx length) zoom)
-          :collect (+ hd2 (* hd2 e)))))
+  (loop :with hd2 := (/ height 2)
+        :with length := (length wave)
+        :for idx :from 0
+        :for e :across wave
+        :collect (* width (/ idx length) zoom)
+        :collect (+ hd2 (* hd2 e))))
 
 ;;; presentation utilities
 
