@@ -211,8 +211,6 @@ See also: `scroll-top-to', `scroll-center-to', `scroll-bottom-to'"
           (queue-event pane (make-instance 'pointer-double-click-event
                                            :button (slot-value event 'climi::button)
                                            :pointer (slot-value event 'climi::pointer)
-                                           :graft-y (slot-value event 'climi::graft-y)
-                                           :graft-x (slot-value event 'climi::graft-x)
                                            :y (slot-value event 'climi::y)
                                            :x (slot-value event 'climi::x)
                                            :modifier-state (slot-value event 'climi::modifier-state)
