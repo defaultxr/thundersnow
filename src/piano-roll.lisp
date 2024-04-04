@@ -1,17 +1,17 @@
-(in-package #:thundersnow/piano-roll)
+;;;; piano-roll.lisp - a piano roll.
 
-;;;; piano-roll
-;;; a piano roll, obviously
 ;; TODO:
 ;; - allow notes to be added to the left of the start of the eseq (in which case it becomes the new 0 and the other notes are moved later in time)
 ;; FIX: check out: with-temporary-margins, with-translation
 
-;;; util
+(in-package #:thundersnow/piano-roll)
+
+;;; utility
 
 (defvar *tmp* nil
   "Temporary variable for convenience during development.")
 
-;;; gui stuff
+;;; gui
 
 (defun find-piano-roll-pane (pane &optional (errorp t))
   "If PANE is a `piano-roll-pane', return it. If it's a frame, try to locate a piano-roll-pane in it. Otherwise, signal an error if ERRORP, or just return nil.
@@ -417,7 +417,7 @@ See also: `scroll-top-to', `scroll-center-to', `scroll-bottom-to'"
 
 (define-command (com-play :name t :menu t
                           :command-table piano-roll-file-command-table
-                          ;; :keystroke (#\space) ;; FIX: this conflicts with command entry in the interactor
+                          ;; :keystroke (#\space) ; FIX: this conflicts with command entry in the interactor
                           )
     ()
   (play (slot-value *application-frame* 'eseq)))

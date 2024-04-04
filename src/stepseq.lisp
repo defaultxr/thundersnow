@@ -15,26 +15,6 @@
       (draw-text stream "nil" (bounding-rectangle-center stream))
       (return-from display-stepseq))))
 
-(define-command-table stepseq-file-command-table
-  :inherit-from (thundersnow-common-file-command-table)
-  :inherit-menu t)
-
-(define-command-table stepseq-edit-command-table
-  :inherit-from (thundersnow-common-edit-command-table)
-  :inherit-menu t)
-
-(define-command-table stepseq-view-command-table
-  :inherit-from (thundersnow-common-view-command-table)
-  :inherit-menu t)
-
-(define-command-table stepseq-tools-command-table
-  :inherit-from (thundersnow-common-tools-command-table)
-  :inherit-menu t)
-
-(define-command-table stepseq-help-command-table
-  :inherit-from (thundersnow-common-help-command-table)
-  :inherit-menu t)
-
 (define-application-frame stepseq (thundersnow-application-frame)
   ()
   (:command-table (stepseq
@@ -64,6 +44,26 @@
     (vertically ()
       interactor)))
   (:pointer-documentation t))
+
+(define-command-table stepseq-file-command-table
+  :inherit-from (thundersnow-common-file-command-table)
+  :inherit-menu t)
+
+(define-command-table stepseq-edit-command-table
+  :inherit-from (thundersnow-common-edit-command-table)
+  :inherit-menu t)
+
+(define-command-table stepseq-view-command-table
+  :inherit-from (thundersnow-common-view-command-table)
+  :inherit-menu t)
+
+(define-command-table stepseq-tools-command-table
+  :inherit-from (thundersnow-common-tools-command-table)
+  :inherit-menu t)
+
+(define-command-table stepseq-help-command-table
+  :inherit-from (thundersnow-common-help-command-table)
+  :inherit-menu t)
 
 (defmethod initialize-instance :before ((stepseq stepseq) &key &allow-other-keys)
   (thundersnow-ensure-initialized))

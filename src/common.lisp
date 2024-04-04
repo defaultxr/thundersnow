@@ -1,6 +1,6 @@
-(in-package #:thundersnow/common)
-
 ;;;; common.lisp - functionality common to all thundersnow interfaces.
+
+(in-package #:thundersnow/common)
 
 ;;; debug conveniences
 

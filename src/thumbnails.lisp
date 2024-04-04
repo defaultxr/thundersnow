@@ -25,7 +25,7 @@ Examples:
 ;;; thumbnail utility functions
 
 ;; FIX: should this be a general utility? mutility/files perhaps?
-(defun subpathp (maybe-subpath &optional (directory *configuration-directory*)) ;; FIX: still wrong for (subpathp "/home/modula/f" "/home/modula")
+(defun subpathp (maybe-subpath &optional (directory *configuration-directory*)) ; FIX: still wrong for (subpathp "/home/modula/f" "/home/modula")
   "True if MAYBE-SUBPATH is a subdirectory of DIRECTORY.
 
 Note that this is basically just a convenience wrapper around `uiop:subpathp'."

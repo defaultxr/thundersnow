@@ -15,7 +15,7 @@
 ;; arguments for define-drag-and-drop-translator can include:
 ;; - destination-object context-type frame presentation destination-presentation event window x y
 ;; zoom should be proportional; zoom series is: 1, 2, 3, 4, 6, 8, 12, 16, 24, 32
-;; zoom factor = pow(2, steps/100)
+;; zoom factor = pow(2, steps/100). pure data keeps steps within the -400 to 400 range - https://github.com/pure-data/pure-data/pull/1659#issuecomment-1259266894
 ;; to get the clim debugger on errors, wrap your code in (clim-debugger:with-debugger () ...)
 ;; ... or add (:debugger t) to the define-application-frame when supported? (see https://www.youtube.com/watch?v=kfBmRsPRdGg&start=17m0s )
 ;; - add a scrolling event view a la the screenshot here: https://twitter.com/defaultxr/status/621486028751290368
@@ -175,7 +175,7 @@
   (list pattern))
 
 (define-command (com-play :name t :menu t :command-table thundersnow-edit-command-table)
-  ((pattern 'pattern))
+    ((pattern 'pattern))
   (play pattern))
 
 (define-presentation-to-command-translator play (pattern com-play thundersnow
@@ -189,7 +189,7 @@
 
 
 (define-command (com-end :name t :menu t :command-table thundersnow-edit-command-table)
-  ((pattern 'pattern))
+    ((pattern 'pattern))
   (end pattern))
 
 (define-presentation-to-command-translator end (pattern com-end thundersnow
@@ -202,7 +202,7 @@
   (list pattern))
 
 (define-command (com-stop :name t :menu t :command-table thundersnow-edit-command-table)
-  ((pattern 'pattern))
+    ((pattern 'pattern))
   (stop pattern))
 
 (define-presentation-to-command-translator stop (pattern com-stop thundersnow

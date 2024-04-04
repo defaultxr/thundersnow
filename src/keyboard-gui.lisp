@@ -2,7 +2,6 @@
 
 (in-package #:thundersnow/keyboard-gui)
 
-
 (defclass keyboard-gui-pane (application-pane)
   ()
   (:default-initargs
@@ -116,15 +115,15 @@
 
 (define-presentation-to-command-translator event-resizing-translator
     (event com-resize-event keyboard-gui
-           :tester ((object presentation x)
-                    (when (hovering-for-resize-p x presentation)
-                      (climi::set-sheet-pointer-cursor ; (setf pointer-cursor) doesn't seem to work, so we do this
-                       (find-port)
-                       (find-pane-named *application-frame* 'keyboard-gui-pane)
-                       :horizontal-scroll)
-                      t))
-           :pointer-documentation "Resize event"
-           :menu nil)
+     :tester ((object presentation x)
+              (when (hovering-for-resize-p x presentation)
+                (climi::set-sheet-pointer-cursor ; (setf pointer-cursor) doesn't seem to work, so we do this
+                 (find-port)
+                 (find-pane-named *application-frame* 'keyboard-gui-pane)
+                 :horizontal-scroll)
+                t))
+     :pointer-documentation "Resize event"
+     :menu nil)
     (object presentation window x y)
   (list presentation x y))
 

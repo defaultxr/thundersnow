@@ -248,7 +248,7 @@ See also: `sound-frame-pixel'"
 
 (define-command (com-play :name t :menu t
                           :command-table wave-editor-edit-command-table
-                          ;; :keystroke (#\ :) ;; FIX
+                          ;; :keystroke (#\ :) ; FIX
                           )
     ()
   (play (sound *application-frame*)))
