@@ -44,10 +44,8 @@
 (defclass status-pane (basic-gadget)
   ())
 
-(defmethod initialize-instance :after ((pane status-pane) &key &allow-other-keys)
-  (setf (medium-background pane) (theme-color :background)))
-
 (defmethod activate-gadget :after ((status-pane status-pane))
+  (setf (medium-background status-pane) (theme-color :background))
   (clime:schedule-event status-pane (make-instance 'timer-event :sheet status-pane) 1))
 
 (defmethod handle-repaint ((pane status-pane) region)
