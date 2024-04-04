@@ -35,6 +35,8 @@ A simple drum machine-style interface for editing and sequencing drum patterns.
 An Audacity-like UI to show the waveform of a sound buffer and optionally ~splits~ data.
 *** Env editor
 An editor allowing the creation and editing of envelopes and their properties.
+*** Piano GUI [working name]
+Simple interface to trigger and control synths from a piano-based MIDI controller or via the GUI.
 *** Keyboard GUI [working name]
 Simple interface to trigger and control synths from your keyboard or via the GUI.
 

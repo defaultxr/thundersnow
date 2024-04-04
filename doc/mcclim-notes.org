@@ -1,23 +1,24 @@
-#+TITLE: (Mc)CLIM notes
+#+TITLE: Notes
 
-Just various notes I've collected about (Mc)CLIM, either by asking in #clim or randomly online.
+Various notes I've collected about (Mc)CLIM and GUI/UI design/development, either by asking in #clim or randomly online.
 
-* [[https://github.com/McCLIM/McCLIM/wiki/Resources-and-Links][McCLIM Resources and Links]]
+* (Mc)CLIM
+** [[https://github.com/McCLIM/McCLIM/wiki/Resources-and-Links][McCLIM Resources and Links]]
 Various resources and links about McCLIM, UI/UX design, and more.
-* [[http://turtleware.eu/posts/A-tale-of-two-abstractions.html][McCLIM Library Structural Overview]]
+** [[http://turtleware.eu/posts/A-tale-of-two-abstractions.html][McCLIM Library Structural Overview]]
 A very handy "map" of how (Mc)CLIM is conceptually structured.
-* misc mcclim code info/reference
-** useful mcclim macros/functions
+** misc mcclim code info/reference
+*** useful mcclim macros/functions
 - define-presentation-translator
 - define-presentation-to-command-translator
 - define-presentation-action
 - define-drag-and-drop-translator
 - menu-choose
 - menu-choose-from-drawer
-** accessing panes/sheets/etc
+*** accessing panes/sheets/etc
 - frame-top-level-sheet
 - sheet-children
-** define-command argument keywords
+*** define-command argument keywords
 - default
 - default-type
 - display-default
@@ -26,9 +27,9 @@ A very handy "map" of how (Mc)CLIM is conceptually structured.
 - documentation
 - when
 - gesture
-* theming
-** "Sort out the gadget color situation" https://github.com/McCLIM/McCLIM/issues/842
-** Feb 17, 2018
+** theming
+*** "Sort out the gadget color situation" https://github.com/McCLIM/McCLIM/issues/842
+*** Feb 17, 2018
 18:23:01 mepian: does McCLIM support themes? was this proposal implemented? http://vintage-digital.com/hefner/mcclim/mcclim-theme-notes.txt
 18:24:55 jackdaniel: mepian: quick grepping through sources shows, that it is implemented
 18:25:14 jackdaniel: I've never approached this document before (and there is no documentation for it)
@@ -36,7 +37,7 @@ A very handy "map" of how (Mc)CLIM is conceptually structured.
 18:29:17 jackdaniel: I can't speak for everyone. I didn't use it, but since it is implemented I'm sure it was "ever used" at least by the implementor
 18:33:40 jackdaniel: things from "tentative design" section are not implemented whatsoever
 18:34:13 jackdaniel: only things mentioned earlier. so if the first was just a summary of what is implemented, and the second part is the actual proposal, then no, it was not implemented
-** Oct 11, 2018
+*** Oct 11, 2018
 7:07:07 fiddlerwoaroof: What is the function of a frame manager?
 7:07:15 fiddlerwoaroof: Does it control styling?
 7:07:30 fiddlerwoaroof: clim frame-manager
@@ -60,18 +61,18 @@ A very handy "map" of how (Mc)CLIM is conceptually structured.
 7:14:23 jackdaniel: that's why I started this work
 7:14:51 fiddlerwoaroof: I've also been mulling some alternative ports to make it more useful cross-platform
 7:15:53 jackdaniel: imho we should wrap a performant and clean sdl backend - that way we are cross-platform with just one additional backend
-* zoom
-** Apr 19, 2020
+** zoom
+*** Apr 19, 2020
 14:21:45 defaultxr:   i see that there are examples for scrolling of course, but is there a "preferred" way of doing zoom in (mc)clim, or is that just something i should be implementing myself, i.e. by keeping a "scale" or "zoom" slot in my pane/frame and writing my display-function based on it?
 14:37:26 jackdaniel:  currently you should do exactly that, keep the scale as a slot and redisplay when it changes
 14:37:50 jackdaniel:  in the future it will be more seamless, but the thing I'm thinking about does not work correctly yet
-* multiple selection
-** Apr 19, 2020
+** multiple selection
+*** Apr 19, 2020
 14:41:25 defaultxr:   thanks! i'm also wondering about selecting multiple objects at once (i.e. the traditional "click and drag on an empty space to draw a rectangle and all objects in it become selected); does (mc)clim have a preferred way of doing that?
 14:42:37 jackdaniel:  I can't think of anything
 14:42:55 jackdaniel:  but if you write such thing, please share it so we can learn from it
-* how to implement a "partial redisplay" function
-** May 11, 2022
+** how to implement a "partial redisplay" function
+*** May 11, 2022
 2022-05-11 02:06:35	jackdaniel	defaultxr: that's how this could be approached: https://plaster.tymoon.eu/view/3123#3123
 2022-05-11 02:07:04	jackdaniel	notice, that you need to provide /whole/ dimensions when constructing the record, so scroll bars know how much space your pane occupies
 2022-05-11 02:08:56	jackdaniel	this perhaps could be polished into a demo, but oh well, having only 10 fingers is certainly a limiting factor ,)
@@ -80,7 +81,7 @@ A very handy "map" of how (Mc)CLIM is conceptually structured.
 2022-05-11 02:12:29	jackdaniel	it is surprising, because we do compute the intersection with parents in repaint-sheet
 2022-05-11 02:14:34	jackdaniel	defaultxr: btw, this is not a noob quesiton;
 2022-05-11 02:26:22	jackdaniel	I've added this snippet to the wiki in "How to Guides"
-*** linked code
+**** linked code
 #+begin_src lisp
 (in-package #:clim-user)
 
@@ -109,16 +110,16 @@ A very handy "map" of how (Mc)CLIM is conceptually structured.
 
 (find-application-frame 'defaultxr)
 #+end_src
-* when to use updating-output
+** when to use updating-output
 2022-06-11 12:06:19	contrapunctus	jackdaniel: you told me to remove calls to `updating-output` before, so I was wondering in what situations it is required, and in what situations it's enough to just have `:incremental-redisplay t` for the pane. (Perhaps I could add this information to the manual.)
 2022-06-11 12:08:23	jackdaniel	sole :incremental-redisplay t will compare output records before and after the redisplay (the display function will run fully), if you add updating-output caching points, then their bodies will be executed conditionally based on the cache test, so there is less to a) display, b) compare for a difference
 2022-06-11 12:08:51	jackdaniel	there is also the function redisplay-output-record that may be used to recompute only part of the already displayed history
 2022-06-11 12:09:03	jackdaniel	in other words updating-output gives you additional caching points
-* drei info
-** https://common-lisp.net/project/mcclim/static/documents/drei.pdf
-* https://github.com/admich/adm-clim-lib
+** drei info
+*** https://common-lisp.net/project/mcclim/static/documents/drei.pdf
+** https://github.com/admich/adm-clim-lib
 CLIM utilities, including a tree view, datetime presentations, history persistence (undo/redo)
-* 07:58:13 alanz:       Is there a way to define a table cell with a maximum width and have text wrap in it?
+** 07:58:13 alanz:       Is there a way to define a table cell with a maximum width and have text wrap in it?
 08:08:24 alanz:       I guess I can use something based on https://github.com/lokedhs/clim-test/blob/master/word-wrap.lisp
 08:18:24 scymtym:     there are builtin mechanisms. you can use (with-end-of-line-action (STREAM :wrap*) …) for word-based wrapping when the right margin is reached. there are multiple ways to configure the right margin within the table cell. one is (clime:with-temporary-margins (STREAM :right `(:absolute ,DESIRED-RIGHT-MARGIN)) …)
 08:21:14 alanz:       thanks
@@ -128,8 +129,34 @@ CLIM utilities, including a tree view, datetime presentations, history persisten
 08:25:19 jackdaniel:  no, :wrap works at character boundaries, :wrap* looks for spaces (that is not very uax-whatever, I know)
 08:55:22 alanz:       It turns out "(clim:filling-output (stream :fill-width 400) ..)" does exactly what I need
 08:55:59 alanz:       As I want to specify a width, not a right margin
-* [[https://techfak.de/~jmoringe/mcclim-double-buffering-7.ogv][very cool mcclim demo]]
+** [[https://techfak.de/~jmoringe/mcclim-double-buffering-7.ogv][very cool mcclim demo]]
 shows off double buffering, etc
-* i've been thinking about attempting to implement pointer-click-event and pointer-double-click-event. any hints/suggestions/requirements for implementing such? i'm thinking since they are compound events, they should be triggered after the respective "release" event. it looks like there is already a *DOUBLE-CLICK-DELAY* symbol in climi which it seems should probably be used too. a double click should probably only be triggered if both clicks are from the same button. 
-* look into space-requirement-options-mixin for ourcustom gadgets?
-* drawing a line plot with a single DRAW-POLYGON* call can be much more efficient than multiple draw calls, depending on the backend
+** i've been thinking about attempting to implement pointer-click-event and pointer-double-click-event. any hints/suggestions/requirements for implementing such? i'm thinking since they are compound events, they should be triggered after the respective "release" event. it looks like there is already a *DOUBLE-CLICK-DELAY* symbol in climi which it seems should probably be used too. a double click should probably only be triggered if both clicks are from the same button.
+** look into space-requirement-options-mixin for ourcustom gadgets?
+** drawing a line plot with a single DRAW-POLYGON* call can be much more efficient than multiple draw calls, depending on the backend
+* [[https://www.visual-literacy.org/periodic_table/periodic_table.html][A Periodic Table of Visualization Methods]]
+linked by jackdaniel in #clim
+* [[https://scymtym.github.io/content/text.editing/][Some cool Cluffer, Second Climacs, and other McCLIM-related GUI demos]]
+* end of interactor panes
+13:28:09 defaultxr:   is there a way to determine the text in the current line of an interactor pane? i.e. whatever the user has typed in but hasn't pressed enter for yet.
+13:29:00 jackdaniel:  there is
+13:29:02 jackdaniel:  let me think
+13:29:56 jackdaniel:  well, not easily because you need to take the encapsulating stream
+13:30:38 jackdaniel:  when you type input in the interactor, it is done from accept that calls (with-input-editing (interactor …) …); in the dynamic scope of this macro interactor is bound to the encapsulating stream
+13:31:13 jackdaniel:  if you call (stream-input-buffer #<that-encapsulating-stream>), then that should return a string with a fill pointer with the text
+13:31:52 jackdaniel:  as of the means to access the editing stream, if it is in some method called from accept with the argument stream, then you have it
+13:33:09 jackdaniel:  otherwise you'd need to introduce some kind of a kludge that makes it available from the 'outside'
+13:33:45 jackdaniel:  but if you are inside, then *original-stream* should be bound to that streamo
+13:35:48 defaultxr:   ah okay, thanks, that points me in the right direction, i'll investigate further
+13:36:40 jackdaniel:  I'm sceptical though that reading the typed string is the right approach to the <undisclosed problem you want to resolve>
+
+* double click stuff
+3:52:43 defaultxr: is it possible to define-gesture-name a double-click? trying stuff like (define-gesture-name :add :pointer-double-click-event (:left)) and it doesn't seem to work, though i do see that pointer-double-click-event appears to be a symbol in mcclim. i'm basically trying to define-presentation-action an action for a double click; i'm guessing there's a better way than manually storing the time of the last
+3:52:46 defaultxr: click and checking in the :tester whether the current click was within N seconds of the previous...
+6:55:02 scymtym: i had the impression that double click was not fully implemented. i haven't checked though
+9:15:52 jackdaniel: http://bauhh.dyndns.org:8000/clim-spec/8-2.html#_357 <- \"ports are not required to generate these events\" (pointer-double-click-event and pointer-click-and-hold-event)
+9:16:02 jackdaniel: and indeed, clx does not generate them
+9:17:10 jackdaniel: we could synthesize them at a cost of complicated logic in the clx input implementation
+9:17:40 jackdaniel: I think that these events are mainly for displays which themself generate separate events for such gestures
+9:18:20 jackdaniel: otoh it should be possible to queue them from the user code with a state machine implemented in handle-event specialized on other pointer gestures
+

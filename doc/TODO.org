@@ -23,6 +23,8 @@ A list of various ideas and things to be done for Thundersnow, so they aren't fo
 ~sox input.wav -n channels 1 spectrogram -r -o output.png~
 ** ffmpeg also supports generating thumbnails.
 * Look into this page on [[http://www.personal.psu.edu/cab38/ColorSch/Schemes.html][color schemes]]
+** [[https://meodai.github.io/poline/][Poline]]
+"An enigmatic color palette generator, that harnesses the mystical witchcraft of polar coordinates."
 * config file stuff
 ** Example config files
 ** According to the XDG it should probably be `(uiop:xdg-config-home "my-application" "init.lisp")` ...that's `~/.config/my-application/init.lisp` on my system (probably the same on all UNIX-likes; no idea about Windows).
@@ -31,9 +33,12 @@ A list of various ideas and things to be done for Thundersnow, so they aren't fo
 for when Thundersnow is started from the command line, not loaded from an already-running Lisp image.
 * File indexer
 for fast searching through sample/music directories.
+* Wave Editor
 * Playlist view
 * MIDI mapping
 * MIDI device interfacing (generalized functionality to send/receive MIDI to/from controllers to use them as an interface and display relevant info)
 * Testing and distribution/packages
 ** [[https://nyxt.atlas.engineer/article/continuous-testing-and-packaging.org][Useful information from the Nyxt project]]
+* "easy chop" - press a key as a sample is playing to insert a splits point there.
+* support for the [[https://sfzformat.com/][SFZ format]]
 * EVERYTHING ELSE!
