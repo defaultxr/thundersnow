@@ -58,6 +58,7 @@
    (scope (make-pane 'scope :name 'scope))
    (patterns-pane (make-pane 'patterns-pane))
    (pattern-pane (make-pane 'pattern-pane))
+   (documentation-pane (make-pane 'documentation-pane))
    (interactor :interactor)
    (pointer-documentation-pane (make-pane 'pointer-documentation-pane))
    (status-pane (make-pane 'status-pane :name 'status-pane)))
@@ -76,7 +77,10 @@
       (7/10 (horizontally ()
               (1/2 (scrolling (:scroll-bar :vertical) patterns-pane))
               (make-pane 'clime:box-adjuster-gadget)
-              (1/2 (scrolling (:scroll-bar :vertical) pattern-pane))))
+              (1/2 (vertically ()
+                     (2/3 (scrolling (:scroll-bar :vertical) pattern-pane))
+                     (make-pane 'clime:box-adjuster-gadget)
+                     (1/3 (scrolling (:scroll-bar :vertical) documentation-pane))))))
       (make-pane 'clime:box-adjuster-gadget)
       (2/10 interactor)
       (1/200 (horizontally ()
@@ -167,9 +171,10 @@
 
 (define-command (com-select :name t :menu t :command-table thundersnow-edit-command-table)
     ((pattern 'pattern))
-  (format t "~&Select pattern: ~S~%" pattern)
-  (let ((pattern-pane (pattern-pane *application-frame*)))
-    (setf (pane-pattern pattern-pane) pattern)))
+  (let ((pattern-pane (pattern-pane *application-frame*))
+        (documentation-pane (documentation-pane *application-frame*)))
+    (setf (pane-pattern pattern-pane) pattern
+          (pane-object documentation-pane) (class-of pattern))))
 
 (define-presentation-to-command-translator select (pattern com-select thundersnow) (pattern)
   (list pattern))
@@ -352,6 +357,29 @@ See also: `patterns-pane', `thundersnow'"
     (with-output-as-presentation (stream pattern 'pattern)
       (updating-output (stream :unique-id pattern)
         (present pattern 'pattern :stream stream)))))
+
+;;; documentation pane
+
+(defclass documentation-pane (application-pane)
+  ((object :initarg :object :initform nil :accessor pane-object))
+  (:default-initargs :name 'documentation-pane
+                     :display-function 'display-documentation
+                     :default-view +textual-view+
+                     :foreground (theme-color :foreground)
+                     :background (theme-color :background)))
+
+(defun documentation-pane (&optional frame)
+  "Get the documentation-pane of FRAME.
+
+See also: `patterns-pane', `pattern-pane', `thundersnow'"
+  (find-pane-named (or frame (thundersnow)) 'documentation-pane))
+
+(defun display-documentation (frame stream &optional object)
+  "Display documentation in STREAM."
+  (declare (ignorable frame))
+  (let ((*package* (find-package 'thundersnow))
+        (object (or object (pane-object stream))))
+    (describe object stream)))
 
 ;;; main
 
